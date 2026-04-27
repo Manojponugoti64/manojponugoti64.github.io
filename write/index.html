@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write - Manoj's Blog</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        main { max-width: 900px; margin: 2rem auto; padding: 0 2rem; }
+        .writer { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; }
+        .writer h1 { color: var(--accent); margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .writer label { display: block; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; margin-top: 1.5rem; }
+        .writer label:first-of-type { margin-top: 0; }
+        .writer input, .writer textarea {
+            width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px;
+            padding: 0.9rem 1rem; color: var(--text-primary); font-family: Georgia, serif; font-size: 1.05rem;
+            line-height: 1.7; box-sizing: border-box;
+        }
+        .writer input:focus, .writer textarea:focus { outline: none; border-color: var(--accent); }
+        .writer textarea { min-height: 340px; resize: vertical; }
+        .writer .hint { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.4rem; font-style: italic; }
+        .writer .actions { margin-top: 2rem; display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+        .writer button {
+            background: var(--accent); color: #1a1a1a; border: none; padding: 0.8rem 1.6rem; border-radius: 6px;
+            font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s;
+            font-family: Georgia, serif; letter-spacing: 0.5px;
+        }
+        .writer button:hover { background: var(--accent-hover); }
+        .writer button.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+        .writer button.ghost:hover { color: var(--accent); border-color: var(--accent); }
+        .writer button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .status { margin-top: 1.5rem; padding: 1rem 1.2rem; border-radius: 6px; font-size: 0.95rem; display: none; }
+        .status.show { display: block; }
+        .status.info { background: rgba(232,112,64,0.1); border: 1px solid var(--accent-dark); color: var(--text-primary); }
+        .status.success { background: rgba(60,180,90,0.1); border: 1px solid #3cb45a; color: #a8e6b2; }
+        .status.error { background: rgba(220,50,50,0.1); border: 1px solid #c44; color: #ffb0b0; }
+        .preview { margin-top: 1.5rem; padding: 1.5rem; background: var(--bg-primary); border: 1px dashed var(--border); border-radius: 6px; display: none; }
+        .preview.show { display: block; }
+        .preview h1, .preview h2, .preview h3 { color: var(--text-primary); margin: 1rem 0 0.5rem; }
+        .preview h1 { font-size: 1.8rem; }
+        .preview p { color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.7; }
+        .preview blockquote { border-left: 3px solid var(--accent); padding-left: 1.2rem; margin: 1rem 0; color: var(--text-secondary); font-style: italic; }
+        .preview code { background: rgba(255,255,255,0.08); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.95em; }
+        .preview pre { background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 6px; overflow-x: auto; }
+        .preview ul, .preview ol { color: var(--text-secondary); margin: 1rem 0 1rem 1.5rem; }
+        .preview a { color: var(--accent); }
+        .key-setup { background: rgba(232,112,64,0.08); border: 1px solid var(--accent-dark); padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+        .key-setup h3 { color: var(--accent); margin-bottom: 0.8rem; font-size: 1.1rem; }
+        .key-setup ol { margin: 0.8rem 0 0.8rem 1.4rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.8; }
+        .key-setup code { background: rgba(0,0,0,0.4); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+        .footer-actions { margin-top: 1.2rem; font-size: 0.85rem; color: var(--text-secondary); text-align: right; }
+        .footer-actions a { cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Manoj's Blog</div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../archive.html">Archive</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="writer">
+            <h1>Write a new post</h1>
+
+            <div id="keyPrompt" class="key-setup" style="display:none;">
+                <h3>One-time setup — your publishing key</h3>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                    Paste your GitHub fine-grained token below. It's saved only in this browser (never sent anywhere except GitHub).
+                </p>
+                <ol>
+                    <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a></li>
+                    <li>Name: <code>Blog writer</code> · Expiration: <code>1 year</code> (or max)</li>
+                    <li>Resource owner: <code>Manojponugoti64</code></li>
+                    <li>Repository access: <strong>Only select repositories</strong> → <code>manojponugoti64.github.io</code></li>
+                    <li>Permissions → <strong>Repository permissions</strong>: set <code>Contents</code> to <strong>Read and write</strong></li>
+                    <li>Generate token, copy it, paste below</li>
+                </ol>
+                <label for="keyInput">Publishing key</label>
+                <input type="password" id="keyInput" placeholder="github_pat_..." autocomplete="off" />
+                <div class="actions">
+                    <button id="saveKey">Save key</button>
+                </div>
+            </div>
+
+            <div id="editor" style="display:none;">
+                <label for="title">Title</label>
+                <input type="text" id="title" placeholder="e.g. Why I love mornings" />
+
+                <label for="body">Body (supports **bold**, *italic*, # headings, > quotes, - lists, [links](url), `code`)</label>
+                <textarea id="body" placeholder="Write your post here... Markdown works."></textarea>
+                <div class="hint">Tip: blank line between paragraphs. <code>#</code> for H1, <code>##</code> H2, <code>></code> for quotes.</div>
+
+                <div class="actions">
+                    <button id="publish">Publish</button>
+                    <button id="togglePreview" class="ghost">Preview</button>
+                    <button id="saveDraft" class="ghost">Save draft</button>
+                </div>
+
+                <div id="preview" class="preview"></div>
+                <div id="status" class="status"></div>
+
+                <div class="footer-actions">
+                    <a id="resetKey">Reset publishing key</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
+    </footer>
+
+    <script>
+        const OWNER = 'Manojponugoti64';
+        const REPO = 'manojponugoti64.github.io';
+        const BRANCH = 'main';
+        const KEY_STORAGE = 'blog_publishing_key_v1';
+        const DRAFT_TITLE = 'blog_draft_title_v1';
+        const DRAFT_BODY = 'blog_draft_body_v1';
+
+        const $ = id => document.getElementById(id);
+
+        function showEditor() {
+            $('keyPrompt').style.display = 'none';
+            $('editor').style.display = 'block';
+            $('title').value = localStorage.getItem(DRAFT_TITLE) || '';
+            $('body').value = localStorage.getItem(DRAFT_BODY) || '';
+        }
+
+        function showKeyPrompt() {
+            $('keyPrompt').style.display = 'block';
+            $('editor').style.display = 'none';
+        }
+
+        if (localStorage.getItem(KEY_STORAGE)) showEditor(); else showKeyPrompt();
+
+        $('saveKey').addEventListener('click', () => {
+            const val = $('keyInput').value.trim();
+            if (!val.startsWith('github_pat_') && !val.startsWith('ghp_')) {
+                return setStatus('That doesn\'t look like a GitHub token. It should start with "github_pat_" or "ghp_".', 'error');
+            }
+            localStorage.setItem(KEY_STORAGE, val);
+            showEditor();
+        });
+
+        $('resetKey').addEventListener('click', () => {
+            if (confirm('Remove saved publishing key from this browser?')) {
+                localStorage.removeItem(KEY_STORAGE);
+                showKeyPrompt();
+            }
+        });
+
+        $('togglePreview').addEventListener('click', () => {
+            const p = $('preview');
+            if (p.classList.contains('show')) { p.classList.remove('show'); return; }
+            p.innerHTML = marked.parse($('body').value || '*(nothing yet)*');
+            p.classList.add('show');
+        });
+
+        $('saveDraft').addEventListener('click', () => {
+            localStorage.setItem(DRAFT_TITLE, $('title').value);
+            localStorage.setItem(DRAFT_BODY, $('body').value);
+            setStatus('Draft saved in this browser.', 'success');
+        });
+
+        // autosave draft as user types
+        ['title', 'body'].forEach(id => $(id).addEventListener('input', () => {
+            localStorage.setItem(id === 'title' ? DRAFT_TITLE : DRAFT_BODY, $(id).value);
+        }));
+
+        function setStatus(msg, kind) {
+            const s = $('status');
+            s.className = 'status show ' + kind;
+            s.innerHTML = msg;
+            s.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function slugify(s) {
+            return s.toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .slice(0, 60) || 'post-' + Date.now();
+        }
+
+        function escHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function excerpt(bodyHtml) {
+            // strip tags, take first 220 chars
+            const text = bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+            return text.length > 220 ? text.slice(0, 220).replace(/\s+\S*$/, '') + '...' : text;
+        }
+
+        function prettyDate(d) {
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // Base64 that handles unicode (btoa chokes on non-latin1)
+        function b64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+        function ub64(str) {
+            return decodeURIComponent(escape(atob(str.replace(/\s/g, ''))));
+        }
+
+        async function ghApi(path, method, body) {
+            const token = localStorage.getItem(KEY_STORAGE);
+            const res = await fetch('https://api.github.com' + path, {
+                method,
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Type': 'application/json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                },
+                body: body ? JSON.stringify(body) : undefined
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error((json.message || 'HTTP ' + res.status) + (json.errors ? ': ' + JSON.stringify(json.errors) : ''));
+            return json;
+        }
+
+        async function getFile(filepath) {
+            const res = await ghApi(`/repos/${OWNER}/${REPO}/contents/${filepath}?ref=${BRANCH}`, 'GET');
+            return { sha: res.sha, content: ub64(res.content) };
+        }
+
+        async function putFile(filepath, content, message, sha) {
+            const payload = { message, content: b64(content), branch: BRANCH };
+            if (sha) payload.sha = sha;
+            return await ghApi(`/repos/${OWNER}/${REPO}/contents/${filepath}`, 'PUT', payload);
+        }
+
+        function postTemplate({ title, dateStr, bodyHtml }) {
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${escHtml(title)} - Manoj's Blog</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Manoj's Blog</div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../archive.html">Archive</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <article class="post-content">
+            <h1>${escHtml(title)}</h1>
+            <div class="post-meta">${dateStr}</div>
+${bodyHtml}
+        </article>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
+    </footer>
+</body>
+</html>
+`;
+        }
+
+        function insertIndexCard(indexHtml, { title, slug, dateStr, excerptText }) {
+            const card = `
+            <article class="post-card">
+                <h2><a href="posts/${slug}.html">${escHtml(title)}</a></h2>
+                <div class="post-meta">${dateStr}</div>
+                <p class="post-excerpt">
+                    ${escHtml(excerptText)}
+                </p>
+                <a href="posts/${slug}.html" class="read-more">Read more &rarr;</a>
+            </article>
+`;
+            // insert right after <section class="posts-grid">
+            return indexHtml.replace(
+                /(<section class="posts-grid">)/,
+                `$1\n${card}`
+            );
+        }
+
+        function insertArchiveRow(archiveHtml, { title, slug, dateStr }) {
+            const row = `                <li>
+                    <a href="posts/${slug}.html">${escHtml(title)}</a>
+                    <span class="date">${dateStr}</span>
+                </li>
+`;
+            return archiveHtml.replace(
+                /(<ul class="archive-list">)/,
+                `$1\n${row}`
+            );
+        }
+
+        $('publish').addEventListener('click', async () => {
+            const title = $('title').value.trim();
+            const body = $('body').value.trim();
+            if (!title) return setStatus('Please add a title.', 'error');
+            if (!body) return setStatus('Please write something in the body.', 'error');
+
+            const btn = $('publish');
+            btn.disabled = true;
+            setStatus('Publishing…', 'info');
+
+            try {
+                const slug = slugify(title);
+                const now = new Date();
+                const dateStr = prettyDate(now);
+                const bodyHtml = marked.parse(body);
+                const excerptText = excerpt(bodyHtml);
+                const postHtml = postTemplate({ title, dateStr, bodyHtml });
+
+                setStatus('Step 1/3 — saving the post…', 'info');
+                // create post file (no sha since new)
+                try {
+                    await putFile(`posts/${slug}.html`, postHtml, `Add post: ${title}`);
+                } catch (e) {
+                    if (String(e.message).includes('already exists') || String(e.message).includes('sha')) {
+                        // try to overwrite by fetching existing sha
+                        const existing = await getFile(`posts/${slug}.html`);
+                        await putFile(`posts/${slug}.html`, postHtml, `Update post: ${title}`, existing.sha);
+                    } else throw e;
+                }
+
+                setStatus('Step 2/3 — updating homepage…', 'info');
+                const idx = await getFile('index.html');
+                const newIdx = insertIndexCard(idx.content, { title, slug, dateStr, excerptText });
+                await putFile('index.html', newIdx, `Link new post on homepage: ${title}`, idx.sha);
+
+                setStatus('Step 3/3 — updating archive…', 'info');
+                const arc = await getFile('archive.html');
+                const newArc = insertArchiveRow(arc.content, { title, slug, dateStr });
+                await putFile('archive.html', newArc, `Add to archive: ${title}`, arc.sha);
+
+                // clear draft
+                localStorage.removeItem(DRAFT_TITLE);
+                localStorage.removeItem(DRAFT_BODY);
+                $('title').value = '';
+                $('body').value = '';
+                $('preview').classList.remove('show');
+
+                setStatus(
+                    `Published! GitHub Pages usually takes ~30s to rebuild. ` +
+                    `<a href="/posts/${slug}.html" target="_blank">View your post</a> · ` +
+                    `<a href="/" target="_blank">Home</a>`,
+                    'success'
+                );
+            } catch (err) {
+                console.error(err);
+                let msg = String(err.message || err);
+                if (msg.includes('Bad credentials') || msg.includes('401')) {
+                    msg = 'Your publishing key is invalid or expired. Click "Reset publishing key" below and re-enter it.';
+                } else if (msg.includes('403') || msg.includes('not accessible')) {
+                    msg = 'Your key doesn\'t have permission to write. Make sure it has Contents: Read and write on this repo.';
+                }
+                setStatus('Error: ' + msg, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
