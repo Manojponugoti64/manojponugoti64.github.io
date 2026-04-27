@@ -381,7 +381,8 @@ ${bodyHtml}
 
         function replaceIndexCard(indexHtml, slug, { title, dateStr, excerptText }) {
             const slugRe = escapeRegex(slug);
-            const re = new RegExp(`<article class="post-card">[\\s\\S]*?href="posts/${slugRe}\\.html"[\\s\\S]*?</article>`, '');
+            // Tempered greedy: don't span past another <article class="post-card">
+            const re = new RegExp(`<article class="post-card">(?:(?!<article class="post-card">)[\\s\\S])*?href="posts/${slugRe}\\.html"[\\s\\S]*?</article>`, '');
             const newCard = `<article class="post-card">
                 <h2><a href="posts/${slug}.html">${escHtml(title)}</a></h2>
                 <div class="post-meta">${dateStr}</div>
@@ -395,7 +396,8 @@ ${bodyHtml}
 
         function replaceArchiveRow(archiveHtml, slug, { title, dateStr }) {
             const slugRe = escapeRegex(slug);
-            const re = new RegExp(`<li>\\s*<a href="posts/${slugRe}\\.html"[\\s\\S]*?</li>`, '');
+            // Tempered greedy: don't span past another <li>
+            const re = new RegExp(`<li>(?:(?!<li>)[\\s\\S])*?<a href="posts/${slugRe}\\.html"[\\s\\S]*?</li>`, '');
             const newRow = `<li>
                     <a href="posts/${slug}.html">${escHtml(title)}</a>
                     <span class="date">${dateStr}</span>
