@@ -1,7 +1,8 @@
 /* Jocelyn Flores Theme with Claude Colors */
 /* Dark aesthetic with orange/coral accents */
 
-:root {
+:root,
+[data-theme="dark"] {
   --bg-primary: #1a1a1a;
   --bg-secondary: #2d2d2d;
   --bg-card: #242424;
@@ -12,7 +13,27 @@
   --accent-dark: #c45a30;
   --border: #3a3a3a;
   --shadow: rgba(0, 0, 0, 0.4);
+  --code-bg: rgba(255,255,255,0.08);
+  --code-block-bg: rgba(0,0,0,0.4);
 }
+
+[data-theme="light"] {
+  --bg-primary: #faf8f5;
+  --bg-secondary: #f3efe9;
+  --bg-card: #ffffff;
+  --text-primary: #2a2a2a;
+  --text-secondary: #555555;
+  --accent: #d65a30;
+  --accent-hover: #e87040;
+  --accent-dark: #a3401e;
+  --border: #d8d4cc;
+  --shadow: rgba(0, 0, 0, 0.08);
+  --code-bg: rgba(0,0,0,0.06);
+  --code-block-bg: rgba(0,0,0,0.04);
+}
+
+html { background-color: var(--bg-primary); }
+body, header, footer { transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
 
 * {
   margin: 0;
@@ -255,19 +276,38 @@ main {
 }
 
 .post-content code {
-  background: rgba(255,255,255,0.08);
+  background: var(--code-bg);
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
   font-size: 0.95em;
 }
 
 .post-content pre {
-  background: rgba(0,0,0,0.4);
+  background: var(--code-block-bg);
   padding: 1rem;
   border-radius: 6px;
   overflow-x: auto;
   margin: 1.5rem 0;
 }
+
+/* Theme toggle button (injected into nav by /theme.js) */
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  font-family: inherit;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.theme-toggle-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.nav-links li.theme-toggle { display: flex; align-items: center; }
 
 .post-content pre code {
   background: transparent;
