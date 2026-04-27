@@ -45,6 +45,7 @@
         .preview pre { background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 6px; overflow-x: auto; }
         .preview ul, .preview ol { color: var(--text-secondary); margin: 1rem 0 1rem 1.5rem; }
         .preview a { color: var(--accent); }
+        .preview img { display: block; max-width: 100%; height: auto; margin: 1.5rem auto; border-radius: 8px; border: 1px solid var(--border); }
         .key-setup { background: rgba(232,112,64,0.08); border: 1px solid var(--accent-dark); padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
         .key-setup h3 { color: var(--accent); margin-bottom: 0.8rem; font-size: 1.1rem; }
         .key-setup ol { margin: 0.8rem 0 0.8rem 1.4rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.8; }
@@ -99,8 +100,10 @@
 
                 <div class="actions">
                     <button id="publish">Publish</button>
+                    <button id="addPhoto" class="ghost" type="button">Add photo</button>
                     <button id="togglePreview" class="ghost">Preview</button>
                     <button id="saveDraft" class="ghost">Save draft</button>
+                    <input type="file" id="photoInput" accept="image/*" style="display:none" />
                 </div>
 
                 <div id="preview" class="preview"></div>
@@ -308,6 +311,139 @@ ${bodyHtml}
             );
         }
 
+        // ---------- Photo upload ----------
+        const MAX_DIM = 1600;        // resize so longest edge <= 1600px
+        const JPEG_QUALITY = 0.85;
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const fr = new FileReader();
+                fr.onload = () => resolve(fr.result);
+                fr.onerror = reject;
+                fr.readAsDataURL(file);
+            });
+        }
+
+        function loadImage(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = dataUrl;
+            });
+        }
+
+        // Resize a File to a JPEG data URL with max dimension MAX_DIM, returns { dataUrl, blob }
+        async function resizeImage(file) {
+            const dataUrl = await readFileAsDataURL(file);
+            const img = await loadImage(dataUrl);
+            let { width: w, height: h } = img;
+            const longest = Math.max(w, h);
+            if (longest > MAX_DIM) {
+                const scale = MAX_DIM / longest;
+                w = Math.round(w * scale);
+                h = Math.round(h * scale);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const outDataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+            return outDataUrl; // 'data:image/jpeg;base64,...'
+        }
+
+        function dataUrlToBase64(dataUrl) {
+            const i = dataUrl.indexOf(',');
+            return dataUrl.slice(i + 1);
+        }
+
+        function insertAtCursor(textarea, text) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const before = textarea.value.slice(0, start);
+            const after = textarea.value.slice(end);
+            // Surround with newlines so the image renders as its own block
+            const padBefore = before.length === 0 || before.endsWith('\n') ? '' : '\n\n';
+            const padAfter = after.startsWith('\n') ? '\n' : '\n\n';
+            const newText = before + padBefore + text + padAfter + after;
+            textarea.value = newText;
+            const cursorPos = (before + padBefore + text + padAfter).length;
+            textarea.selectionStart = textarea.selectionEnd = cursorPos;
+            textarea.focus();
+            // Trigger save
+            localStorage.setItem(DRAFT_BODY, textarea.value);
+        }
+
+        async function uploadPhoto(file) {
+            // Resize + re-encode as JPEG
+            setStatus('Optimizing photo…', 'info');
+            const dataUrl = await resizeImage(file);
+            const base64 = dataUrlToBase64(dataUrl);
+
+            // Build a unique-ish filename
+            const ts = Date.now();
+            const rand = Math.random().toString(36).slice(2, 7);
+            const safeName = (file.name || 'photo').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'photo';
+            const filename = `${ts}-${rand}-${safeName}.jpg`;
+
+            setStatus('Uploading photo…', 'info');
+            const token = localStorage.getItem(KEY_STORAGE);
+            const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/images/${filename}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Type': 'application/json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                },
+                body: JSON.stringify({
+                    message: `Add photo: ${filename}`,
+                    content: base64,
+                    branch: BRANCH
+                })
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.message || 'Upload failed');
+            return `/images/${filename}`;
+        }
+
+        $('addPhoto').addEventListener('click', () => {
+            if (!localStorage.getItem(KEY_STORAGE)) {
+                return setStatus('Save your publishing key first.', 'error');
+            }
+            $('photoInput').value = '';
+            $('photoInput').click();
+        });
+
+        $('photoInput').addEventListener('change', async (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                return setStatus('That doesn\'t look like an image.', 'error');
+            }
+            const btn = $('addPhoto');
+            btn.disabled = true;
+            try {
+                const path = await uploadPhoto(file);
+                const altText = (file.name || 'photo').replace(/\.[^.]+$/, '');
+                insertAtCursor($('body'), `![${altText}](${path})`);
+                setStatus(`Photo added! It will appear in your post when you publish.`, 'success');
+            } catch (err) {
+                console.error(err);
+                let msg = String(err.message || err);
+                if (msg.includes('Bad credentials') || msg.includes('401')) {
+                    msg = 'Your publishing key is invalid or expired. Click "Reset publishing key" below and re-enter it.';
+                } else if (msg.includes('403') || msg.includes('not accessible')) {
+                    msg = 'Your key needs Contents: Read and write permission to upload photos.';
+                }
+                setStatus('Photo upload failed: ' + msg, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // ---------- Publish ----------
         $('publish').addEventListener('click', async () => {
             const title = $('title').value.trim();
             const body = $('body').value.trim();

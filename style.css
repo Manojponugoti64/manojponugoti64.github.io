@@ -222,6 +222,58 @@ main {
   color: var(--text-secondary);
 }
 
+.post-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 2rem auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.post-content h2 {
+  font-size: 1.6rem;
+  margin: 2rem 0 0.8rem;
+  color: var(--text-primary);
+}
+
+.post-content h3 {
+  font-size: 1.3rem;
+  margin: 1.5rem 0 0.6rem;
+  color: var(--text-primary);
+}
+
+.post-content ul,
+.post-content ol {
+  margin: 1rem 0 1.5rem 1.5rem;
+  color: var(--text-secondary);
+}
+
+.post-content ul li,
+.post-content ol li {
+  margin-bottom: 0.5rem;
+}
+
+.post-content code {
+  background: rgba(255,255,255,0.08);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+}
+
+.post-content pre {
+  background: rgba(0,0,0,0.4);
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.post-content pre code {
+  background: transparent;
+  padding: 0;
+}
+
 /* Archive */
 .archive-list {
   list-style: none;
