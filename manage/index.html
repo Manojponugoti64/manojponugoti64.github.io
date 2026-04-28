@@ -152,6 +152,12 @@
     </main>
 
     <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
         <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
     </footer>
 
@@ -421,16 +427,33 @@
         // ---------- About page ----------
         let aboutSha = null;
 
+        // Strip the common leading whitespace from non-blank lines so users
+        // can paste indented content without it becoming a markdown code block.
+        function dedent(s) {
+            const lines = s.split('\n');
+            let min = Infinity;
+            for (const line of lines) {
+                if (line.trim().length === 0) continue;
+                const m = line.match(/^[ \t]*/);
+                const w = m ? m[0].length : 0;
+                if (w < min) min = w;
+            }
+            if (!isFinite(min) || min === 0) return s;
+            return lines.map(l => (l.length >= min ? l.slice(min) : l)).join('\n');
+        }
+
         function htmlToMd(html) {
             // Look for embedded source first
             const srcM = html.match(/<!--\s*BLOG_SOURCE_BASE64\s+([A-Za-z0-9+/=]+)\s*-->/);
             if (srcM) {
-                try { return ub64(srcM[1].trim()); } catch (e) {}
+                try { return dedent(ub64(srcM[1].trim())); } catch (e) {}
             }
             // Fallback: extract content of .page-content and convert basic HTML to markdown
             const pcM = html.match(/<div class="page-content">([\s\S]*?)<\/div>\s*<\/main>/);
             if (!pcM) return '';
             let s = pcM[1];
+            // Strip leading whitespace from each line to avoid triggering code blocks on round-trip.
+            s = s.split('\n').map(l => l.replace(/^[ \t]+/, '')).join('\n');
             return s
                 .replace(/<h1>([\s\S]*?)<\/h1>/g, '# $1\n\n')
                 .replace(/<h2>([\s\S]*?)<\/h2>/g, '## $1\n\n')
@@ -438,6 +461,7 @@
                 .replace(/<a[^>]*?href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g, '[$2]($1)')
                 .replace(/<strong>([\s\S]*?)<\/strong>/g, '**$1**')
                 .replace(/<em>([\s\S]*?)<\/em>/g, '*$1*')
+                .replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, '$1\n\n')
                 .replace(/<p>([\s\S]*?)<\/p>/g, '$1\n\n')
                 .replace(/<[^>]+>/g, '')
                 .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
@@ -446,6 +470,8 @@
         }
 
         function buildAboutPage(markdownBody) {
+            // Strip common leading whitespace so pasted indented content doesn't render as a code block.
+            markdownBody = dedent(markdownBody);
             const bodyHtml = marked.parse(markdownBody);
             return `<!DOCTYPE html>
 <html lang="en">
@@ -475,6 +501,12 @@ ${bodyHtml}
     </main>
 
     <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
         <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
     </footer>
 </body>
