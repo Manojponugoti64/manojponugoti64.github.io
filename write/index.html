@@ -63,13 +63,11 @@
 <body>
     <header>
         <nav>
-            <div class="logo">Manoj's Blog</div>
-            <ul class="nav-links">
-                <li><a href="../index.html">Home</a></li>
+            <a class="logo" href="../index.html">Manoj's Blog</a>
+                        <ul class="nav-links">
+                <li><a href="../articles.html">Articles</a></li>
                 <li><a href="../about.html">About</a></li>
-                <li><a href="../archive.html">Archive</a></li>
                 <li><a href="../photos.html">Photos</a></li>
-                <li><a href="../thoughts/index.html">Thoughts</a></li>
             </ul>
         </nav>
     </header>
@@ -378,13 +376,11 @@
 <body>
     <header>
         <nav>
-            <div class="logo">Manoj's Blog</div>
+            <a class="logo" href="../index.html">Manoj's Blog</a>
             <ul class="nav-links">
-                <li><a href="../index.html">Home</a></li>
+                <li><a href="../articles.html">Articles</a></li>
                 <li><a href="../about.html">About</a></li>
-                <li><a href="../archive.html">Archive</a></li>
                 <li><a href="../photos.html">Photos</a></li>
-                <li><a href="../thoughts/index.html">Thoughts</a></li>
             </ul>
         </nav>
     </header>
@@ -654,12 +650,12 @@ ${bodyHtml}
                     }
                 }
 
-                setStatus('Step 2/3 — updating homepage…', 'info');
-                await modifyFile('index.html',
+                setStatus('Step 2/3 — updating Articles page…', 'info');
+                await modifyFile('articles.html',
                     c => isEdit
                         ? replaceIndexCard(c, slug, { title, dateStr, excerptText })
                         : insertIndexCard(c, { title, slug, dateStr, excerptText }),
-                    `${isEdit ? 'Update' : 'Link new'} post on homepage: ${title}`
+                    `${isEdit ? 'Update' : 'Link new'} post on Articles page: ${title}`
                 );
 
                 setStatus('Step 3/3 — updating archive…', 'info');
@@ -683,7 +679,7 @@ ${bodyHtml}
                 setStatus(
                     `${isEdit ? 'Saved' : 'Published'}! GitHub Pages usually takes ~30s to rebuild. ` +
                     `<a href="/posts/${slug}.html" target="_blank">View your post</a> · ` +
-                    `<a href="/" target="_blank">Home</a> · ` +
+                    `<a href="/articles.html" target="_blank">Articles</a> · ` +
                     `<a href="/manage/">Manage</a>`,
                     'success'
                 );

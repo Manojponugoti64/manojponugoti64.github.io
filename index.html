@@ -3,43 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Manoj's Blog</title>
     <link rel="stylesheet" href="style.css">
     <script src="theme.js"></script>
     <script src="sidebar.js" defer></script>
-
 </head>
 <body>
     <header>
         <nav>
-            <div class="logo">Manoj's Blog</div>
+            <a class="logo" href="index.html">Manoj's Blog</a>
             <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
+                <li><a href="articles.html">Articles</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="archive.html">Archive</a></li>
                 <li><a href="photos.html">Photos</a></li>
-                <li><a href="thoughts/index.html">Thoughts</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section class="hero">
-            <h1>Welcome to <span>My Blog</span></h1>
-            <p>Thoughts, stories, and ideas — written in the quiet hours.</p>
-        </section>
-
-        <section class="posts-grid">
-
-            <article class="post-card">
-                <h2><a href="posts/between-roots-and-waves-living-real.html">BETWEEN ROOTS AND WAVES: LIVING REAL</a></h2>
-                <div class="post-meta">April 27, 2026</div>
-                <p class="post-excerpt">
-                    There are places where life stops performing and simply exists—unfiltered, unhurried, and unapologetically real. A shoreline, where the sea breathes in long, patient rhythms, and flowers spill over edges and pathways...
-                </p>
-                <a href="posts/between-roots-and-waves-living-real.html" class="read-more">Read more &rarr;</a>
-            </article>
-            </section>
+        <div class="page-content thoughts-page feed-page">
+            <div id="thoughtsFeed" class="thoughts-feed" aria-live="polite"></div>
+            <p id="thoughtsEmpty" class="photo-empty" style="display:none;">Nothing here yet &mdash; check back soon.</p>
+        </div>
     </main>
 
     <footer>
@@ -51,5 +39,67 @@
         </div>
         <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
     </footer>
+
+    <script>
+        (function () {
+            var feed = document.getElementById('thoughtsFeed');
+            var empty = document.getElementById('thoughtsEmpty');
+
+            function escHtml(s) {
+                return String(s).replace(/[&<>"']/g, function (c) {
+                    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]);
+                });
+            }
+            function linkify(s) {
+                return s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+            }
+
+            fetch('thoughts/index.json?cb=' + Date.now())
+                .then(function (r) { return r.ok ? r.json() : { thoughts: [] }; })
+                .then(function (data) {
+                    var thoughts = (data && data.thoughts) || [];
+                    if (!thoughts.length) {
+                        empty.style.display = '';
+                        return;
+                    }
+                    thoughts.slice().reverse().forEach(function (t) {
+                        var card = document.createElement('article');
+                        card.className = 'thought-card';
+                        card.id = 't-' + t.id;
+
+                        var meta = document.createElement('div');
+                        meta.className = 'thought-meta';
+                        meta.innerHTML =
+                            '<span class="thought-date">' + escHtml(t.dateStr || '') + '</span>' +
+                            ' <span class="thought-dot">&middot;</span> ' +
+                            '<a class="thought-permalink" href="thoughts/' + encodeURIComponent(t.id) + '.html">View &amp; comment</a>' +
+                            ' <span class="thought-dot">&middot;</span> ' +
+                            '<img class="thought-views" alt="views" loading="lazy" src="https://hits.sh/manojponugoti64.github.io/thoughts/' + encodeURIComponent(t.id) + '.html.svg?style=flat-square&label=views&color=e87040&labelColor=2a2a2a" />';
+                        card.appendChild(meta);
+
+                        var p = document.createElement('p');
+                        p.className = 'thought-text';
+                        p.innerHTML = linkify(escHtml(t.text || '')).replace(/\n/g, '<br>');
+                        card.appendChild(p);
+
+                        if (t.image) {
+                            var imgWrap = document.createElement('a');
+                            imgWrap.href = t.image.replace(/^\.\.\//, '');
+                            imgWrap.target = '_blank';
+                            imgWrap.className = 'thought-image-wrap';
+                            var img = document.createElement('img');
+                            img.src = t.image.replace(/^\.\.\//, '');
+                            img.alt = '';
+                            img.loading = 'lazy';
+                            imgWrap.appendChild(img);
+                            card.appendChild(imgWrap);
+                        }
+
+                        feed.appendChild(card);
+                    });
+                })
+                .catch(function () { empty.style.display = ''; });
+        })();
+    </script>
 </body>
 </html>

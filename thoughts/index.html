@@ -2,109 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>Thoughts - Manoj's Blog</title>
-    <link rel="stylesheet" href="../style.css">
-    <script src="../theme.js"></script>
-    <script src="../sidebar.js" defer></script>
+    <meta http-equiv="refresh" content="0; url=../index.html">
+    <link rel="canonical" href="../index.html">
+    <title>Manoj's Blog</title>
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo">Manoj's Blog</div>
-            <ul class="nav-links">
-                <li><a href="../index.html">Home</a></li>
-                <li><a href="../about.html">About</a></li>
-                <li><a href="../archive.html">Archive</a></li>
-                <li><a href="../photos.html">Photos</a></li>
-                <li><a href="index.html">Thoughts</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main>
-        <div class="page-content thoughts-page">
-            <h1>Thoughts</h1>
-            <p class="page-sub">Quick notes from my day &mdash; like a journal, public.</p>
-
-            <div id="thoughtsFeed" class="thoughts-feed" aria-live="polite"></div>
-            <p id="thoughtsEmpty" class="photo-empty" style="display:none;">No thoughts yet &mdash; check back soon.</p>
-        </div>
-    </main>
-
-    <footer>
-        <div class="footer-social">
-            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-                <span>ponugotimanojkumar@gmail.com</span>
-            </a>
-        </div>
-        <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
-    </footer>
-
-    <script>
-        (function () {
-            var feed = document.getElementById('thoughtsFeed');
-            var empty = document.getElementById('thoughtsEmpty');
-
-            function escHtml(s) {
-                return String(s).replace(/[&<>"']/g, function (c) {
-                    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]);
-                });
-            }
-            function linkify(s) {
-                return s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-            }
-
-            fetch('index.json?cb=' + Date.now())
-                .then(function (r) { return r.ok ? r.json() : { thoughts: [] }; })
-                .then(function (data) {
-                    var thoughts = (data && data.thoughts) || [];
-                    if (!thoughts.length) {
-                        empty.style.display = '';
-                        return;
-                    }
-                    thoughts.slice().reverse().forEach(function (t) {
-                        var card = document.createElement('article');
-                        card.className = 'thought-card';
-                        card.id = 't-' + t.id;
-
-                        var meta = document.createElement('div');
-                        meta.className = 'thought-meta';
-                        meta.innerHTML =
-                            '<span class="thought-date">' + escHtml(t.dateStr || '') + '</span>' +
-                            ' <span class="thought-dot">&middot;</span> ' +
-                            '<a class="thought-permalink" href="' + encodeURIComponent(t.id) + '.html">View &amp; comment</a>' +
-                            ' <span class="thought-dot">&middot;</span> ' +
-                            '<img class="thought-views" alt="views" loading="lazy" src="https://hits.sh/manojponugoti64.github.io/thoughts/' + encodeURIComponent(t.id) + '.html.svg?style=flat-square&label=views&color=e87040&labelColor=2a2a2a" />';
-                        card.appendChild(meta);
-
-                        var p = document.createElement('p');
-                        p.className = 'thought-text';
-                        p.innerHTML = linkify(escHtml(t.text || '')).replace(/\n/g, '<br>');
-                        card.appendChild(p);
-
-                        if (t.image) {
-                            var imgWrap = document.createElement('a');
-                            imgWrap.href = t.image;
-                            imgWrap.target = '_blank';
-                            imgWrap.className = 'thought-image-wrap';
-                            var img = document.createElement('img');
-                            img.src = t.image;
-                            img.alt = '';
-                            img.loading = 'lazy';
-                            imgWrap.appendChild(img);
-                            card.appendChild(imgWrap);
-                        }
-
-                        feed.appendChild(card);
-                    });
-                })
-                .catch(function () { empty.style.display = ''; });
-        })();
-    </script>
+    <p>Redirecting to <a href="../index.html">the feed</a>&hellip;</p>
+    <script>location.replace('../index.html');</script>
 </body>
 </html>

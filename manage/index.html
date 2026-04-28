@@ -77,13 +77,11 @@
 <body>
     <header>
         <nav>
-            <div class="logo">Manoj's Blog</div>
-            <ul class="nav-links">
-                <li><a href="../index.html">Home</a></li>
+            <a class="logo" href="../index.html">Manoj's Blog</a>
+                        <ul class="nav-links">
+                <li><a href="../articles.html">Articles</a></li>
                 <li><a href="../about.html">About</a></li>
-                <li><a href="../archive.html">Archive</a></li>
                 <li><a href="../photos.html">Photos</a></li>
-                <li><a href="../thoughts/index.html">Thoughts</a></li>
             </ul>
         </nav>
     </header>
@@ -91,7 +89,7 @@
     <main>
         <div class="manage">
             <h1>Manage your blog</h1>
-            <p class="lead">Edit posts, change your homepage, update your About page. All in one place.</p>
+            <p class="lead">Post to your feed, edit articles, update your About page. All in one place.</p>
 
             <div id="keyPrompt" class="key-setup" style="display:none;">
                 <h3>One-time setup — your publishing key</h3>
@@ -110,8 +108,8 @@
 
             <div id="dashboard" style="display:none;">
                 <section class="card">
-                    <h2>Quick Thought</h2>
-                    <p class="hint">Twitter-style short post. Goes live on <a href="../thoughts/index.html" target="_blank">/thoughts/</a> in ~30s. Each thought has its own page where readers can comment + react.</p>
+                    <h2>Compose</h2>
+                    <p class="hint">Quick post for your feed (homepage). Goes live in ~30s. Each post has its own page where readers can comment + react.</p>
                     <textarea id="thoughtText" placeholder="What's on your mind?" maxlength="500" style="min-height:110px;"></textarea>
                     <div class="thought-composer-row">
                         <span id="thoughtCount" class="thought-count">0 / 500</span>
@@ -125,8 +123,8 @@
                 </section>
 
                 <section class="card">
-                    <h2>Your thoughts</h2>
-                    <p class="hint">Recent quick posts. Delete removes the thought page + its entry from the feed.</p>
+                    <h2>Your feed posts</h2>
+                    <p class="hint">Recent posts on your homepage feed. Delete removes the post page + its entry from the feed.</p>
                     <div id="thoughtsList"><div class="empty">Loading…</div></div>
                     <div class="toolbar">
                         <button id="reloadThoughts" class="ghost" type="button">Refresh</button>
@@ -134,8 +132,8 @@
                 </section>
 
                 <section class="card">
-                    <h2>Your posts</h2>
-                    <p class="hint">Click Edit to change a post. Click Delete to remove it from your blog.</p>
+                    <h2>Your articles</h2>
+                    <p class="hint">Long-form posts. Click Edit to change one. Click Delete to remove it from your blog.</p>
                     <div id="postsList"><div class="empty">Loading…</div></div>
                     <div class="toolbar">
                         <a href="../write/"><button>+ Write new post</button></a>
@@ -144,8 +142,8 @@
                 </section>
 
                 <section class="card">
-                    <h2>Homepage</h2>
-                    <p class="hint">The big welcome message at the top of your blog.</p>
+                    <h2>Articles page hero</h2>
+                    <p class="hint">The big welcome message at the top of your <a href="../articles.html" target="_blank">/articles</a> page.</p>
                     <label for="heroPrefix">Heading — first part</label>
                     <input id="heroPrefix" placeholder="e.g. Welcome to" />
                     <label for="heroAccent">Heading — accent (orange) part</label>
@@ -153,7 +151,7 @@
                     <label for="heroSubtitle">Subtitle</label>
                     <input id="heroSubtitle" placeholder="e.g. Thoughts, stories, and ideas — written in the quiet hours." />
                     <div class="toolbar">
-                        <button id="saveHero">Save homepage</button>
+                        <button id="saveHero">Save</button>
                         <button id="reloadHero" class="ghost">Reset</button>
                     </div>
                 </section>
@@ -392,8 +390,8 @@
                 setStatus(`Deleting "${title}" — step 1/3 (post file)…`, 'info');
                 await deleteFileWithRetry(`posts/${slug}.html`, `Delete post: ${title}`);
 
-                setStatus(`Deleting "${title}" — step 2/3 (homepage)…`, 'info');
-                await modifyFile('index.html', c => c.replace(cardRe, '\n            '), `Remove "${title}" from homepage`);
+                setStatus(`Deleting "${title}" — step 2/3 (Articles page)…`, 'info');
+                await modifyFile('articles.html', c => c.replace(cardRe, '\n            '), `Remove "${title}" from Articles page`);
 
                 setStatus(`Deleting "${title}" — step 3/3 (archive)…`, 'info');
                 await modifyFile('archive.html', c => c.replace(rowRe, '\n                '), `Remove "${title}" from archive`);
@@ -412,7 +410,7 @@
 
         async function loadHero() {
             try {
-                const file = await getFile('index.html');
+                const file = await getFile('articles.html');
                 heroSha = file.sha;
                 heroOriginal = file.content;
                 // Match: <section class="hero"> ... <h1>PREFIX <span>ACCENT</span></h1> ... <p>SUBTITLE</p> ... </section>
@@ -443,20 +441,20 @@
             const accent = $('heroAccent').value.trim();
             const subtitle = $('heroSubtitle').value.trim();
             if (!prefix && !accent) return setStatus('Heading cannot be empty.', 'error');
-            setStatus('Saving homepage…', 'info');
+            setStatus('Saving Articles page…', 'info');
             try {
                 const newHero = `<section class="hero">
             <h1>${escHtml(prefix)} <span>${escHtml(accent)}</span></h1>
             <p>${escHtml(subtitle)}</p>
         </section>`;
                 let didReplace = false;
-                const result = await modifyFile('index.html', c => {
+                const result = await modifyFile('articles.html', c => {
                     const updated = c.replace(/<section class="hero">[\s\S]*?<\/section>/, newHero);
                     didReplace = updated !== c;
                     return updated;
-                }, 'Update homepage hero');
+                }, 'Update Articles page hero');
                 if (!didReplace) return setStatus('Could not find hero section to update.', 'error');
-                setStatus('Homepage saved! Pages will rebuild in ~30s.', 'success');
+                setStatus('Articles page saved! Pages will rebuild in ~30s.', 'success');
                 loadHero();
             } catch (err) {
                 console.error(err);
@@ -526,13 +524,11 @@
 <body>
     <header>
         <nav>
-            <div class="logo">Manoj's Blog</div>
+            <a class="logo" href="index.html">Manoj's Blog</a>
             <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
+                <li><a href="articles.html">Articles</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="archive.html">Archive</a></li>
                 <li><a href="photos.html">Photos</a></li>
-                <li><a href="thoughts/index.html">Thoughts</a></li>
             </ul>
         </nav>
     </header>
@@ -755,19 +751,17 @@ ${bodyHtml}
 <body>
     <header>
         <nav>
-            <div class="logo">Manoj's Blog</div>
+            <a class="logo" href="../index.html">Manoj's Blog</a>
             <ul class="nav-links">
-                <li><a href="../index.html">Home</a></li>
+                <li><a href="../articles.html">Articles</a></li>
                 <li><a href="../about.html">About</a></li>
-                <li><a href="../archive.html">Archive</a></li>
                 <li><a href="../photos.html">Photos</a></li>
-                <li><a href="index.html">Thoughts</a></li>
             </ul>
         </nav>
     </header>
     <main>
         <div class="page-content thoughts-page">
-            <a href="index.html" class="thought-back">&larr; Back to all thoughts</a>
+            <a href="../index.html" class="thought-back">&larr; Back to feed</a>
             <article class="thought-card thought-card-full" id="t-${id}">
                 <div class="thought-meta">
                     <span class="thought-date">${dateStr}</span>

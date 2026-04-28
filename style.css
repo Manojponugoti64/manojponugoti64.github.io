@@ -82,7 +82,12 @@ nav {
   font-weight: bold;
   color: var(--accent);
   letter-spacing: 1px;
+  text-decoration: none;
 }
+.logo:hover { color: var(--accent-hover); }
+
+/* Feed homepage spacing */
+.feed-page { padding-top: 0.5rem; }
 
 .nav-links {
   list-style: none;
