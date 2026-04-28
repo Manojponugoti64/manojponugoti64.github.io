@@ -68,6 +68,7 @@
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="../about.html">About</a></li>
                 <li><a href="../archive.html">Archive</a></li>
+                <li><a href="../photos.html">Photos</a></li>
             </ul>
         </nav>
     </header>
@@ -104,6 +105,12 @@
                 <label for="body">Body (supports **bold**, *italic*, # headings, > quotes, - lists, [links](url), `code`)</label>
                 <textarea id="body" placeholder="Write your post here... Markdown works."></textarea>
                 <div class="hint">Tip: blank line between paragraphs. <code>#</code> for H1, <code>##</code> H2, <code>></code> for quotes.</div>
+
+                <fieldset class="category-picker">
+                    <legend>Category</legend>
+                    <label><input type="radio" name="category" value="non-technical" checked> Non-Technical</label>
+                    <label><input type="radio" name="category" value="technical"> Technical</label>
+                </fieldset>
 
                 <div class="actions">
                     <button id="publish">Publish</button>
@@ -172,6 +179,11 @@
 
                 const dateMatch = file.content.match(/<article class="post-content">[\s\S]*?<div class="post-meta">([\s\S]*?)<\/div>/);
                 editPostDateStr = dateMatch ? dateMatch[1].trim() : prettyDate(new Date());
+
+                // Pre-select category radio based on the post's blog-category meta
+                const catMatch = file.content.match(/<meta\s+name="blog-category"\s+content="([^"]+)"/);
+                const cat = (catMatch && catMatch[1]) || 'non-technical';
+                document.querySelectorAll('input[name="category"]').forEach(r => { r.checked = (r.value === cat); });
 
                 const srcMatch = file.content.match(/<!--\s*BLOG_SOURCE_BASE64\s+([A-Za-z0-9+/=]+)\s*-->/);
                 let body = '';
@@ -348,13 +360,15 @@
             }
         }
 
-        function postTemplate({ title, dateStr, bodyHtml, sourceMarkdown }) {
+        function postTemplate({ title, dateStr, bodyHtml, sourceMarkdown, category }) {
             const sourceComment = sourceMarkdown ? `\n<!-- BLOG_SOURCE_BASE64 ${b64(sourceMarkdown)} -->\n` : '';
+            const cat = category || 'non-technical';
             return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="blog-category" content="${cat}">
     <title>${escHtml(title)} - Manoj's Blog</title>
     <link rel="stylesheet" href="../style.css">
     <script src="../theme.js"><\/script>
@@ -368,6 +382,7 @@
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="../about.html">About</a></li>
                 <li><a href="../archive.html">Archive</a></li>
+                <li><a href="../photos.html">Photos</a></li>
             </ul>
         </nav>
     </header>
@@ -414,15 +429,37 @@ ${bodyHtml}
             return indexHtml.replace(re, newCard);
         }
 
-        function replaceArchiveRow(archiveHtml, slug, { title, dateStr }) {
+        function buildArchiveRow(slug, title, dateStr) {
+            return `<li data-slug="${slug}">
+                            <a href="posts/${slug}.html">${escHtml(title)}</a>
+                            <span class="date">${dateStr}</span>
+                        </li>`;
+        }
+
+        // Remove any existing entry for this slug across all archive lists, then
+        // insert a fresh one at the top of the chosen category column.
+        function upsertArchiveRow(archiveHtml, slug, { title, dateStr, category }) {
             const slugRe = escapeRegex(slug);
-            // Tempered greedy: don't span past another <li>
-            const re = new RegExp(`<li>(?:(?!<li>)[\\s\\S])*?<a href="posts/${slugRe}\\.html"[\\s\\S]*?</li>`, '');
-            const newRow = `<li>
-                    <a href="posts/${slug}.html">${escHtml(title)}</a>
-                    <span class="date">${dateStr}</span>
-                </li>`;
-            return archiveHtml.replace(re, newRow);
+            // Remove any prior row keyed by data-slug=slug. Tempered to not span past another <li>.
+            const removeRe = new RegExp(`\\s*<li[^>]*data-slug="${slugRe}"[^>]*>(?:(?!<li)[\\s\\S])*?</li>\\s*`, 'g');
+            let out = archiveHtml.replace(removeRe, '\n                        ');
+            // Also strip empty-state placeholder for the destination column
+            const cat = category || 'non-technical';
+            out = out.replace(
+                new RegExp(`(<ul class="archive-list" data-archive-list="${cat}">)\\s*<li class="archive-empty">[^<]*</li>`),
+                '$1'
+            );
+            // Insert new row at top of the destination ul
+            const row = buildArchiveRow(slug, title, dateStr);
+            return out.replace(
+                new RegExp(`(<ul class="archive-list" data-archive-list="${cat}">)`),
+                `$1\n                        ${row}`
+            );
+        }
+
+        // Backwards-compat for older callers
+        function replaceArchiveRow(archiveHtml, slug, args) {
+            return upsertArchiveRow(archiveHtml, slug, args);
         }
 
         function insertIndexCard(indexHtml, { title, slug, dateStr, excerptText }) {
@@ -443,16 +480,8 @@ ${bodyHtml}
             );
         }
 
-        function insertArchiveRow(archiveHtml, { title, slug, dateStr }) {
-            const row = `                <li>
-                    <a href="posts/${slug}.html">${escHtml(title)}</a>
-                    <span class="date">${dateStr}</span>
-                </li>
-`;
-            return archiveHtml.replace(
-                /(<ul class="archive-list">)/,
-                `$1\n${row}`
-            );
+        function insertArchiveRow(archiveHtml, { title, slug, dateStr, category }) {
+            return upsertArchiveRow(archiveHtml, slug, { title, dateStr, category });
         }
 
         // ---------- Photo upload ----------
@@ -604,7 +633,9 @@ ${bodyHtml}
                 const dateStr = isEdit && editPostDateStr ? editPostDateStr : prettyDate(new Date());
                 const bodyHtml = marked.parse(body);
                 const excerptText = excerpt(bodyHtml);
-                const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body });
+                const categoryEl = document.querySelector('input[name="category"]:checked');
+                const category = (categoryEl && categoryEl.value) || 'non-technical';
+                const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body, category });
 
                 setStatus(isEdit ? 'Step 1/3 — updating the post…' : 'Step 1/3 — saving the post…', 'info');
                 if (isEdit) {
@@ -631,9 +662,7 @@ ${bodyHtml}
 
                 setStatus('Step 3/3 — updating archive…', 'info');
                 await modifyFile('archive.html',
-                    c => isEdit
-                        ? replaceArchiveRow(c, slug, { title, dateStr })
-                        : insertArchiveRow(c, { title, slug, dateStr }),
+                    c => upsertArchiveRow(c, slug, { title, dateStr, category }),
                     `${isEdit ? 'Update' : 'Add to'} archive: ${title}`
                 );
 

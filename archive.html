@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Archive - Manoj's Blog</title>
     <link rel="stylesheet" href="style.css">
     <script src="theme.js"></script>
     <script src="sidebar.js" defer></script>
-
 </head>
 <body>
     <header>
@@ -17,6 +19,7 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="archive.html">Archive</a></li>
+                <li><a href="photos.html">Photos</a></li>
             </ul>
         </nav>
     </header>
@@ -24,14 +27,33 @@
     <main>
         <div class="page-content">
             <h1>Archive</h1>
-            <p>All posts, from newest to oldest.</p>
+            <p class="page-sub">Everything in one place — posts and photos.</p>
 
-            <ul class="archive-list">
-                <li>
-                    <a href="posts/between-roots-and-waves-living-real.html">BETWEEN ROOTS AND WAVES: LIVING REAL</a>
-                    <span class="date">April 27, 2026</span>
-                </li>
-                </ul>
+            <div class="archive-columns">
+                <section class="archive-col">
+                    <h2 class="archive-col-title">Technical</h2>
+                    <ul class="archive-list" data-archive-list="technical">
+                        <li class="archive-empty">No technical posts yet.</li>
+                    </ul>
+                </section>
+
+                <section class="archive-col">
+                    <h2 class="archive-col-title">Non-Technical</h2>
+                    <ul class="archive-list" data-archive-list="non-technical">
+                        <li data-slug="between-roots-and-waves-living-real">
+                            <a href="posts/between-roots-and-waves-living-real.html">BETWEEN ROOTS AND WAVES: LIVING REAL</a>
+                            <span class="date">April 27, 2026</span>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="archive-col">
+                    <h2 class="archive-col-title">Photos</h2>
+                    <div id="archivePhotos" class="archive-photos-preview"></div>
+                    <p id="archivePhotosEmpty" class="archive-empty" style="display:none;">No photos yet.</p>
+                    <a href="photos.html" class="archive-see-all">See all photos &rarr;</a>
+                </section>
+            </div>
         </div>
     </main>
 
@@ -44,5 +66,31 @@
         </div>
         <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
     </footer>
+
+    <script>
+        // Render photo previews from the gallery manifest
+        (function () {
+            var preview = document.getElementById('archivePhotos');
+            var empty = document.getElementById('archivePhotosEmpty');
+            fetch('gallery/manifest.json?cb=' + Date.now())
+                .then(function (r) { return r.ok ? r.json() : { photos: [] }; })
+                .then(function (data) {
+                    var photos = ((data && data.photos) || []).slice().reverse().slice(0, 6);
+                    if (!photos.length) { empty.style.display = ''; return; }
+                    photos.forEach(function (p) {
+                        var a = document.createElement('a');
+                        a.href = 'photos.html';
+                        a.className = 'archive-photo-thumb';
+                        var img = document.createElement('img');
+                        img.src = p.src;
+                        img.alt = p.caption || '';
+                        img.loading = 'lazy';
+                        a.appendChild(img);
+                        preview.appendChild(a);
+                    });
+                })
+                .catch(function () { empty.style.display = ''; });
+        })();
+    </script>
 </body>
 </html>

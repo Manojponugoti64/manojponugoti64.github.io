@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Photos - Manoj's Blog</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
+    <script src="sidebar.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Manoj's Blog</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="archive.html">Archive</a></li>
+                <li><a href="photos.html">Photos</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-content">
+            <h1>Photos</h1>
+            <p class="page-sub">Moments, snapshots, places I&#39;ve been.</p>
+
+            <div id="photoGrid" class="photo-grid" aria-live="polite"></div>
+            <p id="photoEmpty" class="photo-empty" style="display:none;">No photos yet — check back soon.</p>
+            <p id="photoError" class="photo-error" style="display:none;"></p>
+        </div>
+    </main>
+
+    <div id="lightbox" class="lightbox" aria-hidden="true">
+        <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
+        <img id="lightboxImg" alt="">
+    </div>
+
+    <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+        <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
+    </footer>
+
+    <script>
+        (function () {
+            var grid = document.getElementById('photoGrid');
+            var emptyMsg = document.getElementById('photoEmpty');
+            var errMsg = document.getElementById('photoError');
+            var lb = document.getElementById('lightbox');
+            var lbImg = document.getElementById('lightboxImg');
+            var lbClose = lb.querySelector('.lightbox-close');
+
+            function openLightbox(src, alt) {
+                lbImg.src = src;
+                lbImg.alt = alt || '';
+                lb.classList.add('is-open');
+                lb.setAttribute('aria-hidden', 'false');
+            }
+            function closeLightbox() {
+                lb.classList.remove('is-open');
+                lb.setAttribute('aria-hidden', 'true');
+                lbImg.src = '';
+            }
+            lb.addEventListener('click', function (e) {
+                if (e.target === lb || e.target === lbClose) closeLightbox();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeLightbox();
+            });
+
+            // Cache-bust manifest so new uploads show up immediately
+            fetch('gallery/manifest.json?cb=' + Date.now())
+                .then(function (r) {
+                    if (!r.ok) throw new Error('Failed to load gallery (' + r.status + ').');
+                    return r.json();
+                })
+                .then(function (data) {
+                    var photos = (data && data.photos) || [];
+                    if (!photos.length) {
+                        emptyMsg.style.display = '';
+                        return;
+                    }
+                    photos.slice().reverse().forEach(function (p) {
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'photo-tile';
+                        btn.setAttribute('aria-label', 'Open photo' + (p.caption ? ': ' + p.caption : ''));
+                        var img = document.createElement('img');
+                        img.src = p.src;
+                        img.alt = p.caption || '';
+                        img.loading = 'lazy';
+                        btn.appendChild(img);
+                        btn.addEventListener('click', function () {
+                            openLightbox(p.src, p.caption);
+                        });
+                        grid.appendChild(btn);
+                    });
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    emptyMsg.style.display = '';
+                });
+        })();
+    </script>
+</body>
+</html>
