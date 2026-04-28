@@ -407,20 +407,31 @@ nav[data-sidebar-ready="1"] {
   flex: 1;
   overflow-y: auto;
   padding: 0.75rem 0.5rem;
+  text-align: left;
 }
-.sidebar-nav ul {
+.sidebar .sidebar-nav ul {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-.sidebar-nav li { margin: 0; }
-.sidebar-nav a {
   display: block;
-  padding: 0.7rem 1rem;
+  gap: 0;
+  text-align: left;
+}
+.sidebar .sidebar-nav li {
+  margin: 0;
+  display: block;
+  text-align: left;
+}
+.sidebar .sidebar-nav a {
+  display: block;
+  padding: 0.75rem 1rem;
   color: var(--text-primary);
   text-decoration: none;
   border-radius: 8px;
   font-size: 0.98rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
   transition: background 0.2s, color 0.2s;
 }
 .sidebar-nav a:hover {
