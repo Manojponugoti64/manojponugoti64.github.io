@@ -83,6 +83,7 @@
                 <li><a href="../about.html">About</a></li>
                 <li><a href="../archive.html">Archive</a></li>
                 <li><a href="../photos.html">Photos</a></li>
+                <li><a href="../thoughts/index.html">Thoughts</a></li>
             </ul>
         </nav>
     </header>
@@ -108,6 +109,30 @@
             </div>
 
             <div id="dashboard" style="display:none;">
+                <section class="card">
+                    <h2>Quick Thought</h2>
+                    <p class="hint">Twitter-style short post. Goes live on <a href="../thoughts/index.html" target="_blank">/thoughts/</a> in ~30s. Each thought has its own page where readers can comment + react.</p>
+                    <textarea id="thoughtText" placeholder="What's on your mind?" maxlength="500" style="min-height:110px;"></textarea>
+                    <div class="thought-composer-row">
+                        <span id="thoughtCount" class="thought-count">0 / 500</span>
+                        <span id="thoughtPhotoName" class="thought-photo-name"></span>
+                    </div>
+                    <input type="file" id="thoughtPhotoInput" accept="image/*" style="display:none" />
+                    <div class="toolbar">
+                        <button id="addThoughtPhoto" type="button" class="ghost">+ Add photo</button>
+                        <button id="postThought" type="button">Post</button>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>Your thoughts</h2>
+                    <p class="hint">Recent quick posts. Delete removes the thought page + its entry from the feed.</p>
+                    <div id="thoughtsList"><div class="empty">Loading…</div></div>
+                    <div class="toolbar">
+                        <button id="reloadThoughts" class="ghost" type="button">Refresh</button>
+                    </div>
+                </section>
+
                 <section class="card">
                     <h2>Your posts</h2>
                     <p class="hint">Click Edit to change a post. Click Delete to remove it from your blog.</p>
@@ -278,6 +303,7 @@
             loadHero();
             loadAbout();
             loadPhotos();
+            loadThoughts();
         }
         function showKeyPrompt() {
             $('keyPrompt').style.display = 'block';
@@ -506,6 +532,7 @@
                 <li><a href="about.html">About</a></li>
                 <li><a href="archive.html">Archive</a></li>
                 <li><a href="photos.html">Photos</a></li>
+                <li><a href="thoughts/index.html">Thoughts</a></li>
             </ul>
         </nav>
     </header>
@@ -700,6 +727,212 @@ ${bodyHtml}
                 btn.disabled = false;
             }
         });
+
+        // ---------- Thoughts (Twitter-style short posts) ----------
+        let thoughtPhotoFile = null;
+
+        function genThoughtId() {
+            return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+        }
+
+        function thoughtPermalinkHtml({ id, text, dateStr, image }) {
+            const safeText = String(text || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const titleSnippet = (text || '').replace(/\s+/g, ' ').trim().slice(0, 60) || 'Thought';
+            const safeTitle = titleSnippet.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const renderedText = safeText.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g, '<br>');
+            const imageBlock = image ? `<a href="${image}" target="_blank" class="thought-image-wrap"><img src="${image}" alt="" loading="lazy"></a>` : '';
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>${safeTitle} - Manoj's Blog</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../theme.js"><\/script>
+    <script src="../sidebar.js" defer><\/script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Manoj's Blog</div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../archive.html">Archive</a></li>
+                <li><a href="../photos.html">Photos</a></li>
+                <li><a href="index.html">Thoughts</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="page-content thoughts-page">
+            <a href="index.html" class="thought-back">&larr; Back to all thoughts</a>
+            <article class="thought-card thought-card-full" id="t-${id}">
+                <div class="thought-meta">
+                    <span class="thought-date">${dateStr}</span>
+                    <span class="thought-dot">&middot;</span>
+                    <img class="thought-views" alt="views" src="https://hits.sh/manojponugoti64.github.io/thoughts/${id}.html.svg?style=flat-square&amp;label=views&amp;color=e87040&amp;labelColor=2a2a2a">
+                </div>
+                <p class="thought-text">${renderedText}</p>
+                ${imageBlock}
+            </article>
+            <div id="giscus-container" class="giscus"></div>
+        </div>
+    </main>
+    <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+        <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
+    </footer>
+    <script src="comments.js" defer><\/script>
+</body>
+</html>
+`;
+        }
+
+        async function loadThoughts() {
+            const list = $('thoughtsList');
+            list.innerHTML = '<div class="empty">Loading…</div>';
+            try {
+                let thoughts = [];
+                try {
+                    const f = await getFile('thoughts/index.json');
+                    const data = JSON.parse(f.content);
+                    thoughts = (data && data.thoughts) || [];
+                } catch (e) {
+                    thoughts = [];
+                }
+                if (!thoughts.length) {
+                    list.innerHTML = '<div class="empty">No thoughts yet.</div>';
+                    return;
+                }
+                list.innerHTML = '';
+                thoughts.slice().reverse().forEach(t => {
+                    const row = document.createElement('div');
+                    row.className = 'post-row';
+                    const info = document.createElement('div');
+                    info.className = 'info';
+                    const title = document.createElement('div');
+                    title.className = 'title';
+                    const link = document.createElement('a');
+                    link.href = '../thoughts/' + encodeURIComponent(t.id) + '.html';
+                    link.target = '_blank';
+                    link.textContent = (t.text || '').replace(/\s+/g, ' ').trim().slice(0, 90) || '(no text)';
+                    title.appendChild(link);
+                    info.appendChild(title);
+                    const meta = document.createElement('div');
+                    meta.className = 'meta';
+                    meta.textContent = t.dateStr || '';
+                    info.appendChild(meta);
+                    row.appendChild(info);
+                    const actions = document.createElement('div');
+                    actions.className = 'actions';
+                    const del = document.createElement('button');
+                    del.className = 'danger';
+                    del.type = 'button';
+                    del.textContent = 'Delete';
+                    del.addEventListener('click', () => deleteThought(t.id));
+                    actions.appendChild(del);
+                    row.appendChild(actions);
+                    list.appendChild(row);
+                });
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = '<div class="empty">Could not load thoughts: ' + (err.message || err) + '</div>';
+            }
+        }
+
+        $('reloadThoughts').addEventListener('click', loadThoughts);
+
+        $('thoughtText').addEventListener('input', (e) => {
+            $('thoughtCount').textContent = (e.target.value.length) + ' / 500';
+        });
+
+        $('addThoughtPhoto').addEventListener('click', () => $('thoughtPhotoInput').click());
+        $('thoughtPhotoInput').addEventListener('change', (e) => {
+            thoughtPhotoFile = (e.target.files && e.target.files[0]) || null;
+            $('thoughtPhotoName').textContent = thoughtPhotoFile ? ('attached: ' + thoughtPhotoFile.name) : '';
+        });
+
+        $('postThought').addEventListener('click', async () => {
+            const text = $('thoughtText').value.trim();
+            if (!text && !thoughtPhotoFile) {
+                return setStatus('Write something or attach a photo first.', 'error');
+            }
+            const btn = $('postThought');
+            btn.disabled = true;
+            try {
+                const id = genThoughtId();
+                const dateStr = new Date().toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+                let imagePath = null;
+                if (thoughtPhotoFile) {
+                    setStatus('Optimizing photo…', 'info');
+                    const dataUrl = await resizeToJpeg(thoughtPhotoFile);
+                    const base64 = dataUrlToBase64(dataUrl);
+                    const safeName = (thoughtPhotoFile.name || 'photo').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'photo';
+                    const filename = `${id}-${safeName}.jpg`;
+                    const filepath = `images/${filename}`;
+                    setStatus('Uploading photo…', 'info');
+                    await uploadBinary(filepath, base64, `Add thought image: ${filename}`);
+                    imagePath = '../' + filepath;
+                }
+
+                setStatus('Creating thought page…', 'info');
+                const permalinkHtml = thoughtPermalinkHtml({ id, text, dateStr, image: imagePath });
+                await putFile(`thoughts/${id}.html`, permalinkHtml, `Add thought ${id}`);
+
+                setStatus('Updating thoughts feed…', 'info');
+                await modifyFile('thoughts/index.json', (txt) => {
+                    let data = { thoughts: [] };
+                    try { data = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(data.thoughts)) data.thoughts = [];
+                    data.thoughts.push({ id, text, image: imagePath, dateStr, created: Date.now() });
+                    return JSON.stringify(data, null, 2) + '\n';
+                }, `Index thought ${id}`);
+
+                setStatus('Posted! Live in ~30s on /thoughts/', 'success');
+                $('thoughtText').value = '';
+                $('thoughtCount').textContent = '0 / 500';
+                $('thoughtPhotoName').textContent = '';
+                $('thoughtPhotoInput').value = '';
+                thoughtPhotoFile = null;
+                loadThoughts();
+            } catch (err) {
+                console.error(err);
+                setStatus('Post failed: ' + (err.message || err), 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        async function deleteThought(id) {
+            if (!confirm('Delete this thought? This cannot be undone (the GitHub Discussions thread will remain — delete it manually from GitHub if you want it gone).')) return;
+            setStatus('Deleting thought…', 'info');
+            try {
+                await modifyFile('thoughts/index.json', (txt) => {
+                    let data = { thoughts: [] };
+                    try { data = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(data.thoughts)) data.thoughts = [];
+                    data.thoughts = data.thoughts.filter(t => t.id !== id);
+                    return JSON.stringify(data, null, 2) + '\n';
+                }, `Remove thought ${id} from feed`);
+                try {
+                    await deleteFileWithRetry(`thoughts/${id}.html`, `Delete thought ${id}`);
+                } catch (e) {
+                    if (!String(e.message || '').includes('Not Found')) throw e;
+                }
+                setStatus('Thought deleted.', 'success');
+                loadThoughts();
+            } catch (err) {
+                console.error(err);
+                setStatus('Delete failed: ' + (err.message || err), 'error');
+            }
+        }
 
         async function deletePhoto(srcPath) {
             if (!confirm('Delete this photo? This cannot be undone.')) return;
