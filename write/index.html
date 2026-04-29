@@ -67,6 +67,7 @@
                                     <ul class="nav-links">
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="../photos.html">Photos</a></li>
+                <li><a href="../iss-tracker/">ISS Tracker</a></li>
                 <li><a href="../about.html">About</a></li>
             </ul>
         </nav>
@@ -359,9 +360,10 @@
             }
         }
 
-        function postTemplate({ title, dateStr, bodyHtml, sourceMarkdown, category }) {
+        function postTemplate({ title, dateStr, bodyHtml, sourceMarkdown, category, slug }) {
             const sourceComment = sourceMarkdown ? `\n<!-- BLOG_SOURCE_BASE64 ${b64(sourceMarkdown)} -->\n` : '';
             const cat = category || 'non-technical';
+            const slugAttr = escHtml(slug || '');
             return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -372,6 +374,7 @@
     <link rel="stylesheet" href="../style.css">
     <script src="../theme.js"><\/script>
     <script src="../sidebar.js" defer><\/script>
+    <script src="../upvote.js" defer><\/script>
 </head>
 <body>
     <header>
@@ -380,6 +383,7 @@
             <ul class="nav-links">
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="../photos.html">Photos</a></li>
+                <li><a href="../iss-tracker/">ISS Tracker</a></li>
                 <li><a href="../about.html">About</a></li>
             </ul>
         </nav>
@@ -391,6 +395,15 @@
             <div class="post-meta">${dateStr}</div>
 ${bodyHtml}
         </article>
+
+        <div class="upvote-bar" data-slug="${slugAttr}">
+            <button type="button" class="upvote-btn" aria-label="Upvote this article" aria-pressed="false">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><\/svg>
+                <span class="upvote-label">Upvote</span>
+                <span class="upvote-count">0</span>
+            </button>
+        </div>
+        <p class="upvote-hint">If this post resonated, tap to leave a heart.</p>
     </main>
 
     <footer>
@@ -633,7 +646,7 @@ ${bodyHtml}
                 const excerptText = excerpt(bodyHtml);
                 const categoryEl = document.querySelector('input[name="category"]:checked');
                 const category = (categoryEl && categoryEl.value) || 'non-technical';
-                const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body, category });
+                const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body, category, slug });
 
                 setStatus(isEdit ? 'Step 1/3 — updating the post…' : 'Step 1/3 — saving the post…', 'info');
                 if (isEdit) {

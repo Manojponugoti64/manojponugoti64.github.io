@@ -52,6 +52,8 @@
         .post-row .title { color: var(--text-primary); font-weight: bold; font-size: 1rem; }
         .post-row .title a { color: inherit; }
         .post-row .meta { color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.2rem; }
+        .post-row .votes { color: var(--accent); font-size: 0.85rem; margin-top: 0.35rem; font-weight: 600; }
+        .post-row .votes .votes-icon { display: inline-block; transform: translateY(1px); }
         .post-row .actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
         .empty { color: var(--text-secondary); font-style: italic; text-align: center; padding: 1.5rem; }
 
@@ -81,6 +83,7 @@
                                     <ul class="nav-links">
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="../photos.html">Photos</a></li>
+                <li><a href="../iss-tracker/">ISS Tracker</a></li>
                 <li><a href="../about.html">About</a></li>
             </ul>
         </nav>
@@ -334,6 +337,7 @@
                         <div class="info">
                             <div class="title"><a href="../posts/${escHtml(p.slug)}.html" target="_blank">${escHtml(p.title)}</a></div>
                             <div class="meta">${escHtml(p.date)} · /posts/${escHtml(p.slug)}.html</div>
+                            <div class="votes" data-vote-slug="${escHtml(p.slug)}"><span class="votes-icon">♥</span> <span class="votes-count">…</span> upvotes</div>
                         </div>
                         <div class="actions">
                             <button class="ghost" data-action="edit" data-slug="${escHtml(p.slug)}">Edit</button>
@@ -341,6 +345,7 @@
                         </div>
                     </div>
                 `).join('');
+                loadVoteCounts();
                 $('postsList').querySelectorAll('button[data-action="edit"]').forEach(b => {
                     b.addEventListener('click', () => location.href = `../write/?edit=${encodeURIComponent(b.dataset.slug)}`);
                 });
@@ -352,6 +357,25 @@
             }
         }
         $('reloadPosts').addEventListener('click', loadPosts);
+
+        // Fetch upvote counts for visible posts and render them inline.
+        async function loadVoteCounts() {
+            const NS = 'manojponugoti-blog';
+            const nodes = document.querySelectorAll('[data-vote-slug]');
+            await Promise.all(Array.from(nodes).map(async (n) => {
+                const slug = n.getAttribute('data-vote-slug');
+                const countEl = n.querySelector('.votes-count');
+                try {
+                    const r = await fetch('https://abacus.jasoncameron.dev/get/' + encodeURIComponent(NS) + '/' + encodeURIComponent(slug));
+                    if (r.status === 404) { countEl.textContent = '0'; return; }
+                    if (!r.ok) { countEl.textContent = '?'; return; }
+                    const data = await r.json();
+                    countEl.textContent = (data && typeof data.value === 'number') ? data.value : 0;
+                } catch (e) {
+                    countEl.textContent = '?';
+                }
+            }));
+        }
 
         async function deletePost(slug, title) {
             if (!confirm(`Delete "${title}"?\n\nThis removes the post permanently. The post URL will stop working.`)) return;

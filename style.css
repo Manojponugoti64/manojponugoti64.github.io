@@ -897,3 +897,93 @@ footer span {
     margin-left: 0;
   }
 }
+
+/* ----- ISS Tracker page ----- */
+.iss-frame-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 24px auto 16px;
+}
+
+.iss-frame-wrap iframe {
+  width: 100%;
+  max-width: 900px;
+  background: var(--bg-card);
+  box-shadow: 0 6px 24px var(--shadow);
+}
+
+.iss-note {
+  max-width: 720px;
+  margin: 24px auto 8px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-style: italic;
+  text-align: center;
+}
+
+/* ----- Upvote button ----- */
+.upvote-bar {
+  display: flex;
+  justify-content: center;
+  margin: 56px auto 8px;
+}
+
+.upvote-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.upvote-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+.upvote-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.upvote-btn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.upvote-bar.is-voted .upvote-btn,
+.upvote-btn:disabled {
+  background: var(--accent);
+  color: #fff;
+  cursor: default;
+  opacity: 0.95;
+}
+
+.upvote-bar.is-voted .upvote-btn svg {
+  fill: currentColor;
+}
+
+.upvote-count {
+  display: inline-block;
+  min-width: 1.25em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.upvote-hint {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 8px auto 0;
+  font-style: italic;
+}

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../style.css">
     <script src="../theme.js"></script>
     <script src="../sidebar.js" defer></script>
+    <script src="../upvote.js" defer></script>
 </head>
 <body>
     <header>
@@ -16,6 +17,7 @@
             <ul class="nav-links">
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="../photos.html">Photos</a></li>
+                <li><a href="../iss-tracker/">ISS Tracker</a></li>
                 <li><a href="../about.html">About</a></li>
             </ul>
         </nav>
@@ -38,6 +40,15 @@ Other days ask for release let go, trust the tide, move on.</p>
 <p><img src="/images/1777386378103-1vjc7-2026-03-15-21-01-56.jpg" alt="2026-03-15 21.01.56"></p>
 
         </article>
+
+        <div class="upvote-bar" data-slug="between-roots-and-waves-living-real">
+            <button type="button" class="upvote-btn" aria-label="Upvote this article" aria-pressed="false">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span class="upvote-label">Upvote</span>
+                <span class="upvote-count">0</span>
+            </button>
+        </div>
+        <p class="upvote-hint">If this post resonated, tap to leave a heart.</p>
     </main>
 
     <footer>
