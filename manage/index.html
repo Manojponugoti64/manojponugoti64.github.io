@@ -378,27 +378,28 @@
 
         async function deletePost(slug, title) {
             if (!confirm(`Delete "${title}"?\n\nThis removes the post permanently. The post URL will stop working.`)) return;
-            setStatus(`Deleting "${title}"…`, 'info');
+            const safeTitle = escHtml(title);
+            setStatus(`Deleting "${safeTitle}"…`, 'info');
             try {
                 const slugRe = escapeRegex(slug);
                 // Tempered greedy: don't span past another <article class="post-card"> / <li>
                 const cardRe = new RegExp(`\\s*<article class="post-card">(?:(?!<article class="post-card">)[\\s\\S])*?href="posts/${slugRe}\\.html"[\\s\\S]*?</article>\\s*`, '');
                 const rowRe = new RegExp(`\\s*<li[^>]*data-slug="${slugRe}"[^>]*>(?:(?!<li)[\\s\\S])*?</li>\\s*`, '');
 
-                setStatus(`Deleting "${title}" — step 1/3 (post file)…`, 'info');
+                setStatus(`Deleting "${safeTitle}" — step 1/3 (post file)…`, 'info');
                 await deleteFileWithRetry(`posts/${slug}.html`, `Delete post: ${title}`);
 
-                setStatus(`Deleting "${title}" — step 2/3 (homepage)…`, 'info');
+                setStatus(`Deleting "${safeTitle}" — step 2/3 (homepage)…`, 'info');
                 await modifyFile('index.html', c => c.replace(cardRe, '\n            '), `Remove "${title}" from homepage`);
 
-                setStatus(`Deleting "${title}" — step 3/3 (archive)…`, 'info');
+                setStatus(`Deleting "${safeTitle}" — step 3/3 (archive)…`, 'info');
                 await modifyFile('archive.html', c => c.replace(rowRe, '\n                '), `Remove "${title}" from archive`);
 
-                setStatus(`Deleted "${title}". Pages will rebuild in ~30s.`, 'success');
+                setStatus(`Deleted "${safeTitle}". Pages will rebuild in ~30s.`, 'success');
                 loadPosts();
             } catch (err) {
                 console.error(err);
-                setStatus('Delete failed: ' + (err.message || err), 'error');
+                setStatus('Delete failed: ' + escHtml(err.message || err), 'error');
             }
         }
 
@@ -666,7 +667,7 @@ ${bodyHtml}
                 });
             } catch (err) {
                 console.error(err);
-                grid.innerHTML = '<div class="empty">Could not load photos: ' + (err.message || err) + '</div>';
+                grid.innerHTML = '<div class="empty">Could not load photos: ' + escHtml(err.message || err) + '</div>';
             }
         }
         $('reloadPhotos').addEventListener('click', loadPhotos);
