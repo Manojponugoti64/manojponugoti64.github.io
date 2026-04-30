@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Write - Manoj's Blog</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        main { max-width: 900px; margin: 2rem auto; padding: 0 2rem; }
+        .writer { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; }
+        .writer h1 { color: var(--accent); margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .writer label { display: block; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; margin-top: 1.5rem; }
+        .writer label:first-of-type { margin-top: 0; }
+        .writer input, .writer textarea {
+            width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px;
+            padding: 0.9rem 1rem; color: var(--text-primary); font-family: Georgia, serif; font-size: 1.05rem;
+            line-height: 1.7; box-sizing: border-box;
+        }
+        .writer input:focus, .writer textarea:focus { outline: none; border-color: var(--accent); }
+        .writer textarea { min-height: 340px; resize: vertical; }
+        .writer .hint { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.4rem; font-style: italic; }
+        .writer .actions { margin-top: 2rem; display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+        .writer button {
+            background: var(--accent); color: #1a1a1a; border: none; padding: 0.8rem 1.6rem; border-radius: 6px;
+            font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s;
+            font-family: Georgia, serif; letter-spacing: 0.5px;
+        }
+        .writer button:hover { background: var(--accent-hover); }
+        .writer button.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+        .writer button.ghost:hover { color: var(--accent); border-color: var(--accent); }
+        .writer button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .status { margin-top: 1.5rem; padding: 1rem 1.2rem; border-radius: 6px; font-size: 0.95rem; display: none; }
+        .status.show { display: block; }
+        .status.info { background: rgba(232,112,64,0.1); border: 1px solid var(--accent-dark); color: var(--text-primary); }
+        .status.success { background: rgba(60,180,90,0.1); border: 1px solid #3cb45a; color: #a8e6b2; }
+        .status.error { background: rgba(220,50,50,0.1); border: 1px solid #c44; color: #ffb0b0; }
+        .preview { margin-top: 1.5rem; padding: 1.5rem; background: var(--bg-primary); border: 1px dashed var(--border); border-radius: 6px; display: none; }
+        .preview.show { display: block; }
+        .preview h1, .preview h2, .preview h3 { color: var(--text-primary); margin: 1rem 0 0.5rem; }
+        .preview h1 { font-size: 1.8rem; }
+        .preview p { color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.7; }
+        .preview blockquote { border-left: 3px solid var(--accent); padding-left: 1.2rem; margin: 1rem 0; color: var(--text-secondary); font-style: italic; }
+        .preview code { background: rgba(255,255,255,0.08); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.95em; }
+        .preview pre { background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 6px; overflow-x: auto; }
+        .preview ul, .preview ol { color: var(--text-secondary); margin: 1rem 0 1rem 1.5rem; }
+        .preview a { color: var(--accent); }
+        .preview img { display: block; max-width: 100%; height: auto; margin: 1.5rem auto; border-radius: 8px; border: 1px solid var(--border); }
+        .key-setup { background: rgba(232,112,64,0.08); border: 1px solid var(--accent-dark); padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+        .key-setup h3 { color: var(--accent); margin-bottom: 0.8rem; font-size: 1.1rem; }
+        .key-setup ol { margin: 0.8rem 0 0.8rem 1.4rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.8; }
+        .key-setup code { background: rgba(0,0,0,0.4); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+        .footer-actions { margin-top: 1.2rem; font-size: 0.85rem; color: var(--text-secondary); text-align: right; }
+        .footer-actions a { cursor: pointer; }
+    </style>
+    <script src="../theme.js"></script>
+    <script src="../sidebar.js" defer></script>
+
+</head>
+<body>
+    <header>
+        <nav>
+            <a class="logo" href="../index.html">Manoj's Blog</a>
+                                    <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../photos.html">Photos</a></li>
+                <li><a href="../iss-tracker/">ISS Tracker</a></li>
+                <li><a href="../about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="writer">
+            <h1 id="writerHeading">Write a new post</h1>
+            <div id="editBanner" class="status info" style="display:none; margin-bottom:1.5rem;"></div>
+
+            <div id="keyPrompt" class="key-setup" style="display:none;">
+                <h3>One-time setup — your publishing key</h3>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                    Paste your GitHub fine-grained token below. It's saved only in this browser (never sent anywhere except GitHub).
+                </p>
+                <ol>
+                    <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a></li>
+                    <li>Name: <code>Blog writer</code> · Expiration: <code>1 year</code> (or max)</li>
+                    <li>Resource owner: <code>Manojponugoti64</code></li>
+                    <li>Repository access: <strong>Only select repositories</strong> → <code>manojponugoti64.github.io</code></li>
+                    <li>Permissions → <strong>Repository permissions</strong>: set <code>Contents</code> to <strong>Read and write</strong></li>
+                    <li>Generate token, copy it, paste below</li>
+                </ol>
+                <label for="keyInput">Publishing key</label>
+                <input type="password" id="keyInput" placeholder="github_pat_..." autocomplete="off" />
+                <div class="actions">
+                    <button id="saveKey">Save key</button>
+                </div>
+            </div>
+
+            <div id="editor" style="display:none;">
+                <label for="title">Title</label>
+                <input type="text" id="title" placeholder="e.g. Why I love mornings" />
+
+                <label for="body">Body (supports **bold**, *italic*, # headings, > quotes, - lists, [links](url), `code`)</label>
+                <textarea id="body" placeholder="Write your post here... Markdown works."></textarea>
+                <div class="hint">Tip: blank line between paragraphs. <code>#</code> for H1, <code>##</code> H2, <code>></code> for quotes.</div>
+
+                <fieldset class="category-picker">
+                    <legend>Category</legend>
+                    <label><input type="radio" name="category" value="non-technical" checked> Non-Technical</label>
+                    <label><input type="radio" name="category" value="technical"> Technical</label>
+                </fieldset>
+
+                <div class="actions">
+                    <button id="publish">Publish</button>
+                    <button id="addPhoto" class="ghost" type="button">Add photo</button>
+                    <button id="togglePreview" class="ghost">Preview</button>
+                    <button id="saveDraft" class="ghost">Save draft</button>
+                    <input type="file" id="photoInput" accept="image/*" style="display:none" />
+                </div>
+
+                <div id="preview" class="preview"></div>
+                <div id="status" class="status"></div>
+
+                <div class="footer-actions">
+                    <a id="resetKey">Reset publishing key</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        const OWNER = 'Manojponugoti64';
+        const REPO = 'manojponugoti64.github.io';
+        const BRANCH = 'main';
+        const KEY_STORAGE = 'blog_publishing_key_v1';
+        const DRAFT_TITLE = 'blog_draft_title_v1';
+        const DRAFT_BODY = 'blog_draft_body_v1';
+
+        const $ = id => document.getElementById(id);
+
+        function showEditor() {
+            $('keyPrompt').style.display = 'none';
+            $('editor').style.display = 'block';
+            $('title').value = localStorage.getItem(DRAFT_TITLE) || '';
+            $('body').value = localStorage.getItem(DRAFT_BODY) || '';
+        }
+
+        function showKeyPrompt() {
+            $('keyPrompt').style.display = 'block';
+            $('editor').style.display = 'none';
+        }
+
+        // ---------- Edit mode ----------
+        const urlParams = new URLSearchParams(location.search);
+        const editSlug = urlParams.get('edit');
+        let editPostSha = null;
+        let editPostDateStr = null;
+
+        async function loadForEdit(slug) {
+            try {
+                setStatus('Loading post for editing…', 'info');
+                const file = await getFile(`posts/${slug}.html`);
+                editPostSha = file.sha;
+
+                const titleMatch = file.content.match(/<article class="post-content">[\s\S]*?<h1>([\s\S]*?)<\/h1>/);
+                const title = titleMatch ? unescHtml(titleMatch[1].trim()) : '';
+
+                const dateMatch = file.content.match(/<article class="post-content">[\s\S]*?<div class="post-meta">([\s\S]*?)<\/div>/);
+                editPostDateStr = dateMatch ? dateMatch[1].trim() : prettyDate(new Date());
+
+                // Pre-select category radio based on the post's blog-category meta
+                const catMatch = file.content.match(/<meta\s+name="blog-category"\s+content="([^"]+)"/);
+                const cat = (catMatch && catMatch[1]) || 'non-technical';
+                document.querySelectorAll('input[name="category"]').forEach(r => { r.checked = (r.value === cat); });
+
+                const srcMatch = file.content.match(/<!--\s*BLOG_SOURCE_BASE64\s+([A-Za-z0-9+/=]+)\s*-->/);
+                let body = '';
+                if (srcMatch) {
+                    try { body = ub64(srcMatch[1].trim()); } catch (e) { body = ''; }
+                }
+                if (!body) {
+                    const articleMatch = file.content.match(/<article class="post-content">([\s\S]*?)<\/article>/);
+                    if (articleMatch) {
+                        body = articleMatch[1]
+                            .replace(/<h1>[\s\S]*?<\/h1>/g, '')
+                            .replace(/<div class="post-meta">[\s\S]*?<\/div>/g, '')
+                            .replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, (m, c) => '> ' + c.replace(/<[^>]+>/g, '').trim() + '\n\n')
+                            .replace(/<h2>([\s\S]*?)<\/h2>/g, '## $1\n\n')
+                            .replace(/<h3>([\s\S]*?)<\/h3>/g, '### $1\n\n')
+                            .replace(/<img[^>]*?src="([^"]+)"[^>]*?alt="([^"]*)"[^>]*>/g, '![$2]($1)')
+                            .replace(/<img[^>]*?alt="([^"]*)"[^>]*?src="([^"]+)"[^>]*>/g, '![$1]($2)')
+                            .replace(/<img[^>]*?src="([^"]+)"[^>]*>/g, '![]($1)')
+                            .replace(/<a[^>]*?href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g, '[$2]($1)')
+                            .replace(/<strong>([\s\S]*?)<\/strong>/g, '**$1**')
+                            .replace(/<em>([\s\S]*?)<\/em>/g, '*$1*')
+                            .replace(/<p>([\s\S]*?)<\/p>/g, '$1\n\n')
+                            .replace(/<[^>]+>/g, '')
+                            .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#8217;/g, "\u2019").replace(/&hearts;/g, '\u2665').replace(/&rarr;/g, '\u2192')
+                            .replace(/\n{3,}/g, '\n\n')
+                            .trim();
+                    }
+                }
+
+                $('title').value = title;
+                $('body').value = body;
+                $('writerHeading').textContent = 'Edit post';
+                $('editBanner').textContent = `Editing: ${title} (${editPostDateStr})  \u2014 the URL won't change.`;
+                $('editBanner').style.display = 'block';
+                $('publish').textContent = 'Save changes';
+                document.title = `Edit: ${title} - Manoj's Blog`;
+                setStatus('Loaded. Make your changes and click Save changes.', 'success');
+            } catch (err) {
+                console.error(err);
+                setStatus('Could not load post: ' + (err.message || err), 'error');
+            }
+        }
+
+        if (localStorage.getItem(KEY_STORAGE)) {
+            showEditor();
+            if (editSlug) {
+                // Don't auto-restore draft when editing a specific post
+                $('title').value = '';
+                $('body').value = '';
+                loadForEdit(editSlug);
+            }
+        } else {
+            showKeyPrompt();
+        }
+
+        $('saveKey').addEventListener('click', () => {
+            const val = $('keyInput').value.trim();
+            if (!val.startsWith('github_pat_') && !val.startsWith('ghp_')) {
+                return setStatus('That doesn\'t look like a GitHub token. It should start with "github_pat_" or "ghp_".', 'error');
+            }
+            localStorage.setItem(KEY_STORAGE, val);
+            showEditor();
+        });
+
+        $('resetKey').addEventListener('click', () => {
+            if (confirm('Remove saved publishing key from this browser?')) {
+                localStorage.removeItem(KEY_STORAGE);
+                showKeyPrompt();
+            }
+        });
+
+        $('togglePreview').addEventListener('click', () => {
+            const p = $('preview');
+            if (p.classList.contains('show')) { p.classList.remove('show'); return; }
+            p.innerHTML = marked.parse($('body').value || '*(nothing yet)*');
+            p.classList.add('show');
+        });
+
+        $('saveDraft').addEventListener('click', () => {
+            localStorage.setItem(DRAFT_TITLE, $('title').value);
+            localStorage.setItem(DRAFT_BODY, $('body').value);
+            setStatus('Draft saved in this browser.', 'success');
+        });
+
+        // autosave draft as user types
+        ['title', 'body'].forEach(id => $(id).addEventListener('input', () => {
+            localStorage.setItem(id === 'title' ? DRAFT_TITLE : DRAFT_BODY, $(id).value);
+        }));
+
+        function setStatus(msg, kind) {
+            const s = $('status');
+            s.className = 'status show ' + kind;
+            s.innerHTML = msg;
+            s.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function slugify(s) {
+            return s.toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .slice(0, 60) || 'post-' + Date.now();
+        }
+
+        function escHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function excerpt(bodyHtml) {
+            // strip tags, unescape entities so escHtml() downstream doesn't double-encode them
+            const text = bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+                .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'");
+            return text.length > 220 ? text.slice(0, 220).replace(/\s+\S*$/, '') + '...' : text;
+        }
+
+        function prettyDate(d) {
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // Base64 that handles unicode (btoa chokes on non-latin1)
+        function b64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+        function ub64(str) {
+            return decodeURIComponent(escape(atob(str.replace(/\s/g, ''))));
+        }
+
+        async function ghApi(path, method, body) {
+            const token = localStorage.getItem(KEY_STORAGE);
+            const res = await fetch('https://api.github.com' + path, {
+                method,
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Type': 'application/json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                },
+                body: body ? JSON.stringify(body) : undefined
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error((json.message || 'HTTP ' + res.status) + (json.errors ? ': ' + JSON.stringify(json.errors) : ''));
+            return json;
+        }
+
+        async function getFile(filepath) {
+            const res = await ghApi(`/repos/${OWNER}/${REPO}/contents/${filepath}?ref=${BRANCH}`, 'GET');
+            return { sha: res.sha, content: ub64(res.content) };
+        }
+
+        async function putFile(filepath, content, message, sha) {
+            const payload = { message, content: b64(content), branch: BRANCH };
+            if (sha) payload.sha = sha;
+            return await ghApi(`/repos/${OWNER}/${REPO}/contents/${filepath}`, 'PUT', payload);
+        }
+        function isShaConflict(err) {
+            const m = String(err && err.message || '');
+            return m.includes('does not match') || m.includes('is at') || m.includes('409');
+        }
+        // Read-modify-write with retry on sha conflict
+        async function modifyFile(filepath, modFn, message, maxRetries = 4) {
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                const file = await getFile(filepath);
+                const newContent = modFn(file.content);
+                if (newContent === file.content) return { unchanged: true };
+                try {
+                    return await putFile(filepath, newContent, message, file.sha);
+                } catch (err) {
+                    if (attempt < maxRetries && isShaConflict(err)) {
+                        await new Promise(r => setTimeout(r, 250 * (attempt + 1)));
+                        continue;
+                    }
+                    throw err;
+                }
+            }
+        }
+
+        function postTemplate({ title, dateStr, bodyHtml, sourceMarkdown, category, slug }) {
+            const sourceComment = sourceMarkdown ? `\n<!-- BLOG_SOURCE_BASE64 ${b64(sourceMarkdown)} -->\n` : '';
+            const cat = category || 'non-technical';
+            const slugAttr = escHtml(slug || '');
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="blog-category" content="${cat}">
+    <title>${escHtml(title)} - Manoj's Blog</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="../theme.js"><\/script>
+    <script src="../sidebar.js" defer><\/script>
+    <script src="../upvote.js" defer><\/script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a class="logo" href="../index.html">Manoj's Blog</a>
+            <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../photos.html">Photos</a></li>
+                <li><a href="../iss-tracker/">ISS Tracker</a></li>
+                <li><a href="../about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <article class="post-content">
+            <h1>${escHtml(title)}</h1>
+            <div class="post-meta">${dateStr}</div>
+${bodyHtml}
+        </article>
+
+        <div class="upvote-bar" data-slug="${slugAttr}">
+            <button type="button" class="upvote-btn" aria-label="Upvote this article" aria-pressed="false">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/><\/svg>
+                <span class="upvote-label">Upvote</span>
+                <span class="upvote-count">0</span>
+            </button>
+        </div>
+        <p class="upvote-hint">If this post resonated, tap to leave a heart.</p>
+    </main>
+
+    <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+</body>
+</html>${sourceComment}`;
+        }
+
+        function escapeRegex(s) { return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'); }
+
+        function unescHtml(s) {
+            return s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+        }
+
+        function replaceIndexCard(indexHtml, slug, { title, dateStr, excerptText }) {
+            const slugRe = escapeRegex(slug);
+            // Tempered greedy: don't span past another <article class="post-card">
+            const re = new RegExp(`<article class="post-card">(?:(?!<article class="post-card">)[\\s\\S])*?href="posts/${slugRe}\\.html"[\\s\\S]*?</article>`, '');
+            const newCard = `<article class="post-card">
+                <h2><a href="posts/${slug}.html">${escHtml(title)}</a></h2>
+                <div class="post-meta">${dateStr}</div>
+                <p class="post-excerpt">
+                    ${escHtml(excerptText)}
+                </p>
+                <a href="posts/${slug}.html" class="read-more">Read more &rarr;</a>
+            </article>`;
+            return indexHtml.replace(re, newCard);
+        }
+
+        function buildArchiveRow(slug, title, dateStr) {
+            return `<li data-slug="${slug}">
+                            <a href="posts/${slug}.html">${escHtml(title)}</a>
+                            <span class="date">${dateStr}</span>
+                        </li>`;
+        }
+
+        // Remove any existing entry for this slug across all archive lists, then
+        // insert a fresh one at the top of the chosen category column.
+        function upsertArchiveRow(archiveHtml, slug, { title, dateStr, category }) {
+            const slugRe = escapeRegex(slug);
+            // Remove any prior row keyed by data-slug=slug. Tempered to not span past another <li>.
+            const removeRe = new RegExp(`\\s*<li[^>]*data-slug="${slugRe}"[^>]*>(?:(?!<li)[\\s\\S])*?</li>\\s*`, 'g');
+            let out = archiveHtml.replace(removeRe, '\n                        ');
+            // Also strip empty-state placeholder for the destination column
+            const cat = category || 'non-technical';
+            out = out.replace(
+                new RegExp(`(<ul class="archive-list" data-archive-list="${cat}">)\\s*<li class="archive-empty">[^<]*</li>`),
+                '$1'
+            );
+            // Insert new row at top of the destination ul
+            const row = buildArchiveRow(slug, title, dateStr);
+            return out.replace(
+                new RegExp(`(<ul class="archive-list" data-archive-list="${cat}">)`),
+                `$1\n                        ${row}`
+            );
+        }
+
+        // Backwards-compat for older callers
+        function replaceArchiveRow(archiveHtml, slug, args) {
+            return upsertArchiveRow(archiveHtml, slug, args);
+        }
+
+        function insertIndexCard(indexHtml, { title, slug, dateStr, excerptText }) {
+            const card = `
+            <article class="post-card">
+                <h2><a href="posts/${slug}.html">${escHtml(title)}</a></h2>
+                <div class="post-meta">${dateStr}</div>
+                <p class="post-excerpt">
+                    ${escHtml(excerptText)}
+                </p>
+                <a href="posts/${slug}.html" class="read-more">Read more &rarr;</a>
+            </article>
+`;
+            // insert right after <section class="posts-grid">
+            return indexHtml.replace(
+                /(<section class="posts-grid">)/,
+                `$1\n${card}`
+            );
+        }
+
+        function insertArchiveRow(archiveHtml, { title, slug, dateStr, category }) {
+            return upsertArchiveRow(archiveHtml, slug, { title, dateStr, category });
+        }
+
+        // ---------- Photo upload ----------
+        const MAX_DIM = 1600;        // resize so longest edge <= 1600px
+        const JPEG_QUALITY = 0.85;
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const fr = new FileReader();
+                fr.onload = () => resolve(fr.result);
+                fr.onerror = reject;
+                fr.readAsDataURL(file);
+            });
+        }
+
+        function loadImage(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = dataUrl;
+            });
+        }
+
+        // Resize a File to a JPEG data URL with max dimension MAX_DIM, returns { dataUrl, blob }
+        async function resizeImage(file) {
+            const dataUrl = await readFileAsDataURL(file);
+            const img = await loadImage(dataUrl);
+            let { width: w, height: h } = img;
+            const longest = Math.max(w, h);
+            if (longest > MAX_DIM) {
+                const scale = MAX_DIM / longest;
+                w = Math.round(w * scale);
+                h = Math.round(h * scale);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const outDataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+            return outDataUrl; // 'data:image/jpeg;base64,...'
+        }
+
+        function dataUrlToBase64(dataUrl) {
+            const i = dataUrl.indexOf(',');
+            return dataUrl.slice(i + 1);
+        }
+
+        function insertAtCursor(textarea, text) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const before = textarea.value.slice(0, start);
+            const after = textarea.value.slice(end);
+            // Surround with newlines so the image renders as its own block
+            const padBefore = before.length === 0 || before.endsWith('\n') ? '' : '\n\n';
+            const padAfter = after.startsWith('\n') ? '\n' : '\n\n';
+            const newText = before + padBefore + text + padAfter + after;
+            textarea.value = newText;
+            const cursorPos = (before + padBefore + text + padAfter).length;
+            textarea.selectionStart = textarea.selectionEnd = cursorPos;
+            textarea.focus();
+            // Trigger save
+            localStorage.setItem(DRAFT_BODY, textarea.value);
+        }
+
+        async function uploadPhoto(file) {
+            // Resize + re-encode as JPEG
+            setStatus('Optimizing photo…', 'info');
+            const dataUrl = await resizeImage(file);
+            const base64 = dataUrlToBase64(dataUrl);
+
+            // Build a unique-ish filename
+            const ts = Date.now();
+            const rand = Math.random().toString(36).slice(2, 7);
+            const safeName = (file.name || 'photo').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'photo';
+            const filename = `${ts}-${rand}-${safeName}.jpg`;
+
+            setStatus('Uploading photo…', 'info');
+            const token = localStorage.getItem(KEY_STORAGE);
+            const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/images/${filename}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Type': 'application/json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                },
+                body: JSON.stringify({
+                    message: `Add photo: ${filename}`,
+                    content: base64,
+                    branch: BRANCH
+                })
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.message || 'Upload failed');
+            return `/images/${filename}`;
+        }
+
+        $('addPhoto').addEventListener('click', () => {
+            if (!localStorage.getItem(KEY_STORAGE)) {
+                return setStatus('Save your publishing key first.', 'error');
+            }
+            $('photoInput').value = '';
+            $('photoInput').click();
+        });
+
+        $('photoInput').addEventListener('change', async (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                return setStatus('That doesn\'t look like an image.', 'error');
+            }
+            const btn = $('addPhoto');
+            btn.disabled = true;
+            try {
+                const path = await uploadPhoto(file);
+                const altText = (file.name || 'photo').replace(/\.[^.]+$/, '');
+                insertAtCursor($('body'), `![${altText}](${path})`);
+                setStatus(`Photo added! It will appear in your post when you publish.`, 'success');
+            } catch (err) {
+                console.error(err);
+                let msg = String(err.message || err);
+                if (msg.includes('Bad credentials') || msg.includes('401')) {
+                    msg = 'Your publishing key is invalid or expired. Click "Reset publishing key" below and re-enter it.';
+                } else if (msg.includes('403') || msg.includes('not accessible')) {
+                    msg = 'Your key needs Contents: Read and write permission to upload photos.';
+                }
+                setStatus('Photo upload failed: ' + msg, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // ---------- Publish ----------
+        $('publish').addEventListener('click', async () => {
+            const title = $('title').value.trim();
+            const body = $('body').value.trim();
+            if (!title) return setStatus('Please add a title.', 'error');
+            if (!body) return setStatus('Please write something in the body.', 'error');
+
+            const btn = $('publish');
+            btn.disabled = true;
+            setStatus('Publishing…', 'info');
+
+            try {
+                const isEdit = !!editSlug;
+                const slug = isEdit ? editSlug : slugify(title);
+                const dateStr = isEdit && editPostDateStr ? editPostDateStr : prettyDate(new Date());
+                const bodyHtml = marked.parse(body);
+                const excerptText = excerpt(bodyHtml);
+                const categoryEl = document.querySelector('input[name="category"]:checked');
+                const category = (categoryEl && categoryEl.value) || 'non-technical';
+                const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body, category, slug });
+
+                setStatus(isEdit ? 'Step 1/3 — updating the post…' : 'Step 1/3 — saving the post…', 'info');
+                if (isEdit) {
+                    // Refetch sha for safety + auto-retry on conflict
+                    await modifyFile(`posts/${slug}.html`, () => postHtml, `Edit post: ${title}`);
+                } else {
+                    try {
+                        await putFile(`posts/${slug}.html`, postHtml, `Add post: ${title}`);
+                    } catch (e) {
+                        if (String(e.message).includes('already exists') || String(e.message).includes('sha')) {
+                            const existing = await getFile(`posts/${slug}.html`);
+                            await putFile(`posts/${slug}.html`, postHtml, `Update post: ${title}`, existing.sha);
+                        } else throw e;
+                    }
+                }
+
+                setStatus('Step 2/3 — updating homepage…', 'info');
+                await modifyFile('index.html',
+                    c => isEdit
+                        ? replaceIndexCard(c, slug, { title, dateStr, excerptText })
+                        : insertIndexCard(c, { title, slug, dateStr, excerptText }),
+                    `${isEdit ? 'Update' : 'Link new'} post on homepage: ${title}`
+                );
+
+                setStatus('Step 3/3 — updating archive…', 'info');
+                await modifyFile('archive.html',
+                    c => upsertArchiveRow(c, slug, { title, dateStr, category }),
+                    `${isEdit ? 'Update' : 'Add to'} archive: ${title}`
+                );
+
+                // clear draft
+                localStorage.removeItem(DRAFT_TITLE);
+                localStorage.removeItem(DRAFT_BODY);
+                $('title').value = '';
+                $('body').value = '';
+                $('preview').classList.remove('show');
+
+                // Refresh editPostSha since we just changed it
+                if (isEdit) {
+                    try { editPostSha = (await getFile(`posts/${slug}.html`)).sha; } catch (e) {}
+                }
+
+                setStatus(
+                    `${isEdit ? 'Saved' : 'Published'}! GitHub Pages usually takes ~30s to rebuild. ` +
+                    `<a href="/posts/${slug}.html" target="_blank">View your post</a> · ` +
+                    `<a href="/" target="_blank">Home</a> · ` +
+                    `<a href="/manage/">Manage</a>`,
+                    'success'
+                );
+            } catch (err) {
+                console.error(err);
+                let msg = String(err.message || err);
+                if (msg.includes('Bad credentials') || msg.includes('401')) {
+                    msg = 'Your publishing key is invalid or expired. Click "Reset publishing key" below and re-enter it.';
+                } else if (msg.includes('403') || msg.includes('not accessible')) {
+                    msg = 'Your key doesn\'t have permission to write. Make sure it has Contents: Read and write on this repo.';
+                }
+                setStatus('Error: ' + msg, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

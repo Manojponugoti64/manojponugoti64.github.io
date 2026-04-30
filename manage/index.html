@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Manage - Manoj's Blog</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        main { max-width: 900px; margin: 2rem auto; padding: 0 2rem; }
+        .manage h1 { color: var(--accent); font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .manage > p.lead { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem; }
+        section.card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+            padding: 1.8rem; margin-bottom: 1.5rem;
+        }
+        section.card h2 { color: var(--accent); font-size: 1.25rem; margin-bottom: 0.8rem; }
+        section.card p.hint { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; font-style: italic; }
+        label {
+            display: block; font-size: 0.8rem; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.5px; margin: 1rem 0 0.4rem;
+        }
+        input, textarea {
+            width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px;
+            padding: 0.8rem 1rem; color: var(--text-primary); font-family: Georgia, serif; font-size: 1rem;
+            line-height: 1.6; box-sizing: border-box;
+        }
+        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+        textarea { min-height: 280px; resize: vertical; }
+        button {
+            background: var(--accent); color: #1a1a1a; border: none; padding: 0.7rem 1.4rem; border-radius: 6px;
+            font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: background 0.2s;
+            font-family: Georgia, serif; letter-spacing: 0.5px;
+        }
+        button:hover { background: var(--accent-hover); }
+        button.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); padding: 0.5rem 1rem; font-size: 0.85rem; }
+        button.ghost:hover { color: var(--accent); border-color: var(--accent); }
+        button.danger { background: #c44; color: #fff; }
+        button.danger:hover { background: #d55; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button + button { margin-left: 0.5rem; }
+
+        .post-row {
+            display: flex; align-items: center; gap: 1rem; padding: 0.9rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .post-row:last-child { border-bottom: none; }
+        .post-row .info { flex: 1; min-width: 0; }
+        .post-row .title { color: var(--text-primary); font-weight: bold; font-size: 1rem; }
+        .post-row .title a { color: inherit; }
+        .post-row .meta { color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.2rem; }
+        .post-row .votes { color: var(--accent); font-size: 0.85rem; margin-top: 0.35rem; font-weight: 600; }
+        .post-row .votes .votes-icon { display: inline-block; transform: translateY(1px); }
+        .post-row .actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+        .empty { color: var(--text-secondary); font-style: italic; text-align: center; padding: 1.5rem; }
+
+        .status { margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 6px; font-size: 0.9rem; display: none; }
+        .status.show { display: block; }
+        .status.info { background: rgba(232,112,64,0.1); border: 1px solid var(--accent-dark); color: var(--text-primary); }
+        .status.success { background: rgba(60,180,90,0.1); border: 1px solid #3cb45a; color: #a8e6b2; }
+        .status.error { background: rgba(220,50,50,0.1); border: 1px solid #c44; color: #ffb0b0; }
+
+        .key-setup { background: rgba(232,112,64,0.08); border: 1px solid var(--accent-dark); padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; }
+        .key-setup h3 { color: var(--accent); margin-bottom: 0.8rem; font-size: 1.1rem; }
+        .key-setup ol { margin: 0.8rem 0 0.8rem 1.4rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.8; }
+        .key-setup code { background: rgba(0,0,0,0.4); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+
+        .toolbar { display: flex; gap: 0.8rem; margin-top: 0.8rem; flex-wrap: wrap; }
+        .footer-actions { margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-secondary); text-align: right; }
+        .footer-actions a { cursor: pointer; }
+    </style>
+    <script src="../theme.js"></script>
+    <script src="../sidebar.js" defer></script>
+
+</head>
+<body>
+    <header>
+        <nav>
+            <a class="logo" href="../index.html">Manoj's Blog</a>
+                                    <ul class="nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../photos.html">Photos</a></li>
+                <li><a href="../iss-tracker/">ISS Tracker</a></li>
+                <li><a href="../about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="manage">
+            <h1>Manage your blog</h1>
+            <p class="lead">Edit posts, change your homepage, update your About page. All in one place.</p>
+
+            <div id="keyPrompt" class="key-setup" style="display:none;">
+                <h3>One-time setup — your publishing key</h3>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">Paste your GitHub fine-grained token. Saved only in this browser.</p>
+                <ol>
+                    <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a></li>
+                    <li>Resource owner: <code>Manojponugoti64</code> · Repository: <code>manojponugoti64.github.io</code></li>
+                    <li>Permissions → <code>Contents</code>: <strong>Read and write</strong></li>
+                </ol>
+                <label for="keyInput">Publishing key</label>
+                <input type="password" id="keyInput" placeholder="github_pat_..." autocomplete="off" />
+                <div class="toolbar">
+                    <button id="saveKey">Save key</button>
+                </div>
+            </div>
+
+            <div id="dashboard" style="display:none;">
+                <section class="card">
+                    <h2>Your posts</h2>
+                    <p class="hint">Click Edit to change a post. Click Delete to remove it from your blog.</p>
+                    <div id="postsList"><div class="empty">Loading…</div></div>
+                    <div class="toolbar">
+                        <a href="../write/"><button>+ Write new post</button></a>
+                        <button id="reloadPosts" class="ghost">Refresh</button>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>Homepage</h2>
+                    <p class="hint">The big welcome message at the top of your blog.</p>
+                    <label for="heroPrefix">Heading — first part</label>
+                    <input id="heroPrefix" placeholder="e.g. Welcome to" />
+                    <label for="heroAccent">Heading — accent (orange) part</label>
+                    <input id="heroAccent" placeholder="e.g. My Blog" />
+                    <label for="heroSubtitle">Subtitle</label>
+                    <input id="heroSubtitle" placeholder="e.g. Thoughts, stories, and ideas — written in the quiet hours." />
+                    <div class="toolbar">
+                        <button id="saveHero">Save homepage</button>
+                        <button id="reloadHero" class="ghost">Reset</button>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>About page</h2>
+                    <p class="hint">Tell people who you are. Use blank lines between paragraphs. Markdown works (e.g. <code>**bold**</code>, <code>## Heading</code>).</p>
+                    <label for="aboutBody">About content</label>
+                    <textarea id="aboutBody"></textarea>
+                    <div class="toolbar">
+                        <button id="saveAbout">Save about</button>
+                        <button id="reloadAbout" class="ghost">Reset</button>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>Photos</h2>
+                    <p class="hint">Upload one or more photos. Big images are auto-resized for fast loading. They appear in <a href="../photos.html" target="_blank">Photos</a> and on the Archive page.</p>
+                    <div class="toolbar">
+                        <button id="addPhotosBtn" type="button">+ Upload photos</button>
+                        <input type="file" id="photoInput" accept="image/*" multiple style="display:none" />
+                        <button id="reloadPhotos" class="ghost" type="button">Refresh</button>
+                    </div>
+                    <div id="photosGrid" class="manage-photos-grid"><div class="empty">Loading…</div></div>
+                </section>
+
+                <div id="status" class="status"></div>
+
+                <div class="footer-actions">
+                    <a id="resetKey">Reset publishing key</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        const OWNER = 'Manojponugoti64';
+        const REPO = 'manojponugoti64.github.io';
+        const BRANCH = 'main';
+        const KEY_STORAGE = 'blog_publishing_key_v1';
+
+        const $ = id => document.getElementById(id);
+
+        function escHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function unescHtml(s) {
+            return String(s).replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+        }
+        function escapeRegex(s) { return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'); }
+        function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
+        function ub64(str) { return decodeURIComponent(escape(atob(str.replace(/\s/g, '')))); }
+
+        function setStatus(msg, kind) {
+            const s = $('status');
+            s.className = 'status show ' + kind;
+            s.innerHTML = msg;
+            s.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        async function ghApi(path, method, body) {
+            const token = localStorage.getItem(KEY_STORAGE);
+            const res = await fetch('https://api.github.com' + path, {
+                method,
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Type': 'application/json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                },
+                body: body ? JSON.stringify(body) : undefined
+            });
+            // 204 has no body
+            if (res.status === 204) return {};
+            const json = await res.json();
+            if (!res.ok) throw new Error((json.message || 'HTTP ' + res.status) + (json.errors ? ': ' + JSON.stringify(json.errors) : ''));
+            return json;
+        }
+        async function getFile(filepath) {
+            const res = await ghApi(`/repos/${OWNER}/${REPO}/contents/${filepath}?ref=${BRANCH}`, 'GET');
+            return { sha: res.sha, content: ub64(res.content) };
+        }
+        async function putFile(filepath, content, message, sha) {
+            const payload = { message, content: b64(content), branch: BRANCH };
+            if (sha) payload.sha = sha;
+            return await ghApi(`/repos/${OWNER}/${REPO}/contents/${filepath}`, 'PUT', payload);
+        }
+        async function deleteFile(filepath, message, sha) {
+            return await ghApi(`/repos/${OWNER}/${REPO}/contents/${filepath}`, 'DELETE', { message, sha, branch: BRANCH });
+        }
+        function isShaConflict(err) {
+            const m = String(err && err.message || '');
+            return m.includes('does not match') || m.includes('is at') || m.includes('409');
+        }
+        // Read → modify → write with automatic conflict retry. modFn(content) returns new content.
+        async function modifyFile(filepath, modFn, message, maxRetries = 4) {
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                const file = await getFile(filepath);
+                const newContent = modFn(file.content);
+                if (newContent === file.content) return { unchanged: true };
+                try {
+                    return await putFile(filepath, newContent, message, file.sha);
+                } catch (err) {
+                    if (attempt < maxRetries && isShaConflict(err)) {
+                        await new Promise(r => setTimeout(r, 250 * (attempt + 1)));
+                        continue;
+                    }
+                    throw err;
+                }
+            }
+        }
+        // Delete with retry on sha mismatch
+        async function deleteFileWithRetry(filepath, message, maxRetries = 4) {
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                const file = await getFile(filepath);
+                try {
+                    return await deleteFile(filepath, message, file.sha);
+                } catch (err) {
+                    if (attempt < maxRetries && isShaConflict(err)) {
+                        await new Promise(r => setTimeout(r, 250 * (attempt + 1)));
+                        continue;
+                    }
+                    throw err;
+                }
+            }
+        }
+        async function listDir(filepath) {
+            const res = await ghApi(`/repos/${OWNER}/${REPO}/contents/${filepath}?ref=${BRANCH}`, 'GET');
+            return res; // array of items
+        }
+
+        // ---------- Auth flow ----------
+        function showDashboard() {
+            $('keyPrompt').style.display = 'none';
+            $('dashboard').style.display = 'block';
+            loadPosts();
+            loadHero();
+            loadAbout();
+            loadPhotos();
+        }
+        function showKeyPrompt() {
+            $('keyPrompt').style.display = 'block';
+            $('dashboard').style.display = 'none';
+        }
+        if (localStorage.getItem(KEY_STORAGE)) showDashboard(); else showKeyPrompt();
+
+        $('saveKey').addEventListener('click', () => {
+            const val = $('keyInput').value.trim();
+            if (!val.startsWith('github_pat_') && !val.startsWith('ghp_')) {
+                return alert('That doesn\'t look like a GitHub token.');
+            }
+            localStorage.setItem(KEY_STORAGE, val);
+            showDashboard();
+        });
+        $('resetKey').addEventListener('click', () => {
+            if (confirm('Remove saved publishing key from this browser?')) {
+                localStorage.removeItem(KEY_STORAGE);
+                showKeyPrompt();
+            }
+        });
+
+        // ---------- Posts list ----------
+        async function loadPosts() {
+            $('postsList').innerHTML = '<div class="empty">Loading…</div>';
+            try {
+                const items = await listDir('posts');
+                const posts = items.filter(i => i.type === 'file' && i.name.endsWith('.html'));
+                if (!posts.length) {
+                    $('postsList').innerHTML = '<div class="empty">No posts yet. Click "Write new post" below.</div>';
+                    return;
+                }
+                // Get title + date for each by fetching content (only h1 + post-meta)
+                // For speed, fetch in parallel
+                const details = await Promise.all(posts.map(async (p) => {
+                    try {
+                        const f = await getFile(`posts/${p.name}`);
+                        const titleM = f.content.match(/<article class="post-content">[\s\S]*?<h1>([\s\S]*?)<\/h1>/);
+                        const dateM = f.content.match(/<article class="post-content">[\s\S]*?<div class="post-meta">([\s\S]*?)<\/div>/);
+                        const title = titleM ? unescHtml(titleM[1].trim()) : p.name.replace(/\.html$/, '');
+                        const date = dateM ? dateM[1].trim() : '';
+                        return { slug: p.name.replace(/\.html$/, ''), title, date };
+                    } catch (e) {
+                        return { slug: p.name.replace(/\.html$/, ''), title: p.name, date: '' };
+                    }
+                }));
+                // Sort: try parsing date, newest first; fall back to slug desc
+                details.sort((a, b) => {
+                    const da = Date.parse(a.date) || 0;
+                    const db = Date.parse(b.date) || 0;
+                    return db - da;
+                });
+                $('postsList').innerHTML = details.map(p => `
+                    <div class="post-row" data-slug="${escHtml(p.slug)}">
+                        <div class="info">
+                            <div class="title"><a href="../posts/${escHtml(p.slug)}.html" target="_blank">${escHtml(p.title)}</a></div>
+                            <div class="meta">${escHtml(p.date)} · /posts/${escHtml(p.slug)}.html</div>
+                            <div class="votes" data-vote-slug="${escHtml(p.slug)}"><span class="votes-icon">♥</span> <span class="votes-count">…</span> upvotes</div>
+                        </div>
+                        <div class="actions">
+                            <button class="ghost" data-action="edit" data-slug="${escHtml(p.slug)}">Edit</button>
+                            <button class="danger" data-action="delete" data-slug="${escHtml(p.slug)}" data-title="${escHtml(p.title)}">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+                loadVoteCounts();
+                $('postsList').querySelectorAll('button[data-action="edit"]').forEach(b => {
+                    b.addEventListener('click', () => location.href = `../write/?edit=${encodeURIComponent(b.dataset.slug)}`);
+                });
+                $('postsList').querySelectorAll('button[data-action="delete"]').forEach(b => {
+                    b.addEventListener('click', () => deletePost(b.dataset.slug, b.dataset.title));
+                });
+            } catch (err) {
+                $('postsList').innerHTML = `<div class="empty" style="color:#ffb0b0;">Could not load posts: ${escHtml(err.message || err)}</div>`;
+            }
+        }
+        $('reloadPosts').addEventListener('click', loadPosts);
+
+        // Fetch upvote counts for visible posts and render them inline.
+        async function loadVoteCounts() {
+            const NS = 'manojponugoti-blog';
+            const nodes = document.querySelectorAll('[data-vote-slug]');
+            await Promise.all(Array.from(nodes).map(async (n) => {
+                const slug = n.getAttribute('data-vote-slug');
+                const countEl = n.querySelector('.votes-count');
+                try {
+                    const r = await fetch('https://abacus.jasoncameron.dev/get/' + encodeURIComponent(NS) + '/' + encodeURIComponent(slug));
+                    if (r.status === 404) { countEl.textContent = '0'; return; }
+                    if (!r.ok) { countEl.textContent = '?'; return; }
+                    const data = await r.json();
+                    countEl.textContent = (data && typeof data.value === 'number') ? data.value : 0;
+                } catch (e) {
+                    countEl.textContent = '?';
+                }
+            }));
+        }
+
+        async function deletePost(slug, title) {
+            if (!confirm(`Delete "${title}"?\n\nThis removes the post permanently. The post URL will stop working.`)) return;
+            const safeTitle = escHtml(title);
+            setStatus(`Deleting "${safeTitle}"…`, 'info');
+            try {
+                const slugRe = escapeRegex(slug);
+                // Tempered greedy: don't span past another <article class="post-card"> / <li>
+                const cardRe = new RegExp(`\\s*<article class="post-card">(?:(?!<article class="post-card">)[\\s\\S])*?href="posts/${slugRe}\\.html"[\\s\\S]*?</article>\\s*`, '');
+                const rowRe = new RegExp(`\\s*<li[^>]*data-slug="${slugRe}"[^>]*>(?:(?!<li)[\\s\\S])*?</li>\\s*`, '');
+
+                setStatus(`Deleting "${safeTitle}" — step 1/3 (post file)…`, 'info');
+                await deleteFileWithRetry(`posts/${slug}.html`, `Delete post: ${title}`);
+
+                setStatus(`Deleting "${safeTitle}" — step 2/3 (homepage)…`, 'info');
+                await modifyFile('index.html', c => c.replace(cardRe, '\n            '), `Remove "${title}" from homepage`);
+
+                setStatus(`Deleting "${safeTitle}" — step 3/3 (archive)…`, 'info');
+                await modifyFile('archive.html', c => c.replace(rowRe, '\n                '), `Remove "${title}" from archive`);
+
+                setStatus(`Deleted "${safeTitle}". Pages will rebuild in ~30s.`, 'success');
+                loadPosts();
+            } catch (err) {
+                console.error(err);
+                setStatus('Delete failed: ' + escHtml(err.message || err), 'error');
+            }
+        }
+
+        // ---------- Homepage hero ----------
+        let heroSha = null;
+        let heroOriginal = '';
+
+        async function loadHero() {
+            try {
+                const file = await getFile('index.html');
+                heroSha = file.sha;
+                heroOriginal = file.content;
+                // Match: <section class="hero"> ... <h1>PREFIX <span>ACCENT</span></h1> ... <p>SUBTITLE</p> ... </section>
+                const heroM = file.content.match(/<section class="hero">([\s\S]*?)<\/section>/);
+                if (!heroM) return;
+                const hm = heroM[1].match(/<h1>([\s\S]*?)<span>([\s\S]*?)<\/span>([\s\S]*?)<\/h1>/);
+                let prefix = '', accent = '';
+                if (hm) {
+                    prefix = unescHtml(hm[1].trim());
+                    accent = unescHtml(hm[2].trim());
+                } else {
+                    const h1 = heroM[1].match(/<h1>([\s\S]*?)<\/h1>/);
+                    if (h1) prefix = unescHtml(h1[1].replace(/<[^>]+>/g, '').trim());
+                }
+                const pm = heroM[1].match(/<p>([\s\S]*?)<\/p>/);
+                const subtitle = pm ? unescHtml(pm[1].trim()) : '';
+                $('heroPrefix').value = prefix;
+                $('heroAccent').value = accent;
+                $('heroSubtitle').value = subtitle;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        $('reloadHero').addEventListener('click', loadHero);
+
+        $('saveHero').addEventListener('click', async () => {
+            const prefix = $('heroPrefix').value.trim();
+            const accent = $('heroAccent').value.trim();
+            const subtitle = $('heroSubtitle').value.trim();
+            if (!prefix && !accent) return setStatus('Heading cannot be empty.', 'error');
+            setStatus('Saving homepage…', 'info');
+            try {
+                const newHero = `<section class="hero">
+            <h1>${escHtml(prefix)} <span>${escHtml(accent)}</span></h1>
+            <p>${escHtml(subtitle)}</p>
+        </section>`;
+                let didReplace = false;
+                const result = await modifyFile('index.html', c => {
+                    const updated = c.replace(/<section class="hero">[\s\S]*?<\/section>/, newHero);
+                    didReplace = updated !== c;
+                    return updated;
+                }, 'Update homepage hero');
+                if (!didReplace) return setStatus('Could not find hero section to update.', 'error');
+                setStatus('Homepage saved! Pages will rebuild in ~30s.', 'success');
+                loadHero();
+            } catch (err) {
+                console.error(err);
+                setStatus('Save failed: ' + (err.message || err), 'error');
+            }
+        });
+
+        // ---------- About page ----------
+        let aboutSha = null;
+
+        // Strip the common leading whitespace from non-blank lines so users
+        // can paste indented content without it becoming a markdown code block.
+        function dedent(s) {
+            const lines = s.split('\n');
+            let min = Infinity;
+            for (const line of lines) {
+                if (line.trim().length === 0) continue;
+                const m = line.match(/^[ \t]*/);
+                const w = m ? m[0].length : 0;
+                if (w < min) min = w;
+            }
+            if (!isFinite(min) || min === 0) return s;
+            return lines.map(l => (l.length >= min ? l.slice(min) : l)).join('\n');
+        }
+
+        function htmlToMd(html) {
+            // Look for embedded source first
+            const srcM = html.match(/<!--\s*BLOG_SOURCE_BASE64\s+([A-Za-z0-9+/=]+)\s*-->/);
+            if (srcM) {
+                try { return dedent(ub64(srcM[1].trim())); } catch (e) {}
+            }
+            // Fallback: extract content of .page-content and convert basic HTML to markdown
+            const pcM = html.match(/<div class="page-content">([\s\S]*?)<\/div>\s*<\/main>/);
+            if (!pcM) return '';
+            let s = pcM[1];
+            // Strip leading whitespace from each line to avoid triggering code blocks on round-trip.
+            s = s.split('\n').map(l => l.replace(/^[ \t]+/, '')).join('\n');
+            return s
+                .replace(/<h1>([\s\S]*?)<\/h1>/g, '# $1\n\n')
+                .replace(/<h2>([\s\S]*?)<\/h2>/g, '## $1\n\n')
+                .replace(/<h3>([\s\S]*?)<\/h3>/g, '### $1\n\n')
+                .replace(/<a[^>]*?href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g, '[$2]($1)')
+                .replace(/<strong>([\s\S]*?)<\/strong>/g, '**$1**')
+                .replace(/<em>([\s\S]*?)<\/em>/g, '*$1*')
+                .replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, '$1\n\n')
+                .replace(/<p>([\s\S]*?)<\/p>/g, '$1\n\n')
+                .replace(/<[^>]+>/g, '')
+                .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+        }
+
+        function buildAboutPage(markdownBody) {
+            // Strip common leading whitespace so pasted indented content doesn't render as a code block.
+            markdownBody = dedent(markdownBody);
+            const bodyHtml = marked.parse(markdownBody);
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Manoj's Blog</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"><\/script>
+    <script src="sidebar.js" defer><\/script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a class="logo" href="index.html">Manoj's Blog</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="photos.html">Photos</a></li>
+                <li><a href="iss-tracker/">ISS Tracker</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-content">
+${bodyHtml}
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+</body>
+</html>
+<!-- BLOG_SOURCE_BASE64 ${b64(markdownBody)} -->
+`;
+        }
+
+        async function loadAbout() {
+            try {
+                const file = await getFile('about.html');
+                aboutSha = file.sha;
+                $('aboutBody').value = htmlToMd(file.content);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        $('reloadAbout').addEventListener('click', loadAbout);
+
+        $('saveAbout').addEventListener('click', async () => {
+            const md = $('aboutBody').value.trim();
+            if (!md) return setStatus('About content cannot be empty.', 'error');
+            setStatus('Saving about page…', 'info');
+            try {
+                const newContent = buildAboutPage(md);
+                await modifyFile('about.html', () => newContent, 'Update about page');
+                setStatus('About page saved! Pages will rebuild in ~30s.', 'success');
+                loadAbout();
+            } catch (err) {
+                console.error(err);
+                setStatus('Save failed: ' + (err.message || err), 'error');
+            }
+        });
+
+        // ---------- Photos ----------
+        const PHOTO_MAX_DIM = 1600;
+        const PHOTO_JPEG_QUALITY = 0.85;
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const fr = new FileReader();
+                fr.onload = () => resolve(fr.result);
+                fr.onerror = reject;
+                fr.readAsDataURL(file);
+            });
+        }
+        function loadImageEl(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = dataUrl;
+            });
+        }
+        async function resizeToJpeg(file) {
+            const dataUrl = await readFileAsDataURL(file);
+            const img = await loadImageEl(dataUrl);
+            let { width: w, height: h } = img;
+            const longest = Math.max(w, h);
+            if (longest > PHOTO_MAX_DIM) {
+                const scale = PHOTO_MAX_DIM / longest;
+                w = Math.round(w * scale);
+                h = Math.round(h * scale);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            return canvas.toDataURL('image/jpeg', PHOTO_JPEG_QUALITY);
+        }
+        function dataUrlToBase64(dataUrl) {
+            const i = dataUrl.indexOf(',');
+            return dataUrl.slice(i + 1);
+        }
+
+        async function getManifest() {
+            try {
+                const f = await getFile('gallery/manifest.json');
+                let data = { photos: [] };
+                try { data = JSON.parse(f.content); } catch (e) {}
+                if (!data || !Array.isArray(data.photos)) data = { photos: [] };
+                return { sha: f.sha, data };
+            } catch (err) {
+                // Manifest missing — start fresh
+                return { sha: null, data: { photos: [] } };
+            }
+        }
+
+        async function writeManifest(data, message) {
+            return await modifyFile('gallery/manifest.json', () => JSON.stringify(data, null, 2) + '\n', message);
+        }
+
+        async function loadPhotos() {
+            const grid = $('photosGrid');
+            grid.innerHTML = '<div class="empty">Loading…</div>';
+            try {
+                const { data } = await getManifest();
+                const photos = (data.photos || []).slice().reverse();
+                if (!photos.length) {
+                    grid.innerHTML = '<div class="empty">No photos yet. Upload one to get started.</div>';
+                    return;
+                }
+                grid.innerHTML = '';
+                photos.forEach(p => {
+                    const tile = document.createElement('div');
+                    tile.className = 'manage-photo-tile';
+                    const img = document.createElement('img');
+                    img.src = '../' + p.src;
+                    img.alt = p.caption || '';
+                    img.loading = 'lazy';
+                    const del = document.createElement('button');
+                    del.type = 'button';
+                    del.className = 'manage-photo-delete';
+                    del.setAttribute('aria-label', 'Delete photo');
+                    del.textContent = '\u00d7';
+                    del.addEventListener('click', () => deletePhoto(p.src));
+                    tile.appendChild(img);
+                    tile.appendChild(del);
+                    grid.appendChild(tile);
+                });
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<div class="empty">Could not load photos: ' + escHtml(err.message || err) + '</div>';
+            }
+        }
+        $('reloadPhotos').addEventListener('click', loadPhotos);
+
+        // Direct binary upload (skips putFile's text encoding so JPEG bytes survive)
+        async function uploadBinary(filepath, base64Content, message) {
+            const res = await ghApi(`/repos/${OWNER}/${REPO}/contents/${filepath}`, 'PUT', {
+                message,
+                content: base64Content,
+                branch: BRANCH
+            });
+            return res;
+        }
+
+        $('addPhotosBtn').addEventListener('click', () => $('photoInput').click());
+        $('photoInput').addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+            const btn = $('addPhotosBtn');
+            btn.disabled = true;
+            const uploaded = [];
+            try {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    setStatus(`Photo ${i + 1}/${files.length} — optimizing…`, 'info');
+                    const dataUrl = await resizeToJpeg(file);
+                    const base64 = dataUrlToBase64(dataUrl);
+                    const ts = Date.now();
+                    const rand = Math.random().toString(36).slice(2, 7);
+                    const safeName = (file.name || 'photo').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'photo';
+                    const filename = `${ts}-${rand}-${safeName}.jpg`;
+                    const filepath = `gallery/${filename}`;
+                    setStatus(`Photo ${i + 1}/${files.length} — uploading…`, 'info');
+                    await uploadBinary(filepath, base64, `Add gallery photo: ${filename}`);
+                    uploaded.push({ src: filepath, uploaded: ts, caption: '' });
+                }
+                setStatus('Updating gallery index…', 'info');
+                await modifyFile('gallery/manifest.json', (txt) => {
+                    let data = { photos: [] };
+                    try { data = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(data.photos)) data.photos = [];
+                    data.photos = data.photos.concat(uploaded);
+                    return JSON.stringify(data, null, 2) + '\n';
+                }, `Index ${uploaded.length} new photo(s)`);
+                setStatus(`Uploaded ${uploaded.length} photo${uploaded.length > 1 ? 's' : ''}! Pages will rebuild in ~30s.`, 'success');
+                $('photoInput').value = '';
+                loadPhotos();
+            } catch (err) {
+                console.error(err);
+                setStatus('Photo upload failed: ' + (err.message || err), 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        async function deletePhoto(srcPath) {
+            if (!confirm('Delete this photo? This cannot be undone.')) return;
+            setStatus('Deleting photo…', 'info');
+            try {
+                // Remove from manifest first so the grid updates fast
+                await modifyFile('gallery/manifest.json', (txt) => {
+                    let data = { photos: [] };
+                    try { data = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(data.photos)) data.photos = [];
+                    data.photos = data.photos.filter(p => p.src !== srcPath);
+                    return JSON.stringify(data, null, 2) + '\n';
+                }, `Remove photo from gallery index: ${srcPath}`);
+                // Then delete the actual file
+                try {
+                    await deleteFileWithRetry(srcPath, `Delete gallery photo: ${srcPath}`);
+                } catch (e) {
+                    // If file is already gone, that's fine
+                    if (!String(e.message || '').includes('Not Found')) throw e;
+                }
+                setStatus('Photo deleted.', 'success');
+                loadPhotos();
+            } catch (err) {
+                console.error(err);
+                setStatus('Delete failed: ' + (err.message || err), 'error');
+            }
+        }
+    </script>
+</body>
+</html>
