@@ -137,7 +137,6 @@
                 <span>ponugotimanojkumar@gmail.com</span>
             </a>
         </div>
-        <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
     </footer>
 
     <script>
@@ -294,8 +293,10 @@
         }
 
         function excerpt(bodyHtml) {
-            // strip tags, take first 220 chars
-            const text = bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+            // strip tags, unescape entities so escHtml() downstream doesn't double-encode them
+            const text = bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+                .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'");
             return text.length > 220 ? text.slice(0, 220).replace(/\s+\S*$/, '') + '...' : text;
         }
 
@@ -413,7 +414,6 @@ ${bodyHtml}
                 <span>ponugotimanojkumar@gmail.com</span>
             </a>
         </div>
-        <p>&copy; 2026 Manoj Kumar. Built with <span>&hearts;</span> and late nights.</p>
     </footer>
 </body>
 </html>${sourceComment}`;
