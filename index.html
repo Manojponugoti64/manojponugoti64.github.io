@@ -84,12 +84,16 @@
         var intro = document.getElementById('bougIntro');
         if (!intro) return;
 
-        // Only show once per browser session
-        if (sessionStorage.getItem('bougSeen')) {
+        // Only show once per browser session. Guard storage access so that
+        // disabled cookies / Safari private browsing / quota errors can never
+        // leave the full-screen overlay stuck on top of the page.
+        var seen = false;
+        try { seen = !!sessionStorage.getItem('bougSeen'); } catch (e) {}
+        if (seen) {
             intro.style.display = 'none';
             return;
         }
-        sessionStorage.setItem('bougSeen', '1');
+        try { sessionStorage.setItem('bougSeen', '1'); } catch (e) {}
 
         var container = document.getElementById('bougPetals');
 
