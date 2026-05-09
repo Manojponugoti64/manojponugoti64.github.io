@@ -24,8 +24,38 @@
 
     <main>
         <section class="hero">
-            <h1>Welcome to <span>My Blog</span></h1>
+            <p class="hero-eyebrow">Manoj Kumar</p>
+            <h1 class="hero-title">
+                Notes from a <span class="hero-accent">restless mind</span>.
+            </h1>
+            <p class="hero-tagline">
+                <span class="typewriter" aria-live="polite">
+                    <span class="typewriter-text"></span><span class="typewriter-caret" aria-hidden="true"></span>
+                </span>
+            </p>
         </section>
+        <script>
+        (function () {
+            var roles = ['Writer.', 'Photographer.', 'Explorer.', 'Quiet observer.', 'Builder of small things.'];
+            var el = document.querySelector('.typewriter-text');
+            if (!el) return;
+            var i = 0, j = 0, deleting = false;
+            function tick() {
+                var word = roles[i];
+                if (!deleting) {
+                    j++;
+                    el.textContent = word.slice(0, j);
+                    if (j === word.length) { deleting = true; setTimeout(tick, 1500); return; }
+                } else {
+                    j--;
+                    el.textContent = word.slice(0, j);
+                    if (j === 0) { deleting = false; i = (i + 1) % roles.length; }
+                }
+                setTimeout(tick, deleting ? 35 : 80);
+            }
+            tick();
+        })();
+        </script>
 
         <section class="posts-grid">
 
