@@ -66,19 +66,29 @@
   }
 
   function syncThemeOnToggle() {
-    var btn = document.querySelector('.theme-toggle, [data-theme-toggle]');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      // Wait a tick for theme.js to flip data-theme.
-      setTimeout(function () {
-        var iframe = document.querySelector('iframe.giscus-frame');
-        if (!iframe || !iframe.contentWindow) return;
-        iframe.contentWindow.postMessage(
-          { giscus: { setConfig: { theme: currentTheme() } } },
-          'https://giscus.app'
-        );
-      }, 50);
-    });
+    // theme.js injects `.theme-toggle` from a DOMContentLoaded handler.
+    // comments.js loads with `defer`, so we may run *before* that handler
+    // fires and the button doesn't exist yet — wait for the next tick if so.
+    function attach() {
+      var btn = document.querySelector('.theme-toggle, [data-theme-toggle]');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        // Wait a tick for theme.js to flip data-theme.
+        setTimeout(function () {
+          var iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe || !iframe.contentWindow) return;
+          iframe.contentWindow.postMessage(
+            { giscus: { setConfig: { theme: currentTheme() } } },
+            'https://giscus.app'
+          );
+        }, 50);
+      });
+    }
+    if (document.readyState === 'loading' || document.readyState === 'interactive') {
+      document.addEventListener('DOMContentLoaded', attach);
+    } else {
+      attach();
+    }
   }
 
   function init() {
