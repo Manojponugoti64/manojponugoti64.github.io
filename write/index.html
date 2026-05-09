@@ -361,23 +361,43 @@
             }
         }
 
-        function postTemplate({ title, dateStr, bodyHtml, sourceMarkdown, category, slug }) {
+        function postTemplate({ title, dateStr, bodyHtml, sourceMarkdown, category, slug, excerptText, isoDate }) {
             const sourceComment = sourceMarkdown ? `\n<!-- BLOG_SOURCE_BASE64 ${b64(sourceMarkdown)} -->\n` : '';
             const cat = category || 'non-technical';
             const slugAttr = escHtml(slug || '');
+            const desc = escHtml(excerptText || '');
+            const pubDate = isoDate || new Date().toISOString().slice(0, 10);
             return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="blog-category" content="${cat}">
-    <title>${escHtml(title)} - Manoj's Blog</title>
+    <title>${escHtml(title)} — Manoj's Blog</title>
+    <meta name="description" content="${desc}">
+    <link rel="canonical" href="https://manojponugoti64.github.io/posts/${escHtml(slug)}.html">
+    <link rel="alternate" type="application/rss+xml" title="Manoj's Blog" href="/feed.xml">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Manoj's Blog">
+    <meta property="og:title" content="${escHtml(title)}">
+    <meta property="og:description" content="${desc}">
+    <meta property="og:url" content="https://manojponugoti64.github.io/posts/${escHtml(slug)}.html">
+    <meta property="og:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="article:author" content="Manoj Kumar">
+    <meta property="article:published_time" content="${pubDate}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${escHtml(title)}">
+    <meta name="twitter:description" content="${desc}">
+    <meta name="twitter:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
     <link rel="stylesheet" href="../style.css">
     <script src="../theme.js"><\/script>
     <script src="../sidebar.js" defer><\/script>
     <script src="../upvote.js" defer><\/script>
     <script src="../reading-time.js" defer><\/script>
     <script src="../comments.js" defer><\/script>
+    <script src="../share.js" defer><\/script>
 </head>
 <body>
     <header>
@@ -495,6 +515,42 @@ ${bodyHtml}
 
         function insertArchiveRow(archiveHtml, { title, slug, dateStr, category }) {
             return upsertArchiveRow(archiveHtml, slug, { title, dateStr, category });
+        }
+
+        // Convert ISO date (YYYY-MM-DD) into RFC 822 used by RSS pubDate.
+        function isoToRfc822(iso) {
+            const d = new Date(iso + 'T00:00:00Z');
+            return d.toUTCString();
+        }
+
+        // Insert / update an <item> entry in feed.xml for the given post.
+        // Existing item with the same <guid> is removed first (idempotent edits).
+        // New items go directly after the channel <image> block, keeping newest-first order.
+        function upsertFeedItem(feedXml, { slug, title, excerptText, isoDate }) {
+            const url = `https://manojponugoti64.github.io/posts/${slug}.html`;
+            // Tempered greedy token (?:(?!<item>)[\s\S])*? prevents the lazy
+            // match from spanning past earlier <item> blocks, so editing a
+            // non-first post only removes its own entry.
+            const guidRe = new RegExp(
+                `\\s*<item>(?:(?!<item>)[\\s\\S])*?<guid[^>]*>${escapeRegex(url)}</guid>(?:(?!<item>)[\\s\\S])*?</item>`,
+                'g'
+            );
+            let stripped = feedXml.replace(guidRe, '');
+            const item = `\n\n    <item>\n` +
+                `      <title>${escHtml(title)}</title>\n` +
+                `      <link>${url}</link>\n` +
+                `      <guid isPermaLink="true">${url}</guid>\n` +
+                `      <pubDate>${isoToRfc822(isoDate)}</pubDate>\n` +
+                `      <description><![CDATA[${(excerptText || '').replace(/]]>/g, ']]]]><![CDATA[>')}]]></description>\n` +
+                `    </item>`;
+            // Insert right after the </image> block so newest items sit on top.
+            const imageEnd = stripped.indexOf('</image>');
+            if (imageEnd !== -1) {
+                const cut = imageEnd + '</image>'.length;
+                return stripped.slice(0, cut) + item + stripped.slice(cut);
+            }
+            // Fallback: insert before </channel>.
+            return stripped.replace('</channel>', item + '\n  </channel>');
         }
 
         // ---------- Photo upload ----------
@@ -648,9 +704,19 @@ ${bodyHtml}
                 const excerptText = excerpt(bodyHtml);
                 const categoryEl = document.querySelector('input[name="category"]:checked');
                 const category = (categoryEl && categoryEl.value) || 'non-technical';
-                const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body, category, slug });
+                // Build YYYY-MM-DD from local components so a date typed in IST
+                // doesn't slip back a day when serialized through UTC.
+                function localIso(d) {
+                    return d.getFullYear() + '-' +
+                        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(d.getDate()).padStart(2, '0');
+                }
+                const isoDate = isEdit && editPostDateStr
+                    ? localIso(new Date(editPostDateStr))
+                    : localIso(new Date());
+                const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body, category, slug, excerptText, isoDate });
 
-                setStatus(isEdit ? 'Step 1/3 — updating the post…' : 'Step 1/3 — saving the post…', 'info');
+                setStatus(isEdit ? 'Step 1/4 — updating the post…' : 'Step 1/4 — saving the post…', 'info');
                 if (isEdit) {
                     // Refetch sha for safety + auto-retry on conflict
                     await modifyFile(`posts/${slug}.html`, () => postHtml, `Edit post: ${title}`);
@@ -665,7 +731,7 @@ ${bodyHtml}
                     }
                 }
 
-                setStatus('Step 2/3 — updating homepage…', 'info');
+                setStatus('Step 2/4 — updating homepage…', 'info');
                 await modifyFile('index.html',
                     c => isEdit
                         ? replaceIndexCard(c, slug, { title, dateStr, excerptText })
@@ -673,10 +739,16 @@ ${bodyHtml}
                     `${isEdit ? 'Update' : 'Link new'} post on homepage: ${title}`
                 );
 
-                setStatus('Step 3/3 — updating archive…', 'info');
+                setStatus('Step 3/4 — updating archive…', 'info');
                 await modifyFile('archive.html',
                     c => upsertArchiveRow(c, slug, { title, dateStr, category }),
                     `${isEdit ? 'Update' : 'Add to'} archive: ${title}`
+                );
+
+                setStatus('Step 4/4 — updating RSS feed…', 'info');
+                await modifyFile('feed.xml',
+                    c => upsertFeedItem(c, { slug, title, excerptText, isoDate }),
+                    `${isEdit ? 'Update' : 'Add to'} RSS feed: ${title}`
                 );
 
                 // clear draft
