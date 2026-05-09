@@ -18,7 +18,6 @@
     var node = document.createElement(tag);
     if (props) Object.keys(props).forEach(function (k) {
       if (k === 'text') node.textContent = props[k];
-      else if (k === 'html') node.innerHTML = props[k];
       else if (k === 'class') node.className = props[k];
       else node.setAttribute(k, props[k]);
     });
@@ -38,6 +37,7 @@
     setStatus(card, 'Loading today\u2019s sky\u2026');
     fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&thumbs=true')
       .then(function (r) {
+        if (r.status === 429) throw new Error('rate-limited');
         if (!r.ok) throw new Error('http ' + r.status);
         return r.json();
       })
@@ -77,8 +77,11 @@
           more.style.display = '';
         }
       })
-      .catch(function () {
-        setStatus(card, 'Couldn\u2019t reach NASA right now \u2014 try again later.', true);
+      .catch(function (err) {
+        var msg = (err && err.message === 'rate-limited')
+          ? 'NASA APOD is rate-limited right now \u2014 try again in an hour.'
+          : 'Couldn\u2019t reach NASA right now \u2014 try again later.';
+        setStatus(card, msg, true);
       });
   }
 
@@ -106,7 +109,7 @@
     var daysToFull;
     if (pct < 0.5) daysToFull = (0.5 - pct) * SYNODIC;
     else daysToFull = (1.5 - pct) * SYNODIC;
-    var daysToNew = pct < 0 ? -pct * SYNODIC : (1 - pct) * SYNODIC;
+    var daysToNew = (1 - pct) * SYNODIC;
 
     $('.hub-moon-emoji', card).textContent = emoji;
     $('.hub-moon-name', card).textContent = name;
@@ -170,6 +173,7 @@
         var step = 30 * 1000; // 30s
         var horizon = 10 * Math.PI / 180; // 10 deg
         var inPass = null;
+        var lastDate = now;
         for (var t = 0; t < 48 * 3600 * 1000 && passes.length < 3; t += step) {
           var date = new Date(now.getTime() + t);
           var pv = satellite.propagate(rec, date);
@@ -178,6 +182,7 @@
           var posEcf = satellite.eciToEcf(pv.position, gmst);
           var look = satellite.ecfToLookAngles(observer, posEcf);
           var elev = look.elevation;
+          lastDate = date;
           if (elev > horizon) {
             if (!inPass) inPass = { start: date, max: elev, maxAt: date };
             else if (elev > inPass.max) { inPass.max = elev; inPass.maxAt = date; }
@@ -188,6 +193,12 @@
             passes.push(inPass);
             inPass = null;
           }
+        }
+        if (inPass && passes.length < 3) {
+          inPass.end = lastDate;
+          inPass.duration = Math.round((inPass.end - inPass.start) / 60000);
+          inPass.maxDeg = Math.round(inPass.max * 180 / Math.PI);
+          passes.push(inPass);
         }
         renderPasses(card, passes);
       })
