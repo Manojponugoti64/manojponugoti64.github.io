@@ -361,10 +361,12 @@
             }
         }
 
-        function postTemplate({ title, dateStr, bodyHtml, sourceMarkdown, category, slug }) {
+        function postTemplate({ title, dateStr, bodyHtml, sourceMarkdown, category, slug, excerptText, isoDate }) {
             const sourceComment = sourceMarkdown ? `\n<!-- BLOG_SOURCE_BASE64 ${b64(sourceMarkdown)} -->\n` : '';
             const cat = category || 'non-technical';
             const slugAttr = escHtml(slug || '');
+            const desc = escHtml(excerptText || '');
+            const pubDate = isoDate || new Date().toISOString().slice(0, 10);
             return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -372,18 +374,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="blog-category" content="${cat}">
     <title>${escHtml(title)} — Manoj's Blog</title>
+    <meta name="description" content="${desc}">
     <link rel="canonical" href="https://manojponugoti64.github.io/posts/${escHtml(slug)}.html">
     <link rel="alternate" type="application/rss+xml" title="Manoj's Blog" href="/feed.xml">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Manoj's Blog">
     <meta property="og:title" content="${escHtml(title)}">
+    <meta property="og:description" content="${desc}">
     <meta property="og:url" content="https://manojponugoti64.github.io/posts/${escHtml(slug)}.html">
     <meta property="og:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="article:author" content="Manoj Kumar">
+    <meta property="article:published_time" content="${pubDate}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escHtml(title)}">
+    <meta name="twitter:description" content="${desc}">
     <meta name="twitter:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
     <link rel="stylesheet" href="../style.css">
     <script src="../theme.js"><\/script>
@@ -662,7 +668,10 @@ ${bodyHtml}
                 const excerptText = excerpt(bodyHtml);
                 const categoryEl = document.querySelector('input[name="category"]:checked');
                 const category = (categoryEl && categoryEl.value) || 'non-technical';
-                const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body, category, slug });
+                const isoDate = isEdit && editPostDateStr
+                    ? new Date(editPostDateStr).toISOString().slice(0, 10)
+                    : new Date().toISOString().slice(0, 10);
+                const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body, category, slug, excerptText, isoDate });
 
                 setStatus(isEdit ? 'Step 1/3 — updating the post…' : 'Step 1/3 — saving the post…', 'info');
                 if (isEdit) {
