@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Manoj's Blog</title>
+    <link>https://manojponugoti64.github.io/</link>
+    <description>Thoughts on technology, life, and everything in between — from Manoj Kumar.</description>
+    <language>en-us</language>
+    <atom:link href="https://manojponugoti64.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    <image>
+      <url>https://manojponugoti64.github.io/assets/og-image.jpg</url>
+      <title>Manoj's Blog</title>
+      <link>https://manojponugoti64.github.io/</link>
+    </image>
+
+    <item>
+      <title>The Optimal Rate of Failure</title>
+      <link>https://manojponugoti64.github.io/posts/the-optimal-rate-of-failure.html</link>
+      <guid isPermaLink="true">https://manojponugoti64.github.io/posts/the-optimal-rate-of-failure.html</guid>
+      <pubDate>Tue, 28 Apr 2026 00:00:00 +0000</pubDate>
+      <description><![CDATA[The economist George Stigler once said, "If you never miss a plane, you're spending too much time at the airport." It's a small line with a big idea tucked inside it. If you never fail at anything, you're probably not being careful — you're being too cautious.]]></description>
+    </item>
+
+    <item>
+      <title>Between Roots and Waves: Living Real</title>
+      <link>https://manojponugoti64.github.io/posts/between-roots-and-waves-living-real.html</link>
+      <guid isPermaLink="true">https://manojponugoti64.github.io/posts/between-roots-and-waves-living-real.html</guid>
+      <pubDate>Mon, 27 Apr 2026 00:00:00 +0000</pubDate>
+      <description><![CDATA[There are places where life stops performing and simply exists — unfiltered, unhurried, and unapologetically real. A meditation on roots, the sea, and the unhurried real.]]></description>
+    </item>
+  </channel>
+</rss>

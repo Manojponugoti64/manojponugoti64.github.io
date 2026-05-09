@@ -371,13 +371,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="blog-category" content="${cat}">
-    <title>${escHtml(title)} - Manoj's Blog</title>
+    <title>${escHtml(title)} — Manoj's Blog</title>
+    <link rel="canonical" href="https://manojponugoti64.github.io/posts/${escHtml(slug)}.html">
+    <link rel="alternate" type="application/rss+xml" title="Manoj's Blog" href="/feed.xml">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Manoj's Blog">
+    <meta property="og:title" content="${escHtml(title)}">
+    <meta property="og:url" content="https://manojponugoti64.github.io/posts/${escHtml(slug)}.html">
+    <meta property="og:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="article:author" content="Manoj Kumar">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${escHtml(title)}">
+    <meta name="twitter:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
     <link rel="stylesheet" href="../style.css">
     <script src="../theme.js"><\/script>
     <script src="../sidebar.js" defer><\/script>
     <script src="../upvote.js" defer><\/script>
     <script src="../reading-time.js" defer><\/script>
     <script src="../comments.js" defer><\/script>
+    <script src="../share.js" defer><\/script>
 </head>
 <body>
     <header>
