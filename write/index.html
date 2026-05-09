@@ -528,8 +528,11 @@ ${bodyHtml}
         // New items go directly after the channel <image> block, keeping newest-first order.
         function upsertFeedItem(feedXml, { slug, title, excerptText, isoDate }) {
             const url = `https://manojponugoti64.github.io/posts/${slug}.html`;
+            // Tempered greedy token (?:(?!<item>)[\s\S])*? prevents the lazy
+            // match from spanning past earlier <item> blocks, so editing a
+            // non-first post only removes its own entry.
             const guidRe = new RegExp(
-                `\\s*<item>[\\s\\S]*?<guid[^>]*>${escapeRegex(url)}</guid>[\\s\\S]*?</item>`,
+                `\\s*<item>(?:(?!<item>)[\\s\\S])*?<guid[^>]*>${escapeRegex(url)}</guid>(?:(?!<item>)[\\s\\S])*?</item>`,
                 'g'
             );
             let stripped = feedXml.replace(guidRe, '');
