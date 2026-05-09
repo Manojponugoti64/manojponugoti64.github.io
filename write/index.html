@@ -517,6 +517,39 @@ ${bodyHtml}
             return upsertArchiveRow(archiveHtml, slug, { title, dateStr, category });
         }
 
+        // Convert ISO date (YYYY-MM-DD) into RFC 822 used by RSS pubDate.
+        function isoToRfc822(iso) {
+            const d = new Date(iso + 'T00:00:00Z');
+            return d.toUTCString();
+        }
+
+        // Insert / update an <item> entry in feed.xml for the given post.
+        // Existing item with the same <guid> is removed first (idempotent edits).
+        // New items go directly after the channel <image> block, keeping newest-first order.
+        function upsertFeedItem(feedXml, { slug, title, excerptText, isoDate }) {
+            const url = `https://manojponugoti64.github.io/posts/${slug}.html`;
+            const guidRe = new RegExp(
+                `\\s*<item>[\\s\\S]*?<guid[^>]*>${escapeRegex(url)}</guid>[\\s\\S]*?</item>`,
+                'g'
+            );
+            let stripped = feedXml.replace(guidRe, '');
+            const item = `\n\n    <item>\n` +
+                `      <title>${escHtml(title)}</title>\n` +
+                `      <link>${url}</link>\n` +
+                `      <guid isPermaLink="true">${url}</guid>\n` +
+                `      <pubDate>${isoToRfc822(isoDate)}</pubDate>\n` +
+                `      <description><![CDATA[${excerptText || ''}]]></description>\n` +
+                `    </item>`;
+            // Insert right after the </image> block so newest items sit on top.
+            const imageEnd = stripped.indexOf('</image>');
+            if (imageEnd !== -1) {
+                const cut = imageEnd + '</image>'.length;
+                return stripped.slice(0, cut) + item + stripped.slice(cut);
+            }
+            // Fallback: insert before </channel>.
+            return stripped.replace('</channel>', item + '\n  </channel>');
+        }
+
         // ---------- Photo upload ----------
         const MAX_DIM = 1600;        // resize so longest edge <= 1600px
         const JPEG_QUALITY = 0.85;
@@ -668,12 +701,19 @@ ${bodyHtml}
                 const excerptText = excerpt(bodyHtml);
                 const categoryEl = document.querySelector('input[name="category"]:checked');
                 const category = (categoryEl && categoryEl.value) || 'non-technical';
+                // Build YYYY-MM-DD from local components so a date typed in IST
+                // doesn't slip back a day when serialized through UTC.
+                function localIso(d) {
+                    return d.getFullYear() + '-' +
+                        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(d.getDate()).padStart(2, '0');
+                }
                 const isoDate = isEdit && editPostDateStr
-                    ? new Date(editPostDateStr).toISOString().slice(0, 10)
-                    : new Date().toISOString().slice(0, 10);
+                    ? localIso(new Date(editPostDateStr))
+                    : localIso(new Date());
                 const postHtml = postTemplate({ title, dateStr, bodyHtml, sourceMarkdown: body, category, slug, excerptText, isoDate });
 
-                setStatus(isEdit ? 'Step 1/3 — updating the post…' : 'Step 1/3 — saving the post…', 'info');
+                setStatus(isEdit ? 'Step 1/4 — updating the post…' : 'Step 1/4 — saving the post…', 'info');
                 if (isEdit) {
                     // Refetch sha for safety + auto-retry on conflict
                     await modifyFile(`posts/${slug}.html`, () => postHtml, `Edit post: ${title}`);
@@ -688,7 +728,7 @@ ${bodyHtml}
                     }
                 }
 
-                setStatus('Step 2/3 — updating homepage…', 'info');
+                setStatus('Step 2/4 — updating homepage…', 'info');
                 await modifyFile('index.html',
                     c => isEdit
                         ? replaceIndexCard(c, slug, { title, dateStr, excerptText })
@@ -696,10 +736,16 @@ ${bodyHtml}
                     `${isEdit ? 'Update' : 'Link new'} post on homepage: ${title}`
                 );
 
-                setStatus('Step 3/3 — updating archive…', 'info');
+                setStatus('Step 3/4 — updating archive…', 'info');
                 await modifyFile('archive.html',
                     c => upsertArchiveRow(c, slug, { title, dateStr, category }),
                     `${isEdit ? 'Update' : 'Add to'} archive: ${title}`
+                );
+
+                setStatus('Step 4/4 — updating RSS feed…', 'info');
+                await modifyFile('feed.xml',
+                    c => upsertFeedItem(c, { slug, title, excerptText, isoDate }),
+                    `${isEdit ? 'Update' : 'Add to'} RSS feed: ${title}`
                 );
 
                 // clear draft
