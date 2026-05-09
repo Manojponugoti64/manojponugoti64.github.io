@@ -6,10 +6,12 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>ISS Live Tracker - Manoj's Blog</title>
+    <title>ISS Space Hub — Manoj's Blog</title>
     <link rel="stylesheet" href="../style.css">
     <script src="../theme.js"></script>
     <script src="../sidebar.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.0/dist/satellite.min.js" defer></script>
+    <script src="../space-hub.js" defer></script>
 </head>
 <body>
     <header>
@@ -26,8 +28,8 @@
 
     <main>
         <div class="page-content">
-            <h1>ISS Live Tracker</h1>
-            <p class="page-sub">Watch the International Space Station as it orbits Earth in real time.</p>
+            <h1>ISS Space Hub</h1>
+            <p class="page-sub">A small window on what's happening above your head.</p>
 
             <div class="iss-frame-wrap">
                 <iframe
@@ -40,6 +42,47 @@
             </div>
 
             <p class="iss-note">The ISS travels at about 28,000 km/h and circles Earth roughly every 90 minutes — every dot you see on the map is a moment of human presence in orbit.</p>
+
+            <div class="hub-grid">
+                <article class="hub-card" id="hub-apod">
+                    <header class="hub-head">
+                        <h2 class="hub-title">Astronomy Picture of the Day</h2>
+                        <span class="hub-source">NASA APOD</span>
+                    </header>
+                    <div class="hub-apod-media"></div>
+                    <h3 class="hub-apod-title"></h3>
+                    <p class="hub-apod-date"></p>
+                    <p class="hub-apod-explanation"></p>
+                    <a class="hub-apod-more" href="#" target="_blank" rel="noopener" style="display:none;">View full size →</a>
+                    <p class="hub-status"></p>
+                </article>
+
+                <article class="hub-card" id="hub-moon">
+                    <header class="hub-head">
+                        <h2 class="hub-title">Tonight's Moon</h2>
+                        <span class="hub-source">Computed locally</span>
+                    </header>
+                    <div class="hub-moon-emoji" aria-hidden="true">🌑</div>
+                    <h3 class="hub-moon-name">—</h3>
+                    <p class="hub-moon-illum">—</p>
+                    <p class="hub-moon-age">—</p>
+                    <p class="hub-moon-next">—</p>
+                </article>
+
+                <article class="hub-card" id="hub-passes">
+                    <header class="hub-head">
+                        <h2 class="hub-title">Next ISS passes overhead</h2>
+                        <span class="hub-source">Live TLE · satellite.js</span>
+                    </header>
+                    <p class="hub-pass-prompt">
+                        See when the ISS will fly over your sky in the next 48 hours.
+                        We'll only use your location to compute passes — nothing leaves your device.
+                    </p>
+                    <button type="button" class="hub-pass-btn">Find passes from my location</button>
+                    <ul class="hub-pass-list"></ul>
+                    <p class="hub-status"></p>
+                </article>
+            </div>
         </div>
     </main>
 
