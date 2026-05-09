@@ -152,7 +152,10 @@
       return;
     }
     fetch(TLE_URL)
-      .then(function (r) { return r.text(); })
+      .then(function (r) {
+        if (!r.ok) throw new Error('http ' + r.status);
+        return r.text();
+      })
       .then(function (txt) {
         var lines = txt.trim().split(/\r?\n/);
         if (lines.length < 3) throw new Error('bad tle');
