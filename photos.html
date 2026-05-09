@@ -29,15 +29,27 @@
             <h1>Photos</h1>
             <p class="page-sub">Moments, snapshots, places I&#39;ve been.</p>
 
-            <div id="photoGrid" class="photo-grid" aria-live="polite"></div>
+            <div id="photoGrid" class="photo-grid photo-grid-masonry" aria-live="polite"></div>
             <p id="photoEmpty" class="photo-empty" style="display:none;">No photos yet — check back soon.</p>
             <p id="photoError" class="photo-error" style="display:none;"></p>
         </div>
     </main>
 
-    <div id="lightbox" class="lightbox" aria-hidden="true">
+    <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-label="Photo viewer">
         <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
-        <img id="lightboxImg" alt="">
+        <button type="button" class="lightbox-nav lightbox-prev" aria-label="Previous photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button type="button" class="lightbox-nav lightbox-next" aria-label="Next photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="lightbox-stage">
+            <img id="lightboxImg" alt="">
+        </div>
+        <div class="lightbox-meta">
+            <span id="lightboxCaption" class="lightbox-caption"></span>
+            <span id="lightboxCount" class="lightbox-count"></span>
+        </div>
     </div>
 
     <footer>
@@ -53,54 +65,131 @@
         (function () {
             var grid = document.getElementById('photoGrid');
             var emptyMsg = document.getElementById('photoEmpty');
-            var errMsg = document.getElementById('photoError');
             var lb = document.getElementById('lightbox');
             var lbImg = document.getElementById('lightboxImg');
+            var lbStage = lb.querySelector('.lightbox-stage');
             var lbClose = lb.querySelector('.lightbox-close');
+            var lbPrev = lb.querySelector('.lightbox-prev');
+            var lbNext = lb.querySelector('.lightbox-next');
+            var lbCaption = document.getElementById('lightboxCaption');
+            var lbCount = document.getElementById('lightboxCount');
 
-            function openLightbox(src, alt) {
-                lbImg.src = src;
-                lbImg.alt = alt || '';
+            var photos = [];      // ordered list shown in the grid
+            var currentIdx = -1;
+            var zoomed = false;
+
+            function show(i) {
+                if (i < 0 || i >= photos.length) return;
+                currentIdx = i;
+                var p = photos[i];
+                lbImg.src = p.src;
+                lbImg.alt = p.caption || '';
+                lbCaption.textContent = p.caption || '';
+                lbCount.textContent = (i + 1) + ' / ' + photos.length;
+                resetZoom();
+                lbPrev.style.visibility = (i === 0) ? 'hidden' : 'visible';
+                lbNext.style.visibility = (i === photos.length - 1) ? 'hidden' : 'visible';
+            }
+            function open(i) {
+                show(i);
                 lb.classList.add('is-open');
                 lb.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('lightbox-open');
             }
-            function closeLightbox() {
+            function close() {
                 lb.classList.remove('is-open');
                 lb.setAttribute('aria-hidden', 'true');
-                lbImg.src = '';
+                document.body.classList.remove('lightbox-open');
+                resetZoom();
+                /* defer src clear so the closing transition isn't ugly */
+                setTimeout(function () { if (!lb.classList.contains('is-open')) lbImg.src = ''; }, 240);
             }
+            function next() { if (currentIdx < photos.length - 1) show(currentIdx + 1); }
+            function prev() { if (currentIdx > 0) show(currentIdx - 1); }
+
+            function resetZoom() {
+                zoomed = false;
+                lbImg.style.transform = '';
+                lbImg.style.transformOrigin = '';
+                lbImg.classList.remove('is-zoomed');
+            }
+            function toggleZoom(e) {
+                if (zoomed) { resetZoom(); return; }
+                var r = lbImg.getBoundingClientRect();
+                var x = ((e.clientX - r.left) / r.width) * 100;
+                var y = ((e.clientY - r.top) / r.height) * 100;
+                lbImg.style.transformOrigin = x + '% ' + y + '%';
+                lbImg.style.transform = 'scale(2)';
+                lbImg.classList.add('is-zoomed');
+                zoomed = true;
+            }
+
+            /* --- bindings --- */
+            lbClose.addEventListener('click', close);
+            lbPrev.addEventListener('click', function (e) { e.stopPropagation(); prev(); });
+            lbNext.addEventListener('click', function (e) { e.stopPropagation(); next(); });
+            lbImg.addEventListener('click', function (e) { e.stopPropagation(); toggleZoom(e); });
             lb.addEventListener('click', function (e) {
-                if (e.target === lb || e.target === lbClose) closeLightbox();
+                /* click on backdrop (not image, not buttons) closes */
+                if (e.target === lb || e.target === lbStage) close();
             });
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') closeLightbox();
+                if (!lb.classList.contains('is-open')) return;
+                if (e.key === 'Escape') close();
+                else if (e.key === 'ArrowRight') next();
+                else if (e.key === 'ArrowLeft') prev();
             });
 
-            // Cache-bust manifest so new uploads show up immediately
+            /* swipe (and unzoom on swipe) */
+            var touchStartX = null, touchStartY = null;
+            lb.addEventListener('touchstart', function (e) {
+                if (e.touches.length !== 1) return;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            lb.addEventListener('touchend', function (e) {
+                if (touchStartX === null) return;
+                var t = e.changedTouches[0];
+                var dx = t.clientX - touchStartX;
+                var dy = t.clientY - touchStartY;
+                touchStartX = touchStartY = null;
+                if (zoomed) return;  /* swipe doesn't navigate while zoomed */
+                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+                    if (dx < 0) next(); else prev();
+                } else if (dy > 100 && Math.abs(dy) > Math.abs(dx)) {
+                    /* swipe down to dismiss */
+                    close();
+                }
+            }, { passive: true });
+
+            /* --- load gallery --- */
             fetch('gallery/manifest.json?cb=' + Date.now())
                 .then(function (r) {
                     if (!r.ok) throw new Error('Failed to load gallery (' + r.status + ').');
                     return r.json();
                 })
                 .then(function (data) {
-                    var photos = (data && data.photos) || [];
-                    if (!photos.length) {
-                        emptyMsg.style.display = '';
-                        return;
-                    }
-                    photos.slice().reverse().forEach(function (p) {
+                    var raw = (data && data.photos) || [];
+                    if (!raw.length) { emptyMsg.style.display = ''; return; }
+                    photos = raw.slice().reverse();  /* newest first */
+                    photos.forEach(function (p, idx) {
                         var btn = document.createElement('button');
                         btn.type = 'button';
-                        btn.className = 'photo-tile';
+                        btn.className = 'photo-tile photo-tile-masonry';
                         btn.setAttribute('aria-label', 'Open photo' + (p.caption ? ': ' + p.caption : ''));
                         var img = document.createElement('img');
                         img.src = p.src;
                         img.alt = p.caption || '';
                         img.loading = 'lazy';
+                        img.decoding = 'async';
                         btn.appendChild(img);
-                        btn.addEventListener('click', function () {
-                            openLightbox(p.src, p.caption);
-                        });
+                        if (p.caption) {
+                            var cap = document.createElement('span');
+                            cap.className = 'photo-tile-caption';
+                            cap.textContent = p.caption;
+                            btn.appendChild(cap);
+                        }
+                        btn.addEventListener('click', function () { open(idx); });
                         grid.appendChild(btn);
                     });
                 })
