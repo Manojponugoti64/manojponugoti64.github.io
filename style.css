@@ -1077,8 +1077,12 @@ footer span {
 /* Hide the old square-grid styles' aspect-ratio override on these tiles */
 .photo-tile-masonry { aspect-ratio: auto !important; }
 
-/* ===== Lightbox enhancements ===== */
+/* ===== Lightbox enhancements =====
+   Override the base `.lightbox { display: none }` (line ~612) so that
+   opacity/visibility transitions actually fire on open and close. The
+   element is always laid out as flex; we hide it via opacity+visibility. */
 .lightbox {
+  display: flex;
   background: rgba(8, 6, 5, 0.96);
   flex-direction: column;
   padding: 0;
@@ -1087,7 +1091,6 @@ footer span {
   transition: opacity 0.22s ease, visibility 0s linear 0.22s;
 }
 .lightbox.is-open {
-  display: flex;
   opacity: 1;
   visibility: visible;
   transition: opacity 0.22s ease;
