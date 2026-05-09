@@ -385,8 +385,8 @@
     <meta property="og:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="article:author" content="Manoj Kumar">
     <meta property="article:published_time" content="${pubDate}">
+    <meta property="article:author" content="Manoj Kumar">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escHtml(title)}">
     <meta name="twitter:description" content="${desc}">
@@ -518,14 +518,39 @@ ${bodyHtml}
         }
 
         // Convert ISO date (YYYY-MM-DD) into RFC 822 used by RSS pubDate.
+        // Date.toUTCString() ends in "GMT"; we normalize to "+0000" to match
+        // the timezone suffix used by the existing hand-written feed entries.
         function isoToRfc822(iso) {
             const d = new Date(iso + 'T00:00:00Z');
-            return d.toUTCString();
+            return d.toUTCString().replace(/ GMT$/, ' +0000');
+        }
+
+        // Default seed feed.xml used when no feed exists yet (e.g. fresh fork
+        // that hasn't deployed the feed file yet). Channel matches what the
+        // hand-written feed.xml on main looks like, minus any <item> entries.
+        function defaultFeedXml() {
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Manoj's Blog</title>
+    <link>https://manojponugoti64.github.io/</link>
+    <description>Thoughts on technology, life, and everything in between — from Manoj Kumar.</description>
+    <language>en-us</language>
+    <atom:link href="https://manojponugoti64.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    <image>
+      <url>https://manojponugoti64.github.io/assets/og-image.jpg</url>
+      <title>Manoj's Blog</title>
+      <link>https://manojponugoti64.github.io/</link>
+    </image>
+  </channel>
+</rss>
+`;
         }
 
         // Insert / update an <item> entry in feed.xml for the given post.
         // Existing item with the same <guid> is removed first (idempotent edits).
-        // New items go directly after the channel <image> block, keeping newest-first order.
+        // New items are placed in newest-first order based on <pubDate>, so
+        // editing an older post does not promote it to the top of the feed.
         function upsertFeedItem(feedXml, { slug, title, excerptText, isoDate }) {
             const url = `https://manojponugoti64.github.io/posts/${slug}.html`;
             // Tempered greedy token (?:(?!<item>)[\s\S])*? prevents the lazy
@@ -543,13 +568,41 @@ ${bodyHtml}
                 `      <pubDate>${isoToRfc822(isoDate)}</pubDate>\n` +
                 `      <description><![CDATA[${(excerptText || '').replace(/]]>/g, ']]]]><![CDATA[>')}]]></description>\n` +
                 `    </item>`;
-            // Insert right after the </image> block so newest items sit on top.
+            // Find the first existing item whose pubDate is older than this
+            // post's pubDate, and insert immediately before it. That keeps the
+            // feed sorted newest-first and preserves an edited post's original
+            // position when its publish date hasn't changed.
+            const itemRe = /<item>[\s\S]*?<pubDate>([^<]+)<\/pubDate>[\s\S]*?<\/item>/g;
+            const newTime = Date.parse(isoToRfc822(isoDate));
+            let m;
+            let insertBefore = -1;
+            let sawItems = false;
+            while ((m = itemRe.exec(stripped)) !== null) {
+                sawItems = true;
+                const t = Date.parse(m[1]);
+                if (!isNaN(t) && !isNaN(newTime) && newTime > t) {
+                    // Walk back over leading whitespace so we slot in cleanly
+                    // before the existing item rather than wedging against it.
+                    let start = m.index;
+                    while (start > 0 && /\s/.test(stripped[start - 1])) start--;
+                    insertBefore = start;
+                    break;
+                }
+            }
+            if (insertBefore !== -1) {
+                return stripped.slice(0, insertBefore) + item + stripped.slice(insertBefore);
+            }
+            // Other items exist but none are older — this post is the oldest.
+            // Append before </channel> so it lands at the bottom of the feed.
+            if (sawItems) {
+                return stripped.replace('</channel>', item + '\n  </channel>');
+            }
+            // Feed has no items yet — drop in right after the <image> block.
             const imageEnd = stripped.indexOf('</image>');
             if (imageEnd !== -1) {
                 const cut = imageEnd + '</image>'.length;
                 return stripped.slice(0, cut) + item + stripped.slice(cut);
             }
-            // Fallback: insert before </channel>.
             return stripped.replace('</channel>', item + '\n  </channel>');
         }
 
@@ -746,6 +799,18 @@ ${bodyHtml}
                 );
 
                 setStatus('Step 4/4 — updating RSS feed…', 'info');
+                // If feed.xml doesn't exist yet (e.g. fresh fork that never
+                // deployed it), seed it from a default channel template so
+                // the upsert step doesn't fail with a 404.
+                try {
+                    await getFile('feed.xml');
+                } catch (e) {
+                    if (String(e.message || '').includes('Not Found') || String(e.message || '').includes('404')) {
+                        await putFile('feed.xml', defaultFeedXml(), 'Initialize RSS feed');
+                    } else {
+                        throw e;
+                    }
+                }
                 await modifyFile('feed.xml',
                     c => upsertFeedItem(c, { slug, title, excerptText, isoDate }),
                     `${isEdit ? 'Update' : 'Add to'} RSS feed: ${title}`

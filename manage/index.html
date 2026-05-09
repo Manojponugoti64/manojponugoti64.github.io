@@ -386,14 +386,33 @@
                 const cardRe = new RegExp(`\\s*<article class="post-card">(?:(?!<article class="post-card">)[\\s\\S])*?href="posts/${slugRe}\\.html"[\\s\\S]*?</article>\\s*`, '');
                 const rowRe = new RegExp(`\\s*<li[^>]*data-slug="${slugRe}"[^>]*>(?:(?!<li)[\\s\\S])*?</li>\\s*`, '');
 
-                setStatus(`Deleting "${safeTitle}" — step 1/3 (post file)…`, 'info');
+                // Tempered greedy guard so removing a non-first post doesn't
+                // delete intervening <item> blocks. Mirrors the pattern used
+                // in upsertFeedItem in write/index.html.
+                const url = `https://manojponugoti64.github.io/posts/${slug}.html`;
+                const feedItemRe = new RegExp(
+                    `\\s*<item>(?:(?!<item>)[\\s\\S])*?<guid[^>]*>${escapeRegex(url)}</guid>(?:(?!<item>)[\\s\\S])*?</item>`,
+                    'g'
+                );
+
+                setStatus(`Deleting "${safeTitle}" — step 1/4 (post file)…`, 'info');
                 await deleteFileWithRetry(`posts/${slug}.html`, `Delete post: ${title}`);
 
-                setStatus(`Deleting "${safeTitle}" — step 2/3 (homepage)…`, 'info');
+                setStatus(`Deleting "${safeTitle}" — step 2/4 (homepage)…`, 'info');
                 await modifyFile('index.html', c => c.replace(cardRe, '\n            '), `Remove "${title}" from homepage`);
 
-                setStatus(`Deleting "${safeTitle}" — step 3/3 (archive)…`, 'info');
+                setStatus(`Deleting "${safeTitle}" — step 3/4 (archive)…`, 'info');
                 await modifyFile('archive.html', c => c.replace(rowRe, '\n                '), `Remove "${title}" from archive`);
+
+                setStatus(`Deleting "${safeTitle}" — step 4/4 (RSS feed)…`, 'info');
+                // feed.xml may not exist on older deployments — skip silently
+                // in that case so delete doesn't fail at the last step.
+                try {
+                    await modifyFile('feed.xml', c => c.replace(feedItemRe, ''), `Remove "${title}" from RSS feed`);
+                } catch (e) {
+                    const msg = String(e.message || '');
+                    if (!(msg.includes('Not Found') || msg.includes('404'))) throw e;
+                }
 
                 setStatus(`Deleted "${safeTitle}". Pages will rebuild in ~30s.`, 'success');
                 loadPosts();
