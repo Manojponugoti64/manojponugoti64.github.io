@@ -541,7 +541,7 @@ ${bodyHtml}
                 `      <link>${url}</link>\n` +
                 `      <guid isPermaLink="true">${url}</guid>\n` +
                 `      <pubDate>${isoToRfc822(isoDate)}</pubDate>\n` +
-                `      <description><![CDATA[${excerptText || ''}]]></description>\n` +
+                `      <description><![CDATA[${(excerptText || '').replace(/]]>/g, ']]]]><![CDATA[>')}]]></description>\n` +
                 `    </item>`;
             // Insert right after the </image> block so newest items sit on top.
             const imageEnd = stripped.indexOf('</image>');
