@@ -71,8 +71,7 @@ function buildPayload(api) {
       artist: null,
       album: null,
       albumImageUrl: null,
-      songUrl: null,
-      updatedAt: new Date().toISOString()
+      songUrl: null
     };
   }
   const item = api.item;
@@ -82,17 +81,41 @@ function buildPayload(api) {
     artist: (item.artists || []).map((a) => a.name).filter(Boolean).join(', ') || null,
     album: (item.album && item.album.name) || null,
     albumImageUrl: item.album && pickAlbumArt(item.album.images),
-    songUrl: (item.external_urls && item.external_urls.spotify) || null,
-    updatedAt: new Date().toISOString()
+    songUrl: (item.external_urls && item.external_urls.spotify) || null
   };
+}
+
+// Whether two payloads differ in any field that actually matters to the
+// widget. updatedAt is intentionally excluded — see main() for the
+// rationale (the workflow's `git diff --quiet` guard would otherwise
+// commit every 5 minutes even when nothing's playing).
+function meaningfulDiff(prev, next) {
+  if (!prev) return true;
+  const keys = ['isPlaying', 'title', 'artist', 'album', 'albumImageUrl', 'songUrl'];
+  return keys.some((k) => prev[k] !== next[k]);
+}
+
+function readExisting(out) {
+  try { return JSON.parse(fs.readFileSync(out, 'utf8')); } catch (e) { return null; }
 }
 
 (async function main() {
   try {
     const token = await getAccessToken();
     const api = await getCurrentlyPlaying(token);
-    const payload = buildPayload(api);
+    const next = buildPayload(api);
     const out = path.resolve(__dirname, '..', '..', 'now-playing.json');
+    const prev = readExisting(out);
+    if (!meaningfulDiff(prev, next)) {
+      // Nothing changed — leave the file alone. The workflow's git diff
+      // check will short-circuit and skip the commit.
+      console.log('no change, isPlaying=', next.isPlaying, 'title=', next.title);
+      return;
+    }
+    // Only stamp updatedAt when the meaningful payload actually changed,
+    // so it doubles as a "last change" marker rather than churning every
+    // run.
+    const payload = Object.assign({}, next, { updatedAt: new Date().toISOString() });
     fs.writeFileSync(out, JSON.stringify(payload, null, 2) + '\n');
     console.log('wrote', out, 'isPlaying=', payload.isPlaying, 'title=', payload.title);
   } catch (err) {

@@ -46,7 +46,7 @@
     return node;
   }
 
-  function buildWidget() {
+  function buildWidget(onDismiss) {
     var widget = el('a', {
       class: 'spotify-widget',
       href: '#',
@@ -75,6 +75,7 @@
       e.preventDefault();
       e.stopPropagation();
       dismiss();
+      if (typeof onDismiss === 'function') onDismiss();
       widget.remove();
     });
 
@@ -115,15 +116,22 @@
 
   function init() {
     if (dismissed()) return;
-    var widget = buildWidget();
+    var pollId = null;
+    var onVisible = null;
+    function teardown() {
+      if (pollId !== null) { clearInterval(pollId); pollId = null; }
+      if (onVisible) { document.removeEventListener('visibilitychange', onVisible); onVisible = null; }
+    }
+    var widget = buildWidget(teardown);
     document.body.appendChild(widget);
     fetchFeed(widget);
-    setInterval(function () { fetchFeed(widget); }, POLL_INTERVAL_MS);
+    pollId = setInterval(function () { fetchFeed(widget); }, POLL_INTERVAL_MS);
     // Re-poll when tab regains focus (e.g. after a long sleep) so the
     // displayed track snaps to current state instead of staying stale.
-    document.addEventListener('visibilitychange', function () {
+    onVisible = function () {
       if (document.visibilityState === 'visible') fetchFeed(widget);
-    });
+    };
+    document.addEventListener('visibilitychange', onVisible);
   }
 
   if (document.readyState === 'loading') {
