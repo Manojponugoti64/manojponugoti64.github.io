@@ -1232,3 +1232,105 @@ body.lightbox-open { overflow: hidden; }
   .lightbox-meta { padding: 0.5rem 0.85rem 0.85rem; flex-direction: column; gap: 0.35rem; align-items: center; }
   .lightbox-caption { text-align: center; }
 }
+
+/* ===== 404 page ===== */
+.not-found {
+  max-width: 720px;
+  margin: 4rem auto 6rem;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+.not-found-num {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: clamp(6rem, 18vw, 12rem);
+  line-height: 1;
+  margin: 0 0 0.5rem;
+  background: linear-gradient(135deg, var(--accent) 0%, #ff9a6b 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.03em;
+  user-select: none;
+}
+.not-found-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  color: var(--text-primary);
+  margin: 0 0 1rem;
+  line-height: 1.35;
+}
+.not-found-sub {
+  color: var(--text-secondary);
+  margin: 0 auto 2.25rem;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  max-width: 520px;
+}
+.not-found-actions { margin-bottom: 3rem; }
+.not-found-cta {
+  display: inline-block;
+  padding: 0.7rem 1.5rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.not-found-cta:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.not-found-suggested {
+  border-top: 1px solid var(--border);
+  padding-top: 1.75rem;
+  margin-top: 2rem;
+  text-align: left;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.not-found-suggested-label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.not-found-suggested ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.not-found-suggested li {
+  margin-bottom: 0.6rem;
+  padding-left: 1.25rem;
+  position: relative;
+}
+.not-found-suggested li::before {
+  content: "→";
+  color: var(--accent);
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: transform 0.2s ease;
+}
+.not-found-suggested li:hover::before {
+  transform: translateX(3px);
+}
+.not-found-suggested a {
+  color: var(--text-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.not-found-suggested a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
