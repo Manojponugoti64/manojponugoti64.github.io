@@ -88,6 +88,7 @@
 
   function render(widget, data) {
     if (!data || !data.isPlaying || !data.title) {
+      widget.classList.remove('is-visible');
       widget.style.display = 'none';
       return;
     }
