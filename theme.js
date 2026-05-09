@@ -1,5 +1,26 @@
-/* Theme toggle: dark <-> light. Saves user's choice in localStorage. */
+/* Theme toggle: dark <-> light. Saves user's choice in localStorage.
+   Also injects shared <head> assets (Google Fonts, favicon) so every page
+   picks them up without editing each HTML file individually. */
 (function () {
+    /* ----- shared head assets ----- */
+    function ensureHeadLink(attrs) {
+        var sel = Object.keys(attrs).map(function (k) {
+            return '[' + k + '="' + attrs[k] + '"]';
+        }).join('');
+        if (document.head.querySelector('link' + sel)) return;
+        var l = document.createElement('link');
+        Object.keys(attrs).forEach(function (k) { l.setAttribute(k, attrs[k]); });
+        document.head.appendChild(l);
+    }
+    ensureHeadLink({ rel: 'preconnect', href: 'https://fonts.googleapis.com' });
+    ensureHeadLink({ rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' });
+    ensureHeadLink({
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap'
+    });
+    /* favicon — absolute path so subpaths (posts/, iss-tracker/) still find it */
+    ensureHeadLink({ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' });
+
     var KEY = 'blog-theme';
 
     function applyTheme(t) {

@@ -987,3 +987,276 @@ footer span {
   margin: 8px auto 0;
   font-style: italic;
 }
+
+/* ============================================================
+   Aesthetic refinement (Quiet Magazine)
+   - Variable serif (Fraunces) for prose, clean sans (Inter) for UI
+   - Slightly warmer dark palette
+   - Refined hero typography + subtle warm glow (no flowers, no overlay)
+   - More elegant post cards
+   - Comfortable reading column for posts
+   ============================================================ */
+
+:root,
+[data-theme="dark"] {
+  --bg-primary: #15110f;
+  --bg-secondary: #1d1815;
+  --bg-card: #1a1612;
+  --text-primary: #f3ece4;
+  --text-secondary: #b6a99c;
+  --border: #2c241f;
+  --shadow: rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="light"] {
+  --bg-primary: #faf6ef;
+  --bg-secondary: #f1ebe0;
+  --bg-card: #ffffff;
+  --text-primary: #2a221c;
+  --text-secondary: #5a4f44;
+  --border: #e2d9ca;
+}
+
+body {
+  font-family: 'Fraunces', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  font-optical-sizing: auto;
+  font-variation-settings: 'opsz' 22, 'SOFT' 30;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* UI surfaces use Inter for crisper rendering at small sizes */
+header,
+.nav-links,
+.menu-toggle,
+.sidebar,
+.theme-toggle-btn,
+.read-more,
+.post-meta,
+.upvote-btn,
+.upvote-hint,
+.post-card .post-meta {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+/* Header subtle backdrop blur */
+header {
+  background: color-mix(in oklab, var(--bg-secondary) 88%, transparent);
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-style: italic;
+  font-size: 1.25rem;
+  letter-spacing: 0;
+}
+
+.nav-links a {
+  font-size: 0.85rem;
+  letter-spacing: 0.7px;
+  font-weight: 500;
+}
+
+/* Hero: more elegant, with a soft warm glow */
+.hero {
+  position: relative;
+  padding: 5.5rem 0 4.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 3.5rem;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -10% -20% auto -20%;
+  height: 220%;
+  background: radial-gradient(
+    ellipse at center top,
+    rgba(232, 112, 64, 0.12) 0%,
+    rgba(232, 112, 64, 0.04) 28%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero > * { position: relative; z-index: 1; }
+
+.hero h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(2.4rem, 5.2vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50;
+  margin-bottom: 0.25rem;
+}
+
+.hero h1 span {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+  font-variation-settings: 'opsz' 144, 'SOFT' 100;
+}
+
+/* Post cards: more refined hierarchy, calmer hover */
+.posts-grid {
+  gap: 1.6rem;
+}
+
+.post-card {
+  border-radius: 12px;
+  padding: 1.9rem 2rem 1.7rem;
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--bg-card) 100%, transparent),
+    color-mix(in oklab, var(--bg-card) 92%, transparent));
+  border-color: var(--border);
+  transition: transform 0.35s cubic-bezier(.2,.7,.3,1),
+              border-color 0.25s ease,
+              box-shadow 0.35s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--accent) 60%, var(--border));
+  box-shadow: 0 12px 32px var(--shadow);
+}
+
+.post-card h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 500;
+  font-size: 1.45rem;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  margin-bottom: 0.6rem;
+  font-variation-settings: 'opsz' 60, 'SOFT' 40;
+}
+
+.post-card h2 a {
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s ease, color 0.2s ease;
+  padding-bottom: 1px;
+}
+.post-card h2 a:hover {
+  background-size: 100% 1px;
+}
+
+.post-meta {
+  font-size: 0.78rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.post-excerpt {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-top: 0.4rem;
+}
+
+.read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.2rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+/* Comfortable reading column for posts */
+.post-content {
+  max-width: 68ch;
+  margin: 0 auto;
+}
+
+.post-content h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  font-variation-settings: 'opsz' 96, 'SOFT' 50;
+  text-transform: none;
+}
+
+.post-content p {
+  font-size: 1.08rem;
+  line-height: 1.78;
+  color: var(--text-primary);
+}
+
+.post-content blockquote {
+  border-left-color: var(--accent);
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  font-variation-settings: 'opsz' 36, 'SOFT' 100;
+}
+
+/* Page headings */
+.page-content h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(2rem, 4.4vw, 2.8rem);
+  font-variation-settings: 'opsz' 96, 'SOFT' 50;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.page-sub {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+}
+
+/* Photo gallery: warmer hover, soft caption overlay */
+.photo-tile {
+  border-radius: 12px;
+  border-color: transparent;
+  background: var(--bg-card);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.18);
+  position: relative;
+}
+.photo-tile img {
+  transition: transform 0.5s cubic-bezier(.2,.7,.3,1), filter 0.35s ease;
+}
+.photo-tile:hover img {
+  transform: scale(1.04);
+  filter: brightness(1.05);
+}
+.photo-tile:hover {
+  border-color: transparent;
+  box-shadow: 0 10px 28px var(--shadow);
+  transform: translateY(-1px);
+}
+
+/* Selection color */
+::selection {
+  background: color-mix(in oklab, var(--accent) 50%, transparent);
+  color: var(--text-primary);
+}
+
+/* Sidebar typography (using Inter as well) */
+.sidebar { font-family: 'Inter', system-ui, sans-serif; }
+.sidebar-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0;
+}
