@@ -1481,6 +1481,7 @@ body.lightbox-open { overflow: hidden; }
 
 /* APOD */
 .hub-apod-media {
+  position: relative;
   width: 100%;
   border-radius: 10px;
   overflow: hidden;
