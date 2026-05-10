@@ -1,0 +1,10 @@
+{
+  "isPlaying": false,
+  "title": null,
+  "artist": null,
+  "album": null,
+  "albumImageUrl": null,
+  "songUrl": null,
+  "updatedAt": null,
+  "_setupRequired": "GitHub Action will overwrite this once SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET and SPOTIFY_REFRESH_TOKEN are set in repo Actions secrets. Until then the widget stays hidden."
+}

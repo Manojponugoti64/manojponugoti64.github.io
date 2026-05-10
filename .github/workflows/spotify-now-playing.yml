@@ -1,0 +1,42 @@
+name: Spotify now-playing
+
+on:
+  schedule:
+    # Runs every 5 minutes. GitHub may delay or skip cron runs under heavy
+    # load; that's fine — the widget shows the last known track.
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: spotify-now-playing
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch current track from Spotify
+        id: spotify
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+        run: node .github/scripts/spotify-now-playing.js
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- now-playing.json; then
+            echo "no change"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add now-playing.json
+          git commit -m "chore: refresh Spotify now-playing"
+          git push
