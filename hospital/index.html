@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital System Prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <aside class="app-sidebar" aria-label="Hospital modules">
+        <a class="brand" href="#dashboard" data-section-link="dashboard">
+            <span class="brand-mark">H</span>
+            <span>
+                <strong>CareDesk</strong>
+                <small>Hospital HIS demo</small>
+            </span>
+        </a>
+        <nav>
+            <a href="#dashboard" class="active" data-section-link="dashboard">Dashboard</a>
+            <a href="#patients" data-section-link="patients">MRD Search</a>
+            <a href="#lab" data-section-link="lab">Lab Investigations</a>
+            <a href="#icu" data-section-link="icu">ICU / OPD View</a>
+            <a href="#discharge" data-section-link="discharge">Discharge Summary</a>
+            <a href="#billing" data-section-link="billing">Billing</a>
+        </nav>
+        <div class="sidebar-note">
+            Prototype only. Use production hosting, login, backups, and audit logs before storing real patient data.
+        </div>
+    </aside>
+
+    <main class="app-shell">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Clickable hospital workflow</p>
+                <h1>MRD-linked labs, discharge summaries, and billing</h1>
+            </div>
+            <div class="mrd-search">
+                <label for="globalMrd">Open MRD</label>
+                <select id="globalMrd"></select>
+            </div>
+        </header>
+
+        <section class="hero-panel">
+            <div>
+                <p class="eyebrow">Demo hospital</p>
+                <h2 id="heroPatientName">Select a patient</h2>
+                <p id="heroPatientMeta">MRD, location, consultant, and admission status will appear here.</p>
+            </div>
+            <div class="hero-stats">
+                <span><strong id="heroPendingLabs">0</strong> pending labs</span>
+                <span><strong id="heroBillDue">₹0</strong> due</span>
+            </div>
+        </section>
+
+        <section class="screen active" id="dashboard">
+            <div class="grid cards-4">
+                <article class="metric-card">
+                    <span>Total active patients</span>
+                    <strong id="metricPatients">0</strong>
+                </article>
+                <article class="metric-card">
+                    <span>Pending lab results</span>
+                    <strong id="metricPendingLabs">0</strong>
+                </article>
+                <article class="metric-card">
+                    <span>ICU beds occupied</span>
+                    <strong id="metricIcu">0</strong>
+                </article>
+                <article class="metric-card">
+                    <span>Today collection</span>
+                    <strong id="metricCollection">₹0</strong>
+                </article>
+            </div>
+            <div class="grid two-col">
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">Live queue</p>
+                            <h3>Recent lab activity</h3>
+                        </div>
+                        <button class="ghost-btn" data-jump="lab">Update labs</button>
+                    </div>
+                    <div id="labActivity" class="timeline"></div>
+                </article>
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">MRD lookup</p>
+                            <h3>Patient snapshot</h3>
+                        </div>
+                        <button class="ghost-btn" data-jump="patients">Search MRD</button>
+                    </div>
+                    <div id="dashboardPatient" class="patient-snapshot"></div>
+                </article>
+            </div>
+        </section>
+
+        <section class="screen" id="patients">
+            <article class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">Registration desk</p>
+                        <h3>Find patient by MRD number</h3>
+                    </div>
+                    <input id="patientSearch" type="search" placeholder="Search MRD, name, phone, ward">
+                </div>
+                <div id="patientCards" class="patient-list"></div>
+            </article>
+        </section>
+
+        <section class="screen" id="lab">
+            <div class="grid two-col">
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">Lab counter</p>
+                            <h3>Enter investigation result</h3>
+                        </div>
+                    </div>
+                    <form id="labForm" class="stacked-form">
+                        <label>
+                            MRD number
+                            <select id="labMrd"></select>
+                        </label>
+                        <label>
+                            Investigation
+                            <select id="labTest">
+                                <option>Complete Blood Count</option>
+                                <option>Renal Function Test</option>
+                                <option>Liver Function Test</option>
+                                <option>Serum Electrolytes</option>
+                                <option>ABG</option>
+                                <option>Chest X-Ray</option>
+                                <option>Blood Culture</option>
+                            </select>
+                        </label>
+                        <label>
+                            Result / values
+                            <textarea id="labResult" rows="5" placeholder="Hb 12.2 g/dL, WBC 8,400, Platelets 2.1 lakh..."></textarea>
+                        </label>
+                        <label>
+                            Status
+                            <select id="labStatus">
+                                <option>Completed</option>
+                                <option>Processing</option>
+                                <option>Sample collected</option>
+                            </select>
+                        </label>
+                        <button type="submit" class="primary-btn">Save lab result</button>
+                    </form>
+                </article>
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">Result board</p>
+                            <h3>All investigations for selected MRD</h3>
+                        </div>
+                        <span id="labSelectedMrd" class="pill"></span>
+                    </div>
+                    <div id="labResults" class="result-list"></div>
+                </article>
+            </div>
+        </section>
+
+        <section class="screen" id="icu">
+            <article class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">ICU / OPD desk</p>
+                        <h3>View lab results by MRD</h3>
+                    </div>
+                    <select id="icuMrd"></select>
+                </div>
+                <div class="clinical-layout">
+                    <div id="icuPatient" class="patient-snapshot"></div>
+                    <div id="icuResults" class="result-list"></div>
+                </div>
+            </article>
+        </section>
+
+        <section class="screen" id="discharge">
+            <div class="grid two-col">
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">Doctor workspace</p>
+                            <h3>Discharge summary template</h3>
+                        </div>
+                        <button id="fillSummary" class="ghost-btn" type="button">Auto-fill from MRD</button>
+                    </div>
+                    <form class="stacked-form">
+                        <label>
+                            Final diagnosis
+                            <textarea id="diagnosis" rows="3"></textarea>
+                        </label>
+                        <label>
+                            Hospital course
+                            <textarea id="course" rows="6"></textarea>
+                        </label>
+                        <label>
+                            Treatment given
+                            <textarea id="treatment" rows="5"></textarea>
+                        </label>
+                        <label>
+                            Advice on discharge
+                            <textarea id="advice" rows="5"></textarea>
+                        </label>
+                    </form>
+                </article>
+                <article class="panel print-card">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">Preview</p>
+                            <h3>Printable discharge summary</h3>
+                        </div>
+                        <button class="primary-btn" type="button" onclick="window.print()">Print / PDF</button>
+                    </div>
+                    <div id="summaryPreview"></div>
+                </article>
+            </div>
+        </section>
+
+        <section class="screen" id="billing">
+            <div class="grid two-col">
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">Billing desk</p>
+                            <h3>Add charge to patient bill</h3>
+                        </div>
+                    </div>
+                    <form id="billingForm" class="stacked-form">
+                        <label>
+                            MRD number
+                            <select id="billingMrd"></select>
+                        </label>
+                        <label>
+                            Charge category
+                            <select id="chargeCategory">
+                                <option>ER charges</option>
+                                <option>Ward bed charges</option>
+                                <option>ICU bed charges</option>
+                                <option>Lab investigations</option>
+                                <option>Procedure charges</option>
+                                <option>Doctor consultation</option>
+                                <option>Nursing charges</option>
+                            </select>
+                        </label>
+                        <label>
+                            Description
+                            <input id="chargeDescription" type="text" placeholder="ICU bed charge - day 2">
+                        </label>
+                        <label>
+                            Amount
+                            <input id="chargeAmount" type="number" min="0" step="50" value="1500">
+                        </label>
+                        <button type="submit" class="primary-btn">Add charge</button>
+                    </form>
+                </article>
+                <article class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">Invoice</p>
+                            <h3>Patient billing summary</h3>
+                        </div>
+                        <span id="billTotalPill" class="pill"></span>
+                    </div>
+                    <div id="billRows" class="bill-table"></div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
