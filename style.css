@@ -887,12 +887,6 @@ footer span {
   height: 1.15rem;
 }
 
-.about-connect {
-  justify-content: flex-start;
-  margin-top: 2rem;
-  margin-bottom: 0;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   nav {
