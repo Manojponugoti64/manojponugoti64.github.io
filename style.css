@@ -878,6 +878,21 @@ footer span {
   background: rgba(232, 112, 64, 0.06);
 }
 
+.footer-social .social-link--icon-only {
+  padding: 0.55rem;
+}
+
+.footer-social .social-link--icon-only svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.about-connect {
+  justify-content: flex-start;
+  margin-top: 2rem;
+  margin-bottom: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   nav {
