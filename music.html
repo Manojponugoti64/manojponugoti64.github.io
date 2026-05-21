@@ -121,77 +121,12 @@
                 return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
             }
 
-            // Render Embed Widget
-            function renderEmbed(releaseId, track) {
-                const card = document.getElementById('player-' + releaseId);
-                if (!card) return;
-
-                const embedContainer = card.querySelector('.bc-embed-container');
-                const controls = card.querySelector('.bc-audio-controls');
-                if (!embedContainer) return;
-
-                // Hide native controls
-                if (controls) controls.style.display = 'none';
-
-                const hasSpotify = !!track.spotifyEmbed;
-                const hasSoundcloud = !!track.soundcloudEmbed;
-                let activeSource = hasSpotify ? 'spotify' : 'soundcloud';
-
-                const renderIframe = (source) => {
-                    const url = source === 'spotify' ? track.spotifyEmbed : track.soundcloudEmbed;
-                    const height = source === 'spotify' ? '152' : '166';
-                    
-                    // Center style and theme integration matching the dark-theme glassmorphism
-                    embedContainer.innerHTML = `
-                        <div class="bc-embed-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 0.8rem;">
-                            ${hasSpotify ? `<button class="bc-embed-tab" data-source="spotify" style="flex: 1; padding: 0.5rem; font-size: 0.75rem; font-weight: bold; border-radius: 6px; border: 1px solid ${source === 'spotify' ? 'var(--accent)' : 'var(--border)'}; background: ${source === 'spotify' ? 'var(--accent)' : 'transparent'}; color: ${source === 'spotify' ? '#1a1a1a' : 'var(--text-secondary)'}; cursor: pointer; transition: all 0.2s;">Play on Spotify</button>` : ''}
-                            ${hasSoundcloud ? `<button class="bc-embed-tab" data-source="soundcloud" style="flex: 1; padding: 0.5rem; font-size: 0.75rem; font-weight: bold; border-radius: 6px; border: 1px solid ${source === 'soundcloud' ? 'var(--accent)' : 'var(--border)'}; background: ${source === 'soundcloud' ? 'var(--accent)' : 'transparent'}; color: ${source === 'soundcloud' ? '#1a1a1a' : 'var(--text-secondary)'}; cursor: pointer; transition: all 0.2s;">Play on SoundCloud</button>` : ''}
-                        </div>
-                        <iframe src="${url}" width="100%" height="${height}" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style="border-radius: 8px; border: none; background: transparent; overflow: hidden;"></iframe>
-                    `;
-
-                    // Bind tab clicks
-                    embedContainer.querySelectorAll('.bc-embed-tab').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            renderIframe(btn.dataset.source);
-                        });
-                    });
-                };
-
-                renderIframe(activeSource);
-                embedContainer.style.display = 'block';
-            }
-
             // Audio Player Core logic
             function playTrack(releaseId, trackIdx) {
                 const release = releases.find(r => r.id === releaseId);
                 if (!release || !release.tracks || !release.tracks[trackIdx]) return;
 
                 const track = release.tracks[trackIdx];
-                const card = document.getElementById('player-' + releaseId);
-
-                // If track is a Spotify or SoundCloud embed
-                if (track.spotifyEmbed || track.soundcloudEmbed) {
-                    globalAudio.pause();
-                    isPlaying = false;
-                    activeReleaseId = releaseId;
-                    activeTrackIdx = trackIdx;
-
-                    updateUI();
-                    renderEmbed(releaseId, track);
-                    return;
-                }
-
-                // If switching back to a standard track, clean up embed
-                if (card) {
-                    const embedContainer = card.querySelector('.bc-embed-container');
-                    if (embedContainer) {
-                        embedContainer.style.display = 'none';
-                        embedContainer.innerHTML = '';
-                    }
-                    const controls = card.querySelector('.bc-audio-controls');
-                    if (controls) controls.style.display = 'flex';
-                }
 
                 if (activeReleaseId === releaseId && activeTrackIdx === trackIdx) {
                     // Toggle play/pause
@@ -283,27 +218,11 @@
                     const curTime = card.querySelector('.bc-current-time');
                     const totTime = card.querySelector('.bc-total-time');
                     const rows = card.querySelectorAll('.bc-track-row');
-                    const embedContainer = card.querySelector('.bc-embed-container');
-                    const controls = card.querySelector('.bc-audio-controls');
 
                     if (rel.id === activeReleaseId) {
-                        const activeTrack = rel.tracks[activeTrackIdx];
-                        const isEmbedTrack = activeTrack && (activeTrack.spotifyEmbed || activeTrack.soundcloudEmbed);
-
-                        if (isEmbedTrack) {
-                            if (controls) controls.style.display = 'none';
-                            if (embedContainer) embedContainer.style.display = 'block';
-                        } else {
-                            if (controls) controls.style.display = 'flex';
-                            if (embedContainer) {
-                                embedContainer.style.display = 'none';
-                                embedContainer.innerHTML = '';
-                            }
-                        }
-
-                        // Play button visual state (only for standard audio)
+                        // Play button visual state
                         if (playBtn) {
-                            if (isPlaying && !isEmbedTrack) {
+                            if (isPlaying) {
                                 playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
                                 playBtn.setAttribute('aria-label', 'Pause');
                             } else {
@@ -327,12 +246,6 @@
                         });
                     } else {
                         // Inactive album player - reset visually
-                        if (controls) controls.style.display = 'flex';
-                        if (embedContainer) {
-                            embedContainer.style.display = 'none';
-                            embedContainer.innerHTML = '';
-                        }
-
                         if (playBtn) {
                             playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
                             playBtn.setAttribute('aria-label', 'Play');
@@ -406,8 +319,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Embed Container for Spotify/SoundCloud Widgets -->
-                            <div class="bc-embed-container" style="display: none; margin-top: 1rem; border-radius: 8px; overflow: hidden; background: transparent; transition: all 0.3s ease;"></div>
+
                             
                             <div class="bc-tracklist">
                                 ${tracksHtml}
@@ -501,7 +413,7 @@
                 const dlBtn = card.querySelector('.bc-download-btn');
                 const updateDownloadLink = (trackIdx) => {
                     const tr = rel.tracks[trackIdx || 0];
-                    if (tr && tr.src && !tr.spotifyEmbed && !tr.soundcloudEmbed) {
+                    if (tr && tr.src) {
                         dlBtn.href = tr.src;
                         dlBtn.download = tr.title + '.mp3';
                         dlBtn.style.display = 'inline-block';
