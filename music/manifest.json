@@ -11,7 +11,9 @@
           "id": "the-less-i-know-the-better",
           "title": "The Less I Know The Better",
           "duration": "03:36",
-          "src": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
+          "src": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+          "spotifyEmbed": "https://open.spotify.com/embed/track/6K4t31am2qvgviCS59rP7g?utm_source=generator",
+          "soundcloudEmbed": "https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/tame-impala/the-less-i-know-the-better&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"
         }
       ]
     }

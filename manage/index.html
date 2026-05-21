@@ -933,6 +933,9 @@ ${bodyHtml}
             currentTargetReleaseId = releaseId;
             $('trackTitleInput').value = '';
             $('trackAudioInput').value = '';
+            $('trackSpotifyInput').value = '';
+            $('trackSoundcloudInput').value = '';
+            $('trackDurationInput').value = '';
             $('trackModal').style.display = 'flex';
         };
 
@@ -959,44 +962,84 @@ ${bodyHtml}
         $('uploadTrackBtn').addEventListener('click', async () => {
             const title = $('trackTitleInput').value.trim();
             const audioInput = $('trackAudioInput');
+            const spotifyInput = $('trackSpotifyInput').value.trim();
+            const soundcloudInput = $('trackSoundcloudInput').value.trim();
+            const manualDuration = $('trackDurationInput').value.trim();
 
-            if (!title || !audioInput.files || !audioInput.files[0]) {
-                return alert('Please enter a track title and select an audio file.');
+            if (!title) {
+                return alert('Please enter a track title.');
             }
 
-            const file = audioInput.files[0];
+            const hasAudio = audioInput.files && audioInput.files[0];
+            const hasEmbed = spotifyInput || soundcloudInput;
+
+            if (!hasAudio && !hasEmbed) {
+                return alert('Please select an audio file or enter a Spotify/SoundCloud track URL/ID.');
+            }
+
+            const file = hasAudio ? audioInput.files[0] : null;
             const releaseId = currentTargetReleaseId;
-            
-            setStatus(`Uploading track "${escHtml(title)}" — analyzing duration...`, 'info');
+            const trackId = 'track-' + Date.now();
+
+            setStatus(`Uploading track "${escHtml(title)}" — registering...`, 'info');
             $('trackModal').style.display = 'none';
 
             try {
-                // Compute duration
-                const durationSec = await getAudioDuration(file);
-                const durationStr = formatTime(durationSec);
+                let durationStr = manualDuration || '00:00';
+                let trackPath = '';
+                let spotifyEmbed = '';
+                let soundcloudEmbed = '';
 
-                setStatus(`Uploading track "${escHtml(title)}" — reading file...`, 'info');
-                
-                // Convert audio to base64
-                const base64 = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        const res = reader.result;
-                        const i = res.indexOf(',');
-                        resolve(res.slice(i + 1));
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
+                // Handle Spotify Embed Parsing
+                if (spotifyInput) {
+                    if (spotifyInput.includes('embed/track/')) {
+                        spotifyEmbed = spotifyInput;
+                    } else {
+                        let match = spotifyInput.match(/\/track\/([a-zA-Z0-9]+)/);
+                        let id = match ? match[1] : spotifyInput;
+                        id = id.split('?')[0];
+                        spotifyEmbed = `https://open.spotify.com/embed/track/${id}?utm_source=generator`;
+                    }
+                }
 
-                const trackId = 'track-' + Date.now();
-                const ext = file.name.split('.').pop().toLowerCase() || 'mp3';
-                const safeName = (file.name || 'track').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'track';
-                const filename = `${releaseId}-${safeName}.${ext}`;
-                const trackPath = `music/tracks/${filename}`;
+                // Handle SoundCloud Embed Parsing
+                if (soundcloudInput) {
+                    if (soundcloudInput.includes('w.soundcloud.com/player/')) {
+                        soundcloudEmbed = soundcloudInput;
+                    } else {
+                        let url = soundcloudInput.split('?')[0];
+                        soundcloudEmbed = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
+                    }
+                }
 
-                setStatus(`Uploading track "${escHtml(title)}" — transferring audio bytes...`, 'info');
-                await uploadBinary(trackPath, base64, `Upload track: ${title}`);
+                if (hasAudio) {
+                    setStatus(`Uploading track "${escHtml(title)}" — analyzing duration...`, 'info');
+                    // Compute duration
+                    const durationSec = await getAudioDuration(file);
+                    durationStr = formatTime(durationSec);
+
+                    setStatus(`Uploading track "${escHtml(title)}" — reading file...`, 'info');
+                    
+                    // Convert audio to base64
+                    const base64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const res = reader.result;
+                            const i = res.indexOf(',');
+                            resolve(res.slice(i + 1));
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+
+                    const ext = file.name.split('.').pop().toLowerCase() || 'mp3';
+                    const safeName = (file.name || 'track').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'track';
+                    const filename = `${releaseId}-${safeName}.${ext}`;
+                    trackPath = `music/tracks/${filename}`;
+
+                    setStatus(`Uploading track "${escHtml(title)}" — transferring audio bytes...`, 'info');
+                    await uploadBinary(trackPath, base64, `Upload track: ${title}`);
+                }
 
                 setStatus(`Uploading track "${escHtml(title)}" — registering track metadata...`, 'info');
                 await modifyFile('music/manifest.json', (txt) => {
@@ -1007,12 +1050,17 @@ ${bodyHtml}
                     const release = data.releases.find(r => r.id === releaseId);
                     if (release) {
                         if (!Array.isArray(release.tracks)) release.tracks = [];
-                        release.tracks.push({
+                        
+                        const newTrack = {
                             id: trackId,
                             title: title,
-                            duration: durationStr,
-                            src: trackPath
-                        });
+                            duration: durationStr
+                        };
+                        if (trackPath) newTrack.src = trackPath;
+                        if (spotifyEmbed) newTrack.spotifyEmbed = spotifyEmbed;
+                        if (soundcloudEmbed) newTrack.soundcloudEmbed = soundcloudEmbed;
+
+                        release.tracks.push(newTrack);
                     }
                     return JSON.stringify(data, null, 2) + '\n';
                 }, `Add track "${title}" to release`);
@@ -1173,8 +1221,17 @@ ${bodyHtml}
             <label for="trackTitleInput">Track Title</label>
             <input type="text" id="trackTitleInput" placeholder="e.g. [intro]" required>
             
-            <label for="trackAudioInput">Audio File (.mp3, .wav, etc.)</label>
-            <input type="file" id="trackAudioInput" accept="audio/*" required>
+            <label for="trackAudioInput">Audio File (Optional if Embed URL is provided)</label>
+            <input type="file" id="trackAudioInput" accept="audio/*">
+
+            <label for="trackSpotifyInput">Spotify Track URL or ID (Optional)</label>
+            <input type="text" id="trackSpotifyInput" placeholder="e.g. https://open.spotify.com/track/... or 6K4t31am...">
+
+            <label for="trackSoundcloudInput">SoundCloud Track URL (Optional)</label>
+            <input type="text" id="trackSoundcloudInput" placeholder="e.g. https://soundcloud.com/...">
+
+            <label for="trackDurationInput">Duration (Optional, e.g. 03:36)</label>
+            <input type="text" id="trackDurationInput" placeholder="e.g. 03:36">
             
             <div class="toolbar" style="margin-top:1.5rem; justify-content:flex-end;">
                 <button type="button" class="ghost" id="closeTrackModalBtn">Cancel</button>
