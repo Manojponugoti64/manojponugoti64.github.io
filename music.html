@@ -173,16 +173,6 @@
                     currentTimeSpan.textContent = formatTime(globalAudio.currentTime);
                     totalTimeSpan.textContent = formatTime(globalAudio.duration);
                 }
-
-                // Update active row duration with playing ticker
-                const activeRow = card.querySelector(`.bc-track-row[data-track-idx="${activeTrackIdx}"]`);
-                if (activeRow) {
-                    const durSpan = activeRow.querySelector('.bc-track-duration');
-                    if (durSpan) {
-                        const curStr = formatTime(globalAudio.currentTime);
-                        durSpan.textContent = `${curStr} / ${formatTime(globalAudio.duration || 0)}`;
-                    }
-                }
             });
 
             globalAudio.addEventListener('play', () => {
@@ -305,6 +295,7 @@
                                     </div>
                                     <div class="bc-time-display">
                                         <span class="bc-current-time">00:00</span>
+                                        <span class="bc-time-separator">/</span>
                                         <span class="bc-total-time">${defaultTotalTime}</span>
                                     </div>
                                 </div>

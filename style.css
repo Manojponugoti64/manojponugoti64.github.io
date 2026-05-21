@@ -1892,10 +1892,16 @@ body.lightbox-open { overflow: hidden; }
 }
 .bc-time-display {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.75rem;
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
+  margin-top: 0.25rem;
+}
+.bc-time-separator {
+  color: var(--border);
+  opacity: 0.6;
 }
 
 .bc-nav-btns {
