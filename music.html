@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Music - Manoj's Blog</title>
+    <link rel="canonical" href="https://manojponugoti64.github.io/music.html">
+    <link rel="alternate" type="application/rss+xml" title="Manoj's Blog" href="/feed.xml">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Manoj's Blog">
+    <meta property="og:title" content="Music — Manoj's Blog">
+    <meta property="og:description" content="Listen to original ambient tracks, records, and sonic soundscapes.">
+    <meta property="og:url" content="https://manojponugoti64.github.io/music.html">
+    <meta property="og:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
+    <script src="sidebar.js" defer></script>
+    <script src="spotify.js" defer></script>
+    <style>
+        .bc-player-grid {
+            margin-top: 1.5rem;
+        }
+        .music-sections {
+            margin-top: 2rem;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a class="logo" href="index.html">Manoj's Blog</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="photos.html">Photos</a></li>
+                <li><a href="music.html" class="active">Music</a></li>
+                <li><a href="iss-tracker/">ISS Tracker</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-content">
+            <h1>Music</h1>
+            <p class="page-sub">Original tracks, ambient experiments, and soundscapes.</p>
+
+            <div class="music-filters">
+                <button class="music-filter-btn active" data-filter="all" id="btnFilterAll">All Releases</button>
+                <button class="music-filter-btn" data-filter="genre" id="btnFilterGenre">By Genre</button>
+                <button class="music-filter-btn" data-filter="artist" id="btnFilterArtist">By Artist</button>
+            </div>
+
+            <div id="musicContainer" class="music-sections">
+                <div class="empty">Loading music catalog...</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            const container = document.getElementById('musicContainer');
+            const filters = document.querySelectorAll('.music-filter-btn');
+            
+            let releases = [];
+            let activeFilter = 'all';
+
+            // Global Player States
+            let activeReleaseId = null;
+            let activeTrackIdx = -1;
+            let globalAudio = new Audio();
+            let isPlaying = false;
+
+            // Load manifest
+            fetch('music/manifest.json?cb=' + Date.now())
+                .then(r => {
+                    if (!r.ok) throw new Error('Catalog is temporarily unavailable.');
+                    return r.json();
+                })
+                .then(data => {
+                    releases = (data && data.releases) || [];
+                    renderCatalog();
+                })
+                .catch(err => {
+                    container.innerHTML = `<div class="empty" style="color: #ffb0b0;">${err.message}</div>`;
+                });
+
+            // Bind filter buttons
+            filters.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filters.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeFilter = btn.dataset.filter;
+                    renderCatalog();
+                });
+            });
+
+            // Format duration helper (e.g. 118 -> "01:58")
+            function formatTime(secs) {
+                if (isNaN(secs) || secs === Infinity) return '00:00';
+                const m = Math.floor(secs / 60);
+                const s = Math.floor(secs % 60);
+                return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+            }
+
+            // Audio Player Core logic
+            function playTrack(releaseId, trackIdx) {
+                const release = releases.find(r => r.id === releaseId);
+                if (!release || !release.tracks || !release.tracks[trackIdx]) return;
+
+                const track = release.tracks[trackIdx];
+
+                if (activeReleaseId === releaseId && activeTrackIdx === trackIdx) {
+                    // Toggle play/pause
+                    if (globalAudio.paused) {
+                        globalAudio.play().catch(e => console.error("Playback error:", e));
+                        isPlaying = true;
+                    } else {
+                        globalAudio.pause();
+                        isPlaying = false;
+                    }
+                    updateUI();
+                    return;
+                }
+
+                // If switching release or track
+                activeReleaseId = releaseId;
+                activeTrackIdx = trackIdx;
+                
+                globalAudio.src = track.src;
+                globalAudio.load();
+                globalAudio.play()
+                    .then(() => { isPlaying = true; })
+                    .catch(e => {
+                        console.error("Playback error:", e);
+                        isPlaying = false;
+                    });
+                
+                updateUI();
+            }
+
+            // Global Audio Events
+            globalAudio.addEventListener('timeupdate', () => {
+                if (!activeReleaseId) return;
+                const card = document.getElementById('player-' + activeReleaseId);
+                if (!card) return;
+
+                const scrubberFill = card.querySelector('.bc-progress-fill');
+                const currentTimeSpan = card.querySelector('.bc-current-time');
+                const totalTimeSpan = card.querySelector('.bc-total-time');
+
+                if (scrubberFill && currentTimeSpan && totalTimeSpan && !isNaN(globalAudio.duration)) {
+                    const pct = (globalAudio.currentTime / globalAudio.duration) * 100;
+                    scrubberFill.style.width = pct + '%';
+                    currentTimeSpan.textContent = formatTime(globalAudio.currentTime);
+                    totalTimeSpan.textContent = formatTime(globalAudio.duration);
+                }
+
+                // Update active row duration with playing ticker
+                const activeRow = card.querySelector(`.bc-track-row[data-track-idx="${activeTrackIdx}"]`);
+                if (activeRow) {
+                    const durSpan = activeRow.querySelector('.bc-track-duration');
+                    if (durSpan) {
+                        const curStr = formatTime(globalAudio.currentTime);
+                        const totStr = isNaN(globalAudio.duration) ? formatTime(globalAudio.duration) : formatTime(globalAudio.duration);
+                        durSpan.textContent = `${curStr} / ${formatTime(globalAudio.duration || 0)}`;
+                    }
+                }
+            });
+
+            globalAudio.addEventListener('play', () => {
+                isPlaying = true;
+                updateUI();
+            });
+
+            globalAudio.addEventListener('pause', () => {
+                isPlaying = false;
+                updateUI();
+            });
+
+            globalAudio.addEventListener('ended', () => {
+                isPlaying = false;
+                // Auto play next track
+                const release = releases.find(r => r.id === activeReleaseId);
+                if (release && release.tracks && activeTrackIdx < release.tracks.length - 1) {
+                    playTrack(activeReleaseId, activeTrackIdx + 1);
+                } else {
+                    activeTrackIdx = -1;
+                    updateUI();
+                }
+            });
+
+            // Sync all UI widgets based on playing state
+            function updateUI() {
+                releases.forEach(rel => {
+                    const card = document.getElementById('player-' + rel.id);
+                    if (!card) return;
+
+                    const playBtn = card.querySelector('.bc-play-btn');
+                    const fill = card.querySelector('.bc-progress-fill');
+                    const curTime = card.querySelector('.bc-current-time');
+                    const totTime = card.querySelector('.bc-total-time');
+                    const rows = card.querySelectorAll('.bc-track-row');
+
+                    if (rel.id === activeReleaseId) {
+                        // Play button visual state
+                        if (isPlaying) {
+                            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                            playBtn.setAttribute('aria-label', 'Pause');
+                        } else {
+                            playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                            playBtn.setAttribute('aria-label', 'Play');
+                        }
+
+                        // Tracks visual states
+                        rows.forEach(row => {
+                            const idx = parseInt(row.dataset.trackIdx);
+                            const durSpan = row.querySelector('.bc-track-duration');
+                            const staticDur = rel.tracks[idx].duration || '00:00';
+
+                            if (idx === activeTrackIdx) {
+                                row.classList.add('active');
+                            } else {
+                                row.classList.remove('active');
+                                if (durSpan) durSpan.textContent = staticDur;
+                            }
+                        });
+                    } else {
+                        // Inactive album player - reset visually
+                        playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                        playBtn.setAttribute('aria-label', 'Play');
+                        if (fill) fill.style.width = '0%';
+                        if (curTime) curTime.textContent = '00:00';
+                        
+                        const firstTrackDuration = rel.tracks && rel.tracks[0] ? rel.tracks[0].duration : '00:00';
+                        if (totTime) totTime.textContent = firstTrackDuration;
+
+                        rows.forEach(row => {
+                            row.classList.remove('active');
+                            const idx = parseInt(row.dataset.trackIdx);
+                            const durSpan = row.querySelector('.bc-track-duration');
+                            if (durSpan) durSpan.textContent = rel.tracks[idx].duration || '00:00';
+                        });
+                    }
+                });
+            }
+
+            // Render single release card
+            function buildReleaseCard(rel) {
+                const coverHtml = rel.cover 
+                    ? `<img class="bc-cover-img" src="${rel.cover}" alt="${rel.title} Cover" loading="lazy">`
+                    : `<div class="bc-cover-placeholder">🎜</div>`;
+
+                const tracksHtml = (rel.tracks || []).map((tr, idx) => `
+                    <div class="bc-track-row" data-track-idx="${idx}">
+                        <span class="bc-track-title">
+                            <span class="bc-track-number">${idx + 1}.</span> ${tr.title}
+                        </span>
+                        <span class="bc-track-duration">${tr.duration || '00:00'}</span>
+                    </div>
+                `).join('');
+
+                const defaultTotalTime = rel.tracks && rel.tracks[0] ? rel.tracks[0].duration : '00:00';
+
+                return `
+                    <div class="bc-player-card" id="player-${rel.id}">
+                        <div class="bc-cover-wrapper">
+                            ${coverHtml}
+                        </div>
+                        <div class="bc-player-body">
+                            <div class="bc-meta">
+                                <div class="bc-album-title">${rel.title}</div>
+                                <div class="bc-artist-name">by ${rel.artist}</div>
+                            </div>
+                            
+                            <div class="bc-audio-controls">
+                                <button class="bc-play-btn" aria-label="Play">
+                                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </button>
+                                
+                                <div class="bc-scrubber-container">
+                                    <div class="bc-scrubber">
+                                        <div class="bc-progress-fill"></div>
+                                    </div>
+                                    <div class="bc-time-display">
+                                        <span class="bc-current-time">00:00</span>
+                                        <span class="bc-total-time">${defaultTotalTime}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bc-nav-btns">
+                                    <button class="bc-nav-btn bc-prev-btn" aria-label="Previous">
+                                        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                                    </button>
+                                    <button class="bc-nav-btn bc-next-btn" aria-label="Next">
+                                        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zm9-12h2v12h-2z"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="bc-tracklist">
+                                ${tracksHtml}
+                            </div>
+                            
+                            <div class="bc-footer-links">
+                                <a class="bc-download-btn" target="_blank" style="display:none;">Download</a>
+                                <a class="bc-share-btn">Share</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Bind actions inside rendered cards
+            function bindCardEvents(rel) {
+                const card = document.getElementById('player-' + rel.id);
+                if (!card) return;
+
+                // Play / Pause button click
+                const playBtn = card.querySelector('.bc-play-btn');
+                playBtn.addEventListener('click', () => {
+                    if (activeReleaseId === rel.id && activeTrackIdx !== -1) {
+                        playTrack(rel.id, activeTrackIdx);
+                    } else {
+                        // Play first track by default
+                        playTrack(rel.id, 0);
+                    }
+                });
+
+                // Track rows click
+                const rows = card.querySelectorAll('.bc-track-row');
+                rows.forEach(row => {
+                    row.addEventListener('click', () => {
+                        const trackIdx = parseInt(row.dataset.trackIdx);
+                        playTrack(rel.id, trackIdx);
+                    });
+                });
+
+                // Prev/Next buttons
+                const prevBtn = card.querySelector('.bc-prev-btn');
+                const nextBtn = card.querySelector('.bc-next-btn');
+
+                prevBtn.addEventListener('click', () => {
+                    if (activeReleaseId === rel.id && activeTrackIdx !== -1) {
+                        if (globalAudio.currentTime > 3) {
+                            globalAudio.currentTime = 0;
+                            updateUI();
+                        } else {
+                            const prevIdx = activeTrackIdx > 0 ? activeTrackIdx - 1 : rel.tracks.length - 1;
+                            playTrack(rel.id, prevIdx);
+                        }
+                    } else {
+                        playTrack(rel.id, 0);
+                    }
+                });
+
+                nextBtn.addEventListener('click', () => {
+                    if (activeReleaseId === rel.id && activeTrackIdx !== -1) {
+                        const nextIdx = (activeTrackIdx + 1) % rel.tracks.length;
+                        playTrack(rel.id, nextIdx);
+                    } else {
+                        playTrack(rel.id, 0);
+                    }
+                });
+
+                // Scrubber drag/click seeking
+                const scrubber = card.querySelector('.bc-scrubber');
+                scrubber.addEventListener('click', (e) => {
+                    const rect = scrubber.getBoundingClientRect();
+                    const pct = (e.clientX - rect.left) / rect.width;
+
+                    if (activeReleaseId === rel.id && activeTrackIdx !== -1) {
+                        if (!isNaN(globalAudio.duration)) {
+                            globalAudio.currentTime = pct * globalAudio.duration;
+                            updateUI();
+                        }
+                    } else {
+                        // Play track 0 and seek on load
+                        playTrack(rel.id, 0);
+                        const seekOnLoad = () => {
+                            globalAudio.currentTime = pct * globalAudio.duration;
+                            updateUI();
+                            globalAudio.removeEventListener('loadedmetadata', seekOnLoad);
+                        };
+                        globalAudio.addEventListener('loadedmetadata', seekOnLoad);
+                    }
+                });
+
+                // Download link update
+                const dlBtn = card.querySelector('.bc-download-btn');
+                const updateDownloadLink = (trackIdx) => {
+                    const tr = rel.tracks[trackIdx || 0];
+                    if (tr && tr.src) {
+                        dlBtn.href = tr.src;
+                        dlBtn.download = tr.title + '.mp3';
+                        dlBtn.style.display = 'inline-block';
+                    } else {
+                        dlBtn.style.display = 'none';
+                    }
+                };
+
+                // Track row clicks should update download link
+                rows.forEach(row => {
+                    row.addEventListener('click', () => {
+                        const trackIdx = parseInt(row.dataset.trackIdx);
+                        updateDownloadLink(trackIdx);
+                    });
+                });
+                
+                // Initialize first track download link
+                updateDownloadLink(0);
+
+                // Share button click
+                const shareBtn = card.querySelector('.bc-share-btn');
+                shareBtn.addEventListener('click', () => {
+                    const shareText = `Check out "${rel.title}" by ${rel.artist} on Manoj's Blog!`;
+                    const shareUrl = window.location.href.split('#')[0] + '#player-' + rel.id;
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(shareUrl + '\n' + shareText)
+                            .then(() => alert('Album share link copied to clipboard!'))
+                            .catch(e => alert('Failed to copy: ' + e));
+                    } else {
+                        alert(`Share URL:\n${shareUrl}`);
+                    }
+                });
+            }
+
+            // Grouping and Catalog Rendering
+            function renderCatalog() {
+                if (!releases.length) {
+                    container.innerHTML = '<div class="empty">No music releases found — check back soon.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+
+                if (activeFilter === 'all') {
+                    const grid = document.createElement('div');
+                    grid.className = 'bc-player-grid';
+                    grid.innerHTML = releases.map(r => buildReleaseCard(r)).join('');
+                    container.appendChild(grid);
+                    releases.forEach(r => bindCardEvents(r));
+                } else if (activeFilter === 'genre') {
+                    // Group by genre
+                    const groups = {};
+                    releases.forEach(r => {
+                        const g = r.genre || 'Uncategorized';
+                        if (!groups[g]) groups[g] = [];
+                        groups[g].push(r);
+                    });
+
+                    Object.keys(groups).sort().forEach(gName => {
+                        const sec = document.createElement('div');
+                        sec.className = 'music-section';
+                        
+                        const title = document.createElement('div');
+                        title.className = 'music-group-title';
+                        title.textContent = gName;
+                        sec.appendChild(title);
+
+                        const grid = document.createElement('div');
+                        grid.className = 'bc-player-grid';
+                        grid.innerHTML = groups[gName].map(r => buildReleaseCard(r)).join('');
+                        sec.appendChild(grid);
+
+                        container.appendChild(sec);
+                        groups[gName].forEach(r => bindCardEvents(r));
+                    });
+                } else if (activeFilter === 'artist') {
+                    // Group by artist
+                    const groups = {};
+                    releases.forEach(r => {
+                        const a = r.artist || 'Unknown Artist';
+                        if (!groups[a]) groups[a] = [];
+                        groups[a].push(r);
+                    });
+
+                    Object.keys(groups).sort().forEach(aName => {
+                        const sec = document.createElement('div');
+                        sec.className = 'music-section';
+                        
+                        const title = document.createElement('div');
+                        title.className = 'music-group-title';
+                        title.textContent = aName;
+                        sec.appendChild(title);
+
+                        const grid = document.createElement('div');
+                        grid.className = 'bc-player-grid';
+                        grid.innerHTML = groups[aName].map(r => buildReleaseCard(r)).join('');
+                        sec.appendChild(grid);
+
+                        container.appendChild(sec);
+                        groups[aName].forEach(r => bindCardEvents(r));
+                    });
+                }
+
+                // Restore active player visuals after rendering
+                updateUI();
+            }
+
+            // Handle anchor link to jump directly to specific album
+            window.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => {
+                    const hash = window.location.hash;
+                    if (hash && hash.startsWith('#player-')) {
+                        const el = document.getElementById(hash.slice(1));
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 400);
+            });
+
+        })();
+    </script>
+</body>
+</html>

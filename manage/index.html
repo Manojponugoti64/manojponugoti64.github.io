@@ -83,6 +83,7 @@
                                     <ul class="nav-links">
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="../photos.html">Photos</a></li>
+                <li><a href="../music.html">Music</a></li>
                 <li><a href="../iss-tracker/">ISS Tracker</a></li>
                 <li><a href="../about.html">About</a></li>
             </ul>
@@ -155,6 +156,16 @@
                         <button id="reloadPhotos" class="ghost" type="button">Refresh</button>
                     </div>
                     <div id="photosGrid" class="manage-photos-grid"><div class="empty">Loading…</div></div>
+                </section>
+
+                <section class="card">
+                    <h2>Music Catalog</h2>
+                    <p class="hint">Manage your music releases and albums. You can upload covers and tracks here. Big cover images are resized automatically. Track duration is computed automatically on upload.</p>
+                    <div class="toolbar">
+                        <button id="addReleaseBtn" type="button">+ Create New Release</button>
+                        <button id="reloadMusic" class="ghost" type="button">Refresh Catalog</button>
+                    </div>
+                    <div id="musicManageContainer"><div class="empty">Loading…</div></div>
                 </section>
 
                 <div id="status" class="status"></div>
@@ -279,6 +290,7 @@
             loadHero();
             loadAbout();
             loadPhotos();
+            loadMusic();
         }
         function showKeyPrompt() {
             $('keyPrompt').style.display = 'block';
@@ -527,6 +539,7 @@
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="photos.html">Photos</a></li>
+                <li><a href="music.html">Music</a></li>
                 <li><a href="iss-tracker/">ISS Tracker</a></li>
                 <li><a href="about.html">About</a></li>
             </ul>
@@ -749,6 +762,425 @@ ${bodyHtml}
                 setStatus('Delete failed: ' + (err.message || err), 'error');
             }
         }
+
+        // ---------- Music Catalog Management ----------
+        let currentTargetReleaseId = null;
+
+        async function getMusicManifest() {
+            try {
+                const f = await getFile('music/manifest.json');
+                let data = { releases: [] };
+                try { data = JSON.parse(f.content); } catch (e) {}
+                if (!data || !Array.isArray(data.releases)) data = { releases: [] };
+                return { sha: f.sha, data };
+            } catch (err) {
+                return { sha: null, data: { releases: [] } };
+            }
+        }
+
+        async function loadMusic() {
+            const container = $('musicManageContainer');
+            container.innerHTML = '<div class="empty">Loading…</div>';
+            try {
+                const { data } = await getMusicManifest();
+                const releases = data.releases || [];
+                if (!releases.length) {
+                    container.innerHTML = '<div class="empty">No releases found. Click "+ Create New Release" to start.</div>';
+                    return;
+                }
+                container.innerHTML = '';
+                releases.forEach(rel => {
+                    const div = document.createElement('div');
+                    div.className = 'music-manage-release';
+                    
+                    const coverSrc = rel.cover ? '../' + rel.cover : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="100%" height="100%" fill="%23222"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23666" font-size="20">🎜</text></svg>';
+                    
+                    const tracksHtml = (rel.tracks || []).map((tr, idx) => `
+                        <div class="music-manage-track-row">
+                            <div class="music-track-info">
+                                <span class="music-track-number">${idx + 1}.</span>
+                                <span class="music-track-title">${escHtml(tr.title)}</span>
+                                <span style="color:var(--text-secondary); font-size:0.8rem; font-variant-numeric:tabular-nums; margin-left:0.5rem;">(${escHtml(tr.duration)})</span>
+                            </div>
+                            <button class="ghost danger" style="padding:0.2rem 0.5rem; font-size:0.8rem;" onclick="deleteTrack('${rel.id}', '${tr.id}')" title="Delete Track">×</button>
+                        </div>
+                    `).join('');
+
+                    div.innerHTML = `
+                        <div class="music-release-header">
+                            <div class="music-release-title-block">
+                                <img class="music-release-mini-cover" src="${coverSrc}" alt="Cover">
+                                <div class="music-release-details">
+                                    <h3>${escHtml(rel.title)}</h3>
+                                    <p>by ${escHtml(rel.artist)} · ${escHtml(rel.genre)}</p>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:0.4rem;">
+                                <button class="ghost" onclick="openAddTrackModal('${rel.id}')">+ Add Track</button>
+                                <button class="danger" style="padding:0.4rem 0.8rem; font-size:0.85rem;" onclick="deleteRelease('${rel.id}', '${escHtml(rel.title)}')">Delete</button>
+                            </div>
+                        </div>
+                        <div class="music-release-tracks-container">
+                            ${tracksHtml || '<div class="empty" style="padding:0.5rem; font-size:0.85rem;">No tracks in this release yet.</div>'}
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="empty" style="color:#ffb0b0;">Could not load catalog: ${escHtml(err.message || err)}</div>`;
+            }
+        }
+
+        $('reloadMusic').addEventListener('click', loadMusic);
+
+        // --- Release Modals ---
+        $('addReleaseBtn').addEventListener('click', () => {
+            $('releaseTitleInput').value = '';
+            $('releaseArtistInput').value = '';
+            $('releaseGenreInput').value = '';
+            $('releaseCoverInput').value = '';
+            $('releaseModalTitle').textContent = 'Create New Release';
+            $('releaseModal').style.display = 'flex';
+        });
+
+        $('closeReleaseModalBtn').addEventListener('click', () => {
+            $('releaseModal').style.display = 'none';
+        });
+
+        $('saveReleaseBtn').addEventListener('click', async () => {
+            const title = $('releaseTitleInput').value.trim();
+            const artist = $('releaseArtistInput').value.trim();
+            const genre = $('releaseGenreInput').value.trim();
+            const coverInput = $('releaseCoverInput');
+            
+            if (!title || !artist || !genre) {
+                return alert('Please fill in all required fields.');
+            }
+
+            setStatus('Creating release...', 'info');
+            $('releaseModal').style.display = 'none';
+
+            try {
+                const releaseId = 'release-' + Date.now();
+                let coverPath = '';
+
+                if (coverInput.files && coverInput.files[0]) {
+                    const file = coverInput.files[0];
+                    setStatus('Creating release — resizing cover art...', 'info');
+                    
+                    // Compress cover image to 800x800 JPEG using canvas
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                            try {
+                                const img = new Image();
+                                img.onload = () => {
+                                    const canvas = document.createElement('canvas');
+                                    const size = 800;
+                                    canvas.width = size;
+                                    canvas.height = size;
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.drawImage(img, 0, 0, size, size);
+                                    resolve(canvas.toDataURL('image/jpeg', 0.85));
+                                };
+                                img.onerror = reject;
+                                img.src = event.target.result;
+                            } catch (e) {
+                                reject(e);
+                            }
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+
+                    const base64 = dataUrlToBase64(dataUrl);
+                    const safeName = (file.name || 'cover').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'cover';
+                    const filename = `${releaseId}-${safeName}.jpg`;
+                    coverPath = `music/covers/${filename}`;
+
+                    setStatus('Creating release — uploading cover art...', 'info');
+                    await uploadBinary(coverPath, base64, `Upload cover for release: ${title}`);
+                }
+
+                setStatus('Creating release — updating index manifest...', 'info');
+                await modifyFile('music/manifest.json', (txt) => {
+                    let data = { releases: [] };
+                    try { data = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(data.releases)) data.releases = [];
+                    
+                    data.releases.push({
+                        id: releaseId,
+                        title: title,
+                        artist: artist,
+                        genre: genre,
+                        cover: coverPath,
+                        tracks: []
+                    });
+                    return JSON.stringify(data, null, 2) + '\n';
+                }, `Add release: ${title}`);
+
+                setStatus(`Successfully created release "${escHtml(title)}"!`, 'success');
+                loadMusic();
+            } catch (err) {
+                console.error(err);
+                setStatus('Failed to create release: ' + (err.message || err), 'error');
+            }
+        });
+
+        // --- Track Modals ---
+        window.openAddTrackModal = function(releaseId) {
+            currentTargetReleaseId = releaseId;
+            $('trackTitleInput').value = '';
+            $('trackAudioInput').value = '';
+            $('trackModal').style.display = 'flex';
+        };
+
+        $('closeTrackModalBtn').addEventListener('click', () => {
+            $('trackModal').style.display = 'none';
+        });
+
+        async function getAudioDuration(file) {
+            return new Promise((resolve) => {
+                const objectUrl = URL.createObjectURL(file);
+                const audio = new Audio();
+                audio.src = objectUrl;
+                audio.addEventListener('loadedmetadata', () => {
+                    resolve(audio.duration);
+                    URL.revokeObjectURL(objectUrl);
+                });
+                audio.addEventListener('error', () => {
+                    resolve(0);
+                    URL.revokeObjectURL(objectUrl);
+                });
+            });
+        }
+
+        $('uploadTrackBtn').addEventListener('click', async () => {
+            const title = $('trackTitleInput').value.trim();
+            const audioInput = $('trackAudioInput');
+
+            if (!title || !audioInput.files || !audioInput.files[0]) {
+                return alert('Please enter a track title and select an audio file.');
+            }
+
+            const file = audioInput.files[0];
+            const releaseId = currentTargetReleaseId;
+            
+            setStatus(`Uploading track "${escHtml(title)}" — analyzing duration...`, 'info');
+            $('trackModal').style.display = 'none';
+
+            try {
+                // Compute duration
+                const durationSec = await getAudioDuration(file);
+                const durationStr = formatTime(durationSec);
+
+                setStatus(`Uploading track "${escHtml(title)}" — reading file...`, 'info');
+                
+                // Convert audio to base64
+                const base64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const res = reader.result;
+                        const i = res.indexOf(',');
+                        resolve(res.slice(i + 1));
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+
+                const trackId = 'track-' + Date.now();
+                const ext = file.name.split('.').pop().toLowerCase() || 'mp3';
+                const safeName = (file.name || 'track').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'track';
+                const filename = `${releaseId}-${safeName}.${ext}`;
+                const trackPath = `music/tracks/${filename}`;
+
+                setStatus(`Uploading track "${escHtml(title)}" — transferring audio bytes...`, 'info');
+                await uploadBinary(trackPath, base64, `Upload track: ${title}`);
+
+                setStatus(`Uploading track "${escHtml(title)}" — registering track metadata...`, 'info');
+                await modifyFile('music/manifest.json', (txt) => {
+                    let data = { releases: [] };
+                    try { data = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(data.releases)) data.releases = [];
+                    
+                    const release = data.releases.find(r => r.id === releaseId);
+                    if (release) {
+                        if (!Array.isArray(release.tracks)) release.tracks = [];
+                        release.tracks.push({
+                            id: trackId,
+                            title: title,
+                            duration: durationStr,
+                            src: trackPath
+                        });
+                    }
+                    return JSON.stringify(data, null, 2) + '\n';
+                }, `Add track "${title}" to release`);
+
+                setStatus(`Successfully added track "${escHtml(title)}"!`, 'success');
+                loadMusic();
+            } catch (err) {
+                console.error(err);
+                setStatus('Failed to upload track: ' + (err.message || err), 'error');
+            }
+        });
+
+        // --- Delete Helpers ---
+        window.deleteTrack = async function(releaseId, trackId) {
+            if (!confirm('Are you sure you want to delete this track? This will remove the track file permanently.')) return;
+            setStatus('Deleting track...', 'info');
+
+            try {
+                let trackPath = '';
+                let trackTitle = '';
+
+                // Get path from manifest
+                const { data } = await getMusicManifest();
+                const release = data.releases.find(r => r.id === releaseId);
+                if (release && release.tracks) {
+                    const track = release.tracks.find(t => t.id === trackId);
+                    if (track) {
+                        trackPath = track.src;
+                        trackTitle = track.title;
+                    }
+                }
+
+                if (!trackPath) throw new Error('Track not found in manifest.');
+
+                setStatus(`Deleting track "${escHtml(trackTitle)}" — updating database index...`, 'info');
+                await modifyFile('music/manifest.json', (txt) => {
+                    let manifestData = { releases: [] };
+                    try { manifestData = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(manifestData.releases)) manifestData.releases = [];
+                    
+                    const rel = manifestData.releases.find(r => r.id === releaseId);
+                    if (rel && rel.tracks) {
+                        rel.tracks = rel.tracks.filter(t => t.id !== trackId);
+                    }
+                    return JSON.stringify(manifestData, null, 2) + '\n';
+                }, `Delete track: ${trackTitle}`);
+
+                // Delete physical file
+                setStatus(`Deleting track "${escHtml(trackTitle)}" — purging audio bytes...`, 'info');
+                try {
+                    await deleteFileWithRetry(trackPath, `Purge track audio: ${trackTitle}`);
+                } catch (e) {
+                    if (!String(e.message || '').includes('Not Found')) throw e;
+                }
+
+                setStatus(`Successfully deleted track "${escHtml(trackTitle)}"!`, 'success');
+                loadMusic();
+            } catch (err) {
+                console.error(err);
+                setStatus('Failed to delete track: ' + (err.message || err), 'error');
+            }
+        };
+
+        window.deleteRelease = async function(releaseId, releaseTitle) {
+            if (!confirm(`Are you sure you want to delete the release "${releaseTitle}"?\nThis will permanently delete the release cover and ALL its track files!`)) return;
+            setStatus(`Deleting release "${escHtml(releaseTitle)}"...`, 'info');
+
+            try {
+                let coverPath = '';
+                let tracks = [];
+
+                // Find files in manifest
+                const { data } = await getMusicManifest();
+                const release = data.releases.find(r => r.id === releaseId);
+                if (release) {
+                    coverPath = release.cover;
+                    tracks = release.tracks || [];
+                }
+
+                // Remove from manifest first so UI refreshes fast
+                setStatus(`Deleting release "${escHtml(releaseTitle)}" — updating database index...`, 'info');
+                await modifyFile('music/manifest.json', (txt) => {
+                    let manifestData = { releases: [] };
+                    try { manifestData = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(manifestData.releases)) manifestData.releases = [];
+                    manifestData.releases = manifestData.releases.filter(r => r.id !== releaseId);
+                    return JSON.stringify(manifestData, null, 2) + '\n';
+                }, `Delete release: ${releaseTitle}`);
+
+                // Delete physical files
+                if (coverPath) {
+                    setStatus(`Deleting release "${escHtml(releaseTitle)}" — purging cover art...`, 'info');
+                    try {
+                        await deleteFileWithRetry(coverPath, `Purge cover for: ${releaseTitle}`);
+                    } catch (e) {
+                        if (!String(e.message || '').includes('Not Found')) throw e;
+                    }
+                }
+
+                for (let i = 0; i < tracks.length; i++) {
+                    const tr = tracks[i];
+                    if (tr.src) {
+                        setStatus(`Deleting release "${escHtml(releaseTitle)}" — purging track ${i + 1}/${tracks.length} (${escHtml(tr.title)})...`, 'info');
+                        try {
+                            await deleteFileWithRetry(tr.src, `Purge track audio: ${tr.title}`);
+                        } catch (e) {
+                            if (!String(e.message || '').includes('Not Found')) throw e;
+                        }
+                    }
+                }
+
+                setStatus(`Successfully deleted release "${escHtml(releaseTitle)}"!`, 'success');
+                loadMusic();
+            } catch (err) {
+                console.error(err);
+                setStatus('Failed to delete release: ' + (err.message || err), 'error');
+            }
+        };
+
+        // Format duration helper (duplicates the one in music.html)
+        function formatTime(secs) {
+            if (isNaN(secs) || secs === Infinity) return '00:00';
+            const m = Math.floor(secs / 60);
+            const s = Math.floor(secs % 60);
+            return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+        }
     </script>
+
+    <!-- Music Release Modal -->
+    <div id="releaseModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:2rem; width:100%; max-width:500px; box-sizing:border-box; margin: 1rem;">
+            <h3 style="color:var(--accent); margin-top:0; font-size:1.4rem;" id="releaseModalTitle">Create New Release</h3>
+            
+            <label for="releaseTitleInput">Release Title</label>
+            <input type="text" id="releaseTitleInput" placeholder="e.g. lingo" required>
+            
+            <label for="releaseArtistInput">Artist</label>
+            <input type="text" id="releaseArtistInput" placeholder="e.g. proceduralia" required>
+            
+            <label for="releaseGenreInput">Genre</label>
+            <input type="text" id="releaseGenreInput" placeholder="e.g. Ambient" required>
+            
+            <label for="releaseCoverInput">Cover Image (JPEG/PNG)</label>
+            <input type="file" id="releaseCoverInput" accept="image/*">
+            
+            <div class="toolbar" style="margin-top:1.5rem; justify-content:flex-end;">
+                <button type="button" class="ghost" id="closeReleaseModalBtn">Cancel</button>
+                <button type="button" id="saveReleaseBtn">Save Release</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Music Track Modal -->
+    <div id="trackModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:2rem; width:100%; max-width:500px; box-sizing:border-box; margin: 1rem;">
+            <h3 style="color:var(--accent); margin-top:0; font-size:1.4rem;">Add Track to Release</h3>
+            
+            <label for="trackTitleInput">Track Title</label>
+            <input type="text" id="trackTitleInput" placeholder="e.g. [intro]" required>
+            
+            <label for="trackAudioInput">Audio File (.mp3, .wav, etc.)</label>
+            <input type="file" id="trackAudioInput" accept="audio/*" required>
+            
+            <div class="toolbar" style="margin-top:1.5rem; justify-content:flex-end;">
+                <button type="button" class="ghost" id="closeTrackModalBtn">Cancel</button>
+                <button type="button" id="uploadTrackBtn">Upload Track</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -1712,3 +1712,353 @@ body.lightbox-open { overflow: hidden; }
     max-width: calc(100vw - 24px);
   }
 }
+
+/* ===== Music Page & Bandcamp-style Player ===== */
+.music-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.music-filter-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.5rem 1.2rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+.music-filter-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.music-filter-btn.active {
+  background: var(--accent);
+  color: #1a1a1a;
+  border-color: var(--accent);
+  font-weight: bold;
+}
+
+.music-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+.music-group-title {
+  font-size: 1.3rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.bc-player-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.bc-player-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.8rem;
+  box-shadow: 0 4px 15px var(--shadow);
+  display: flex;
+  gap: 2rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.bc-player-card:hover {
+  border-color: var(--accent-dark);
+  box-shadow: 0 6px 20px var(--shadow);
+}
+
+.bc-cover-wrapper {
+  flex: 0 0 auto;
+  width: 160px;
+  height: 160px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.bc-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.bc-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--border) 100%);
+}
+
+.bc-player-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* critical for text-overflow in flexbox child */
+}
+
+.bc-meta {
+  margin-bottom: 1rem;
+}
+.bc-album-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 0.2rem;
+  line-height: 1.2;
+}
+.bc-artist-name {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* Controls section mimicking the proceduralia widget */
+.bc-audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.bc-play-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.bc-play-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(232, 112, 64, 0.05);
+}
+.bc-play-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.bc-scrubber-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.bc-scrubber {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+}
+.bc-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  width: 0%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.bc-time-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.bc-nav-btns {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.bc-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+.bc-nav-btn:hover {
+  color: var(--accent);
+  background: rgba(232, 112, 64, 0.05);
+}
+.bc-nav-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Playlist / Tracklist */
+.bc-tracklist {
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.bc-track-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  user-select: none;
+}
+.bc-track-row:last-child {
+  border-bottom: none;
+}
+.bc-track-row:hover {
+  background: rgba(232, 112, 64, 0.05);
+}
+.bc-track-row.active {
+  background: rgba(232, 112, 64, 0.08);
+  font-weight: 600;
+  border-left: 3px solid var(--accent);
+}
+.bc-track-title {
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.bc-track-row.active .bc-track-title {
+  color: var(--accent);
+}
+.bc-track-duration {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Download / Share links */
+.bc-footer-links {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+.bc-footer-links a {
+  color: var(--accent);
+  font-weight: 500;
+  cursor: pointer;
+}
+.bc-footer-links a:hover {
+  text-decoration: underline;
+  color: var(--accent-hover);
+}
+
+@media (max-width: 768px) {
+  .bc-player-card {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .bc-cover-wrapper {
+    width: 100%;
+    height: 200px;
+  }
+}
+
+/* ===== /manage/ Music Panel ===== */
+.music-manage-release {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.music-release-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.music-release-title-block {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.music-release-mini-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+.music-release-details h3 {
+  font-size: 1rem;
+  color: var(--accent);
+  margin: 0;
+}
+.music-release-details p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+.music-release-tracks-container {
+  padding: 1.25rem;
+}
+.music-manage-track-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+.music-manage-track-row:last-child {
+  margin-bottom: 0;
+}
+.music-track-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+}
+.music-track-number {
+  color: var(--text-secondary);
+  font-weight: bold;
+}
