@@ -56,6 +56,21 @@
           "src": "music/reminder.mp3"
         }
       ]
+    },
+    {
+      "id": "adele-singles",
+      "title": "Singles",
+      "artist": "Adele",
+      "genre": "Pop / Soul",
+      "cover": "images/adele_cover.png",
+      "tracks": [
+        {
+          "id": "set-fire-to-the-rain",
+          "title": "Set Fire to the Rain",
+          "duration": "04:03",
+          "src": "music/set-fire-to-the-rain.mp3"
+        }
+      ]
     }
   ]
 }
