@@ -3,44 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Music - Manoj's Blog</title>
     <link rel="stylesheet" href="style.css">
     <script src="theme.js"></script>
     <script src="sidebar.js" defer></script>
     <style>
-        .music-list {
-            display: grid;
-            gap: 1.2rem;
-            margin-top: 1.5rem;
-        }
-        .music-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1.2rem;
-            box-shadow: 0 8px 24px var(--shadow);
-        }
-        .music-card h2 {
-            margin-top: 0;
-            margin-bottom: 0.25rem;
-            color: var(--text-primary);
-        }
-        .music-meta {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 1rem;
-        }
-        .music-embed {
-            width: 100%;
-            min-height: 152px;
-            border: 0;
-            border-radius: 8px;
-            display: block;
-            background: var(--bg-secondary);
-        }
-        .music-actions {
-            margin: 1rem 0 0;
-        }
+        .music-sections { display: grid; gap: 2rem; margin-top: 1.5rem; }
+        .bc-player-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 1.6rem; box-shadow: 0 4px 15px var(--shadow); display: flex; gap: 1.8rem; }
+        .bc-cover-wrapper { width: 160px; height: 160px; flex: 0 0 auto; border-radius: 6px; overflow: hidden; background: var(--bg-secondary); border: 1px solid var(--border); }
+        .bc-cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .bc-cover-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 2.5rem; background: linear-gradient(135deg, var(--bg-secondary), var(--border)); }
+        .bc-player-body { flex: 1; min-width: 0; }
+        .bc-album-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: var(--accent); line-height: 1.2; }
+        .bc-artist-name { color: var(--text-secondary); font-size: 0.95rem; margin: 0.25rem 0 1rem; }
+        .bc-audio-controls { display: flex; align-items: center; gap: 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
+        .bc-play-btn, .bc-nav-btn { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-primary); transition: color 0.2s, border-color 0.2s, background 0.2s; }
+        .bc-play-btn { width: 42px; height: 42px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; flex-shrink: 0; }
+        .bc-play-btn:hover, .bc-nav-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(232,112,64,0.06); }
+        .bc-play-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .bc-nav-btn svg { width: 16px; height: 16px; fill: currentColor; }
+        .bc-scrubber-container { flex: 1; min-width: 0; }
+        .bc-scrubber { width: 100%; height: 6px; background: var(--border); border-radius: 3px; cursor: pointer; overflow: hidden; }
+        .bc-progress-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 3px; }
+        .bc-time-display { display: flex; gap: 0.5rem; margin-top: 0.25rem; font-size: 0.75rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+        .bc-nav-btns { display: flex; gap: 0.35rem; }
+        .bc-nav-btn { width: 32px; height: 32px; background: transparent; border: 0; border-radius: 4px; }
+        .bc-tracklist { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+        .bc-track-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+        .bc-track-row:last-child { border-bottom: 0; }
+        .bc-track-row:hover { background: rgba(232,112,64,0.05); }
+        .bc-track-row.active { background: rgba(232,112,64,0.08); border-left: 3px solid var(--accent); font-weight: 600; }
+        .bc-track-title { display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; color: var(--text-primary); }
+        .bc-track-main { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bc-track-artist { color: var(--text-secondary); font-style: italic; font-size: 0.85rem; white-space: nowrap; }
+        .bc-track-row.active .bc-track-title { color: var(--accent); }
+        .bc-track-duration { color: var(--text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .bc-footer-links { display: flex; gap: 1.25rem; margin-top: 0.9rem; font-size: 0.85rem; }
+        .bc-footer-links a { cursor: pointer; color: var(--accent); }
+        .bc-source-note { margin: 0.8rem 0 0; color: var(--text-secondary); font-size: 0.82rem; font-style: italic; }
+        .empty { color: var(--text-secondary); text-align: center; font-style: italic; }
+        @media (max-width: 768px) { .bc-player-card { flex-direction: column; } .bc-cover-wrapper { width: 100%; height: 200px; } .bc-audio-controls { flex-wrap: wrap; } }
     </style>
 </head>
 <body>
@@ -60,24 +65,8 @@
     <main>
         <div class="page-content">
             <h1>Music</h1>
-            <p class="page-sub">Songs on repeat.</p>
-
-            <section class="music-list" aria-label="Music picks">
-                <article class="music-card">
-                    <h2>What You Wanted</h2>
-                    <div class="music-meta">OneRepublic</div>
-                    <iframe
-                        class="music-embed"
-                        src="https://open.spotify.com/embed/track/4PcuCJh4TjqZyvM3b82e4K?utm_source=generator"
-                        title="What You Wanted by OneRepublic on Spotify"
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                        loading="lazy">
-                    </iframe>
-                    <p class="music-actions">
-                        <a href="https://open.spotify.com/track/4PcuCJh4TjqZyvM3b82e4K" target="_blank" rel="noopener">Open on Spotify</a>
-                    </p>
-                </article>
-            </section>
+            <p class="page-sub">Tracks, favorites, and soundscapes.</p>
+            <div id="musicContainer" class="music-sections"><div class="empty">Loading music catalog...</div></div>
         </div>
     </main>
 
@@ -89,5 +78,124 @@
             </a>
         </div>
     </footer>
+
+    <script>
+        (function () {
+            const container = document.getElementById('musicContainer');
+            const audio = new Audio();
+            let releases = [];
+            let activeReleaseId = null;
+            let activeTrackIdx = -1;
+            let isPlaying = false;
+
+            fetch('music/manifest.json?cb=' + Date.now())
+                .then(r => r.ok ? r.json() : Promise.reject(new Error('Catalog is temporarily unavailable.')))
+                .then(data => { releases = data.releases || []; renderCatalog(); })
+                .catch(err => { container.innerHTML = `<div class="empty" style="color:#ffb0b0;">${err.message}</div>`; });
+
+            function formatTime(secs) {
+                if (isNaN(secs) || secs === Infinity) return '00:00';
+                const m = Math.floor(secs / 60);
+                const s = Math.floor(secs % 60);
+                return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+            }
+            function playIcon() { return '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'; }
+            function pauseIcon() { return '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'; }
+            function resolveTrackSrc(track) {
+                if (track.src) return Promise.resolve(track.src);
+                if (!track.itunesTrackId) return Promise.reject(new Error('No playable source found.'));
+                if (track.previewUrl) return Promise.resolve(track.previewUrl);
+                return fetch('https://itunes.apple.com/lookup?id=' + encodeURIComponent(track.itunesTrackId) + '&entity=song&country=US')
+                    .then(r => r.json())
+                    .then(data => {
+                        const item = data.results && data.results.find(x => x.wrapperType === 'track' && x.previewUrl);
+                        if (!item) throw new Error('Preview is unavailable right now.');
+                        track.previewUrl = item.previewUrl;
+                        return item.previewUrl;
+                    });
+            }
+            function playTrack(releaseId, trackIdx) {
+                const release = releases.find(r => r.id === releaseId);
+                const track = release && release.tracks && release.tracks[trackIdx];
+                if (!track) return;
+                if (activeReleaseId === releaseId && activeTrackIdx === trackIdx && audio.src) {
+                    if (audio.paused) audio.play().catch(console.error);
+                    else audio.pause();
+                    return;
+                }
+                activeReleaseId = releaseId;
+                activeTrackIdx = trackIdx;
+                isPlaying = false;
+                updateUI();
+                resolveTrackSrc(track)
+                    .then(src => { audio.src = src; audio.load(); return audio.play(); })
+                    .then(() => { isPlaying = true; updateUI(); })
+                    .catch(err => { isPlaying = false; updateUI(); alert(err.message || 'Could not play this track.'); });
+            }
+            function buildCard(rel) {
+                const cover = rel.cover ? `<img class="bc-cover-img" src="${rel.cover}" alt="${rel.title} cover" loading="lazy">` : '<div class="bc-cover-placeholder">&#9835;</div>';
+                const tracks = (rel.tracks || []).map((tr, idx) => {
+                    const artist = tr.artist ? `<span class="bc-track-artist">by ${tr.artist}</span>` : '';
+                    return `<div class="bc-track-row" data-track-idx="${idx}"><span class="bc-track-title"><span>${idx + 1}.</span><span class="bc-track-main">${tr.title}</span>${artist}</span><span class="bc-track-duration">${tr.duration || '00:00'}</span></div>`;
+                }).join('');
+                const firstDuration = rel.tracks && rel.tracks[0] ? rel.tracks[0].duration : '00:00';
+                const openLink = rel.externalUrl ? `<a href="${rel.externalUrl}" target="_blank" rel="noopener">Open</a>` : '';
+                const note = rel.sourceNote ? `<p class="bc-source-note">${rel.sourceNote}</p>` : '';
+                return `<article class="bc-player-card" id="player-${rel.id}"><div class="bc-cover-wrapper">${cover}</div><div class="bc-player-body"><div class="bc-album-title">${rel.title}</div><div class="bc-artist-name">by ${rel.artist}</div><div class="bc-audio-controls"><button class="bc-play-btn" aria-label="Play">${playIcon()}</button><div class="bc-scrubber-container"><div class="bc-scrubber"><div class="bc-progress-fill"></div></div><div class="bc-time-display"><span class="bc-current-time">00:00</span><span>/</span><span class="bc-total-time">${firstDuration}</span></div></div><div class="bc-nav-btns"><button class="bc-nav-btn bc-prev-btn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button><button class="bc-nav-btn bc-next-btn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zm9-12h2v12h-2z"/></svg></button></div></div><div class="bc-tracklist">${tracks}</div><div class="bc-footer-links"><a class="bc-share-btn">Share</a>${openLink}</div>${note}</div></article>`;
+            }
+            function bindCard(rel) {
+                const card = document.getElementById('player-' + rel.id);
+                if (!card) return;
+                card.querySelector('.bc-play-btn').addEventListener('click', () => playTrack(rel.id, activeReleaseId === rel.id && activeTrackIdx !== -1 ? activeTrackIdx : 0));
+                card.querySelectorAll('.bc-track-row').forEach(row => row.addEventListener('click', () => playTrack(rel.id, parseInt(row.dataset.trackIdx, 10))));
+                card.querySelector('.bc-prev-btn').addEventListener('click', () => playTrack(rel.id, activeReleaseId === rel.id && activeTrackIdx > 0 ? activeTrackIdx - 1 : 0));
+                card.querySelector('.bc-next-btn').addEventListener('click', () => playTrack(rel.id, activeReleaseId === rel.id && activeTrackIdx < rel.tracks.length - 1 ? activeTrackIdx + 1 : 0));
+                card.querySelector('.bc-scrubber').addEventListener('click', e => {
+                    if (activeReleaseId !== rel.id || activeTrackIdx === -1 || isNaN(audio.duration)) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+                });
+                card.querySelector('.bc-share-btn').addEventListener('click', () => {
+                    const url = window.location.href.split('#')[0] + '#player-' + rel.id;
+                    if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => alert('Share link copied.'));
+                });
+            }
+            function updateUI() {
+                releases.forEach(rel => {
+                    const card = document.getElementById('player-' + rel.id);
+                    if (!card) return;
+                    const activeCard = rel.id === activeReleaseId;
+                    const btn = card.querySelector('.bc-play-btn');
+                    btn.innerHTML = activeCard && isPlaying ? pauseIcon() : playIcon();
+                    card.querySelectorAll('.bc-track-row').forEach(row => row.classList.toggle('active', activeCard && parseInt(row.dataset.trackIdx, 10) === activeTrackIdx));
+                    if (!activeCard) {
+                        card.querySelector('.bc-progress-fill').style.width = '0%';
+                        card.querySelector('.bc-current-time').textContent = '00:00';
+                        card.querySelector('.bc-total-time').textContent = rel.tracks && rel.tracks[0] ? rel.tracks[0].duration : '00:00';
+                    }
+                });
+            }
+            audio.addEventListener('timeupdate', () => {
+                const card = document.getElementById('player-' + activeReleaseId);
+                if (!card || isNaN(audio.duration)) return;
+                card.querySelector('.bc-progress-fill').style.width = (audio.currentTime / audio.duration) * 100 + '%';
+                card.querySelector('.bc-current-time').textContent = formatTime(audio.currentTime);
+                card.querySelector('.bc-total-time').textContent = formatTime(audio.duration);
+            });
+            audio.addEventListener('play', () => { isPlaying = true; updateUI(); });
+            audio.addEventListener('pause', () => { isPlaying = false; updateUI(); });
+            audio.addEventListener('ended', () => {
+                const rel = releases.find(r => r.id === activeReleaseId);
+                if (rel && activeTrackIdx < rel.tracks.length - 1) playTrack(activeReleaseId, activeTrackIdx + 1);
+                else { isPlaying = false; activeTrackIdx = -1; updateUI(); }
+            });
+            function renderCatalog() {
+                if (!releases.length) { container.innerHTML = '<div class="empty">No music releases found yet.</div>'; return; }
+                container.innerHTML = releases.map(buildCard).join('');
+                releases.forEach(bindCard);
+                updateUI();
+            }
+        })();
+    </script>
 </body>
 </html>
