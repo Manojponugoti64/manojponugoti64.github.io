@@ -11,10 +11,10 @@
     <script src="theme.js"></script>
     <script src="sidebar.js" defer></script>
     <style>
-        .music-sections { display: grid; gap: 2rem; margin-top: 1.5rem; }
+        .music-shell { margin-top: 1.5rem; }
         .bc-player-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 1.6rem; box-shadow: 0 4px 15px var(--shadow); display: flex; gap: 1.8rem; }
         .bc-cover-wrapper { width: 160px; height: 160px; flex: 0 0 auto; border-radius: 6px; overflow: hidden; background: var(--bg-secondary); border: 1px solid var(--border); }
-        .bc-cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .bc-cover-wrapper img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .bc-cover-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 2.5rem; background: linear-gradient(135deg, var(--bg-secondary), var(--border)); }
         .bc-player-body { flex: 1; min-width: 0; }
         .bc-album-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: var(--accent); line-height: 1.2; }
@@ -23,8 +23,9 @@
         .bc-play-btn, .bc-nav-btn { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-primary); transition: color 0.2s, border-color 0.2s, background 0.2s; }
         .bc-play-btn { width: 42px; height: 42px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; flex-shrink: 0; }
         .bc-play-btn:hover, .bc-nav-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(232,112,64,0.06); }
-        .bc-play-btn svg { width: 18px; height: 18px; fill: currentColor; }
-        .bc-nav-btn svg { width: 16px; height: 16px; fill: currentColor; }
+        .bc-play-btn svg, .bc-nav-btn svg { fill: currentColor; }
+        .bc-play-btn svg { width: 18px; height: 18px; }
+        .bc-nav-btn svg { width: 16px; height: 16px; }
         .bc-scrubber-container { flex: 1; min-width: 0; }
         .bc-scrubber { width: 100%; height: 6px; background: var(--border); border-radius: 3px; cursor: pointer; overflow: hidden; }
         .bc-progress-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 3px; }
@@ -32,7 +33,7 @@
         .bc-nav-btns { display: flex; gap: 0.35rem; }
         .bc-nav-btn { width: 32px; height: 32px; background: transparent; border: 0; border-radius: 4px; }
         .bc-tracklist { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-        .bc-track-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+        .bc-track-row { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 1rem; border: 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; background: transparent; color: inherit; font-family: inherit; font-size: 0.95rem; text-align: left; }
         .bc-track-row:last-child { border-bottom: 0; }
         .bc-track-row:hover { background: rgba(232,112,64,0.05); }
         .bc-track-row.active { background: rgba(232,112,64,0.08); border-left: 3px solid var(--accent); font-weight: 600; }
@@ -44,9 +45,6 @@
         .bc-youtube-wrap { margin-top: 1rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #000; aspect-ratio: 16 / 9; }
         .bc-youtube-wrap[hidden] { display: none; }
         .bc-youtube-wrap iframe { display: block; width: 100%; height: 100%; border: 0; }
-        .bc-footer-links { display: flex; gap: 1.25rem; margin-top: 0.9rem; font-size: 0.85rem; }
-        .bc-footer-links a { cursor: pointer; color: var(--accent); }
-        .empty { color: var(--text-secondary); text-align: center; font-style: italic; }
         @media (max-width: 768px) { .bc-player-card { flex-direction: column; } .bc-cover-wrapper { width: 100%; height: 200px; } .bc-audio-controls { flex-wrap: wrap; } }
     </style>
 </head>
@@ -68,7 +66,51 @@
         <div class="page-content">
             <h1>Music</h1>
             <p class="page-sub">Tracks, favorites, and soundscapes.</p>
-            <div id="musicContainer" class="music-sections"><div class="empty">Loading music catalog...</div></div>
+
+            <section class="music-shell" aria-label="Music player">
+                <article class="bc-player-card" id="player-currents">
+                    <div class="bc-cover-wrapper">
+                        <img src="https://raw.githubusercontent.com/Manojponugoti64/manojponugoti64.github.io/26fc5bb/images/tame_impala_currents_cover.png" alt="Currents cover" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className:'bc-cover-placeholder', innerHTML:'&#9835;'}));">
+                    </div>
+                    <div class="bc-player-body">
+                        <div class="bc-album-title">Currents</div>
+                        <div class="bc-artist-name">by Tame Impala</div>
+
+                        <div class="bc-audio-controls">
+                            <button class="bc-play-btn" type="button" aria-label="Play selected song">
+                                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </button>
+                            <div class="bc-scrubber-container">
+                                <div class="bc-scrubber"><div class="bc-progress-fill"></div></div>
+                                <div class="bc-time-display"><span class="bc-current-time">00:00</span><span>/</span><span class="bc-total-time">03:36</span></div>
+                            </div>
+                            <div class="bc-nav-btns">
+                                <button class="bc-nav-btn bc-prev-btn" type="button" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                                <button class="bc-nav-btn bc-next-btn" type="button" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zm9-12h2v12h-2z"/></svg></button>
+                            </div>
+                        </div>
+
+                        <div class="bc-tracklist">
+                            <button class="bc-track-row" type="button" data-track="0">
+                                <span class="bc-track-title"><span>1.</span><span class="bc-track-main">The Less I Know The Better</span></span>
+                                <span class="bc-track-duration">03:36</span>
+                            </button>
+                            <button class="bc-track-row" type="button" data-track="1">
+                                <span class="bc-track-title"><span>2.</span><span class="bc-track-main">Dracula</span></span>
+                                <span class="bc-track-duration">03:53</span>
+                            </button>
+                            <button class="bc-track-row" type="button" data-track="2">
+                                <span class="bc-track-title"><span>3.</span><span class="bc-track-main">What You Wanted</span><span class="bc-track-artist">by OneRepublic</span></span>
+                                <span class="bc-track-duration">04:01</span>
+                            </button>
+                        </div>
+
+                        <div class="bc-youtube-wrap" hidden>
+                            <iframe id="youtubePlayer" title="OneRepublic - What You Wanted full song" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </article>
+            </section>
         </div>
     </main>
 
@@ -83,147 +125,89 @@
 
     <script>
         (function () {
-            const container = document.getElementById('musicContainer');
-            const audio = new Audio();
-            let releases = [];
-            let activeReleaseId = null;
-            let activeTrackIdx = -1;
-            let isPlaying = false;
+            var tracks = [
+                { title: 'The Less I Know The Better', duration: '03:36', src: 'https://bobdylanwrotepropagandasongs.wordpress.com/wp-content/uploads/2015/08/07-the-less-i-know-the-better.mp3' },
+                { title: 'Dracula', duration: '03:53', src: 'https://raw.githubusercontent.com/Manojponugoti64/manojponugoti64.github.io/26fc5bb/music/dracula.mp3' },
+                { title: 'What You Wanted', duration: '04:01', youtubeId: 'FeNcYRusSkY' }
+            ];
+            var audio = new Audio();
+            var active = -1;
+            var isPlaying = false;
+            var rows = Array.prototype.slice.call(document.querySelectorAll('.bc-track-row'));
+            var playBtn = document.querySelector('.bc-play-btn');
+            var prevBtn = document.querySelector('.bc-prev-btn');
+            var nextBtn = document.querySelector('.bc-next-btn');
+            var fill = document.querySelector('.bc-progress-fill');
+            var currentTime = document.querySelector('.bc-current-time');
+            var totalTime = document.querySelector('.bc-total-time');
+            var youtubeWrap = document.querySelector('.bc-youtube-wrap');
+            var youtubePlayer = document.getElementById('youtubePlayer');
 
-            fetch('music/manifest.json?cb=' + Date.now())
-                .then(r => r.ok ? r.json() : Promise.reject(new Error('Catalog is temporarily unavailable.')))
-                .then(data => { releases = data.releases || []; renderCatalog(); })
-                .catch(err => { container.innerHTML = `<div class="empty" style="color:#ffb0b0;">${err.message}</div>`; });
-
-            function formatTime(secs) {
-                if (isNaN(secs) || secs === Infinity) return '00:00';
-                const m = Math.floor(secs / 60);
-                const s = Math.floor(secs % 60);
-                return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
-            }
             function playIcon() { return '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'; }
             function pauseIcon() { return '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'; }
-            function stopYouTubePlayers() {
-                document.querySelectorAll('.bc-youtube-frame').forEach(frame => { frame.src = ''; });
-                document.querySelectorAll('.bc-youtube-wrap').forEach(wrap => { wrap.hidden = true; });
+            function formatTime(secs) {
+                if (isNaN(secs) || secs === Infinity) return '00:00';
+                var m = Math.floor(secs / 60);
+                var s = Math.floor(secs % 60);
+                return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
             }
-            function playYouTubeTrack(releaseId, trackIdx, track) {
-                audio.pause();
-                audio.removeAttribute('src');
-                audio.load();
-                activeReleaseId = releaseId;
-                activeTrackIdx = trackIdx;
-                isPlaying = true;
-                stopYouTubePlayers();
-                const card = document.getElementById('player-' + releaseId);
-                const wrap = card && card.querySelector('.bc-youtube-wrap');
-                const frame = card && card.querySelector('.bc-youtube-frame');
-                if (wrap && frame) {
-                    frame.src = 'https://www.youtube.com/embed/' + encodeURIComponent(track.youtubeId) + '?autoplay=1&rel=0';
-                    wrap.hidden = false;
-                    wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-                updateUI();
+            function stopYouTube() {
+                youtubePlayer.src = '';
+                youtubeWrap.hidden = true;
             }
-            function resolveTrackSrc(track) {
-                if (track.src) return Promise.resolve(track.src);
-                if (!track.itunesTrackId) return Promise.reject(new Error('No playable source found.'));
-                if (track.previewUrl) return Promise.resolve(track.previewUrl);
-                return fetch('https://itunes.apple.com/lookup?id=' + encodeURIComponent(track.itunesTrackId) + '&entity=song&country=US')
-                    .then(r => r.json())
-                    .then(data => {
-                        const item = data.results && data.results.find(x => x.wrapperType === 'track' && x.previewUrl);
-                        if (!item) throw new Error('Preview is unavailable right now.');
-                        track.previewUrl = item.previewUrl;
-                        return item.previewUrl;
-                    });
-            }
-            function playTrack(releaseId, trackIdx) {
-                const release = releases.find(r => r.id === releaseId);
-                const track = release && release.tracks && release.tracks[trackIdx];
-                if (!track) return;
+            function updateUI() {
+                rows.forEach(function (row, idx) { row.classList.toggle('active', idx === active); });
+                playBtn.innerHTML = isPlaying ? pauseIcon() : playIcon();
+                playBtn.setAttribute('aria-label', isPlaying ? 'Pause selected song' : 'Play selected song');
+                var track = tracks[active] || tracks[0];
+                totalTime.textContent = track.duration;
                 if (track.youtubeId) {
-                    playYouTubeTrack(releaseId, trackIdx, track);
-                    return;
+                    fill.style.width = '0%';
+                    currentTime.textContent = '00:00';
                 }
-                stopYouTubePlayers();
-                if (activeReleaseId === releaseId && activeTrackIdx === trackIdx && audio.src) {
+            }
+            function playTrack(index) {
+                var track = tracks[index];
+                if (!track) return;
+                if (active === index && !track.youtubeId) {
                     if (audio.paused) audio.play().catch(console.error);
                     else audio.pause();
                     return;
                 }
-                activeReleaseId = releaseId;
-                activeTrackIdx = trackIdx;
-                isPlaying = false;
-                updateUI();
-                resolveTrackSrc(track)
-                    .then(src => { audio.src = src; audio.load(); return audio.play(); })
-                    .then(() => { isPlaying = true; updateUI(); })
-                    .catch(err => { isPlaying = false; updateUI(); alert(err.message || 'Could not play this track.'); });
-            }
-            function buildCard(rel) {
-                const cover = rel.cover ? `<img class="bc-cover-img" src="${rel.cover}" alt="${rel.title} cover" loading="lazy">` : '<div class="bc-cover-placeholder">&#9835;</div>';
-                const tracks = (rel.tracks || []).map((tr, idx) => {
-                    const artist = tr.artist ? `<span class="bc-track-artist">by ${tr.artist}</span>` : '';
-                    return `<div class="bc-track-row" data-track-idx="${idx}"><span class="bc-track-title"><span>${idx + 1}.</span><span class="bc-track-main">${tr.title}</span>${artist}</span><span class="bc-track-duration">${tr.duration || '00:00'}</span></div>`;
-                }).join('');
-                const firstDuration = rel.tracks && rel.tracks[0] ? rel.tracks[0].duration : '00:00';
-                return `<article class="bc-player-card" id="player-${rel.id}"><div class="bc-cover-wrapper">${cover}</div><div class="bc-player-body"><div class="bc-album-title">${rel.title}</div><div class="bc-artist-name">by ${rel.artist}</div><div class="bc-audio-controls"><button class="bc-play-btn" aria-label="Play">${playIcon()}</button><div class="bc-scrubber-container"><div class="bc-scrubber"><div class="bc-progress-fill"></div></div><div class="bc-time-display"><span class="bc-current-time">00:00</span><span>/</span><span class="bc-total-time">${firstDuration}</span></div></div><div class="bc-nav-btns"><button class="bc-nav-btn bc-prev-btn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button><button class="bc-nav-btn bc-next-btn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zm9-12h2v12h-2z"/></svg></button></div></div><div class="bc-tracklist">${tracks}</div><div class="bc-youtube-wrap" hidden><iframe class="bc-youtube-frame" title="Full song player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><div class="bc-footer-links"><a class="bc-share-btn">Share</a></div></div></article>`;
-            }
-            function bindCard(rel) {
-                const card = document.getElementById('player-' + rel.id);
-                if (!card) return;
-                card.querySelector('.bc-play-btn').addEventListener('click', () => playTrack(rel.id, activeReleaseId === rel.id && activeTrackIdx !== -1 ? activeTrackIdx : 0));
-                card.querySelectorAll('.bc-track-row').forEach(row => row.addEventListener('click', () => playTrack(rel.id, parseInt(row.dataset.trackIdx, 10))));
-                card.querySelector('.bc-prev-btn').addEventListener('click', () => playTrack(rel.id, activeReleaseId === rel.id && activeTrackIdx > 0 ? activeTrackIdx - 1 : 0));
-                card.querySelector('.bc-next-btn').addEventListener('click', () => playTrack(rel.id, activeReleaseId === rel.id && activeTrackIdx < rel.tracks.length - 1 ? activeTrackIdx + 1 : 0));
-                card.querySelector('.bc-scrubber').addEventListener('click', e => {
-                    if (activeReleaseId !== rel.id || activeTrackIdx === -1 || isNaN(audio.duration)) return;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
-                });
-                card.querySelector('.bc-share-btn').addEventListener('click', () => {
-                    const url = window.location.href.split('#')[0] + '#player-' + rel.id;
-                    if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => alert('Share link copied.'));
-                });
-            }
-            function updateUI() {
-                releases.forEach(rel => {
-                    const card = document.getElementById('player-' + rel.id);
-                    if (!card) return;
-                    const activeCard = rel.id === activeReleaseId;
-                    const activeTrack = activeCard && activeTrackIdx > -1 ? rel.tracks[activeTrackIdx] : null;
-                    const btn = card.querySelector('.bc-play-btn');
-                    btn.innerHTML = activeCard && isPlaying ? pauseIcon() : playIcon();
-                    btn.setAttribute('aria-label', activeCard && isPlaying ? 'Pause' : 'Play');
-                    card.querySelectorAll('.bc-track-row').forEach(row => row.classList.toggle('active', activeCard && parseInt(row.dataset.trackIdx, 10) === activeTrackIdx));
-                    if (!activeCard || (activeTrack && activeTrack.youtubeId)) {
-                        card.querySelector('.bc-progress-fill').style.width = '0%';
-                        card.querySelector('.bc-current-time').textContent = '00:00';
-                        card.querySelector('.bc-total-time').textContent = activeTrack ? (activeTrack.duration || '00:00') : (rel.tracks && rel.tracks[0] ? rel.tracks[0].duration : '00:00');
-                    }
-                });
-            }
-            audio.addEventListener('timeupdate', () => {
-                const card = document.getElementById('player-' + activeReleaseId);
-                if (!card || isNaN(audio.duration)) return;
-                card.querySelector('.bc-progress-fill').style.width = (audio.currentTime / audio.duration) * 100 + '%';
-                card.querySelector('.bc-current-time').textContent = formatTime(audio.currentTime);
-                card.querySelector('.bc-total-time').textContent = formatTime(audio.duration);
-            });
-            audio.addEventListener('play', () => { isPlaying = true; updateUI(); });
-            audio.addEventListener('pause', () => { isPlaying = false; updateUI(); });
-            audio.addEventListener('ended', () => {
-                const rel = releases.find(r => r.id === activeReleaseId);
-                if (rel && activeTrackIdx < rel.tracks.length - 1) playTrack(activeReleaseId, activeTrackIdx + 1);
-                else { isPlaying = false; activeTrackIdx = -1; updateUI(); }
-            });
-            function renderCatalog() {
-                if (!releases.length) { container.innerHTML = '<div class="empty">No music releases found yet.</div>'; return; }
-                container.innerHTML = releases.map(buildCard).join('');
-                releases.forEach(bindCard);
+                active = index;
+                if (track.youtubeId) {
+                    audio.pause();
+                    audio.removeAttribute('src');
+                    audio.load();
+                    isPlaying = true;
+                    youtubePlayer.src = 'https://www.youtube.com/embed/' + track.youtubeId + '?autoplay=1&rel=0';
+                    youtubeWrap.hidden = false;
+                    youtubeWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    updateUI();
+                    return;
+                }
+                stopYouTube();
+                audio.src = track.src;
+                audio.load();
+                audio.play().then(function () { isPlaying = true; updateUI(); }).catch(console.error);
                 updateUI();
             }
+            rows.forEach(function (row) {
+                row.addEventListener('click', function () { playTrack(parseInt(row.dataset.track, 10)); });
+            });
+            playBtn.addEventListener('click', function () { playTrack(active === -1 ? 0 : active); });
+            prevBtn.addEventListener('click', function () { playTrack(active > 0 ? active - 1 : 0); });
+            nextBtn.addEventListener('click', function () { playTrack(active < tracks.length - 1 ? active + 1 : 0); });
+            audio.addEventListener('play', function () { isPlaying = true; updateUI(); });
+            audio.addEventListener('pause', function () { isPlaying = false; updateUI(); });
+            audio.addEventListener('timeupdate', function () {
+                if (isNaN(audio.duration)) return;
+                fill.style.width = (audio.currentTime / audio.duration) * 100 + '%';
+                currentTime.textContent = formatTime(audio.currentTime);
+                totalTime.textContent = formatTime(audio.duration);
+            });
+            audio.addEventListener('ended', function () { playTrack(active < tracks.length - 1 ? active + 1 : 0); });
+            updateUI();
         })();
     </script>
 </body>
