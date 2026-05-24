@@ -35,6 +35,21 @@
           "src": "music/what-you-wanted.mp3"
         }
       ]
+    },
+    {
+      "id": "one-of-the-girls-single",
+      "title": "One of the Girls",
+      "artist": "The Weeknd, JENNIE, Lily-Rose Depp",
+      "genre": "R&B / Synth-Pop",
+      "cover": "images/one_of_the_girls_cover.png",
+      "tracks": [
+        {
+          "id": "one-of-the-girls",
+          "title": "One of the Girls",
+          "duration": "04:05",
+          "src": "music/one-of-the-girls.mp3"
+        }
+      ]
     }
   ]
 }
