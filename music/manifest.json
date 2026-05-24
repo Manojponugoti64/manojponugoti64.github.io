@@ -37,17 +37,23 @@
       ]
     },
     {
-      "id": "one-of-the-girls-single",
-      "title": "One of the Girls",
-      "artist": "The Weeknd, JENNIE, Lily-Rose Depp",
+      "id": "the-weeknd-singles",
+      "title": "Singles",
+      "artist": "The Weeknd",
       "genre": "R&B / Synth-Pop",
       "cover": "images/one_of_the_girls_cover.png",
       "tracks": [
         {
           "id": "one-of-the-girls",
-          "title": "One of the Girls",
+          "title": "One of the Girls (with JENNIE & Lily-Rose Depp)",
           "duration": "04:05",
           "src": "music/one-of-the-girls.mp3"
+        },
+        {
+          "id": "reminder",
+          "title": "Reminder",
+          "duration": "03:39",
+          "src": "music/reminder.mp3"
         }
       ]
     }
