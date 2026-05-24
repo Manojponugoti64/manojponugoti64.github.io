@@ -18,17 +18,7 @@
           "title": "Dracula",
           "duration": "03:53",
           "src": "https://raw.githubusercontent.com/Manojponugoti64/manojponugoti64.github.io/26fc5bb/music/dracula.mp3"
-        }
-      ]
-    },
-    {
-      "id": "native-deluxe",
-      "title": "Native (Deluxe)",
-      "artist": "OneRepublic",
-      "genre": "Pop Rock",
-      "externalUrl": "https://music.apple.com/us/song/1471704328",
-      "sourceNote": "What You Wanted preview provided courtesy of iTunes.",
-      "tracks": [
+        },
         {
           "id": "what-you-wanted",
           "title": "What You Wanted",
