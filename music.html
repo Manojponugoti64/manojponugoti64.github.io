@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music - Manoj's Blog</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
+    <script src="sidebar.js" defer></script>
+    <style>
+        .music-list {
+            display: grid;
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+        }
+        .music-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+        .music-card h2 {
+            margin-top: 0;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+        .music-meta {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        .music-embed {
+            width: 100%;
+            min-height: 152px;
+            border: 0;
+            border-radius: 8px;
+            display: block;
+            background: var(--bg-secondary);
+        }
+        .music-actions {
+            margin: 1rem 0 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a class="logo" href="index.html">Manoj's Blog</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="photos.html">Photos</a></li>
+                <li><a href="music.html">Music</a></li>
+                <li><a href="iss-tracker/">ISS Tracker</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-content">
+            <h1>Music</h1>
+            <p class="page-sub">Songs on repeat.</p>
+
+            <section class="music-list" aria-label="Music picks">
+                <article class="music-card">
+                    <h2>What You Wanted</h2>
+                    <div class="music-meta">OneRepublic</div>
+                    <iframe
+                        class="music-embed"
+                        src="https://open.spotify.com/embed/track/4PcuCJh4TjqZyvM3b82e4K?utm_source=generator"
+                        title="What You Wanted by OneRepublic on Spotify"
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy">
+                    </iframe>
+                    <p class="music-actions">
+                        <a href="https://open.spotify.com/track/4PcuCJh4TjqZyvM3b82e4K" target="_blank" rel="noopener">Open on Spotify</a>
+                    </p>
+                </article>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-social">
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+</body>
+</html>
