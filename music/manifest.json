@@ -1,0 +1,43 @@
+{
+  "releases": [
+    {
+      "id": "currents",
+      "title": "Currents",
+      "artist": "Tame Impala",
+      "genre": "Psychedelic Pop / Synth-Pop",
+      "cover": "https://raw.githubusercontent.com/Manojponugoti64/manojponugoti64.github.io/26fc5bb/images/tame_impala_currents_cover.png",
+      "tracks": [
+        {
+          "id": "the-less-i-know-the-better",
+          "title": "The Less I Know The Better",
+          "duration": "03:36",
+          "src": "https://bobdylanwrotepropagandasongs.wordpress.com/wp-content/uploads/2015/08/07-the-less-i-know-the-better.mp3"
+        },
+        {
+          "id": "dracula",
+          "title": "Dracula",
+          "duration": "03:53",
+          "src": "https://raw.githubusercontent.com/Manojponugoti64/manojponugoti64.github.io/26fc5bb/music/dracula.mp3"
+        }
+      ]
+    },
+    {
+      "id": "native-deluxe",
+      "title": "Native (Deluxe)",
+      "artist": "OneRepublic",
+      "genre": "Pop Rock",
+      "externalUrl": "https://music.apple.com/us/song/1471704328",
+      "sourceNote": "What You Wanted preview provided courtesy of iTunes.",
+      "tracks": [
+        {
+          "id": "what-you-wanted",
+          "title": "What You Wanted",
+          "artist": "OneRepublic",
+          "duration": "04:01",
+          "itunesTrackId": "1471704328",
+          "externalUrl": "https://music.apple.com/us/song/1471704328"
+        }
+      ]
+    }
+  ]
+}
