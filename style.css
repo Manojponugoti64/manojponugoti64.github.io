@@ -2237,7 +2237,8 @@ body.lightbox-open { overflow: hidden; }
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: var(--bg-primary);
+  background: #ffffff; /* Clean museum-white background */
+  color: #1a1a1a;
   z-index: 3000;
   display: flex;
   flex-direction: column;
@@ -2257,7 +2258,7 @@ body.lightbox-open { overflow: hidden; }
 .art-detail-hero {
   position: relative;
   width: 100%;
-  background: #0d0d0d;
+  background: #ffffff; /* Seamless white background to blend the full picture perfectly */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -2280,23 +2281,23 @@ body.lightbox-open { overflow: hidden; }
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1a1a1a;
   font-size: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.25s, transform 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   z-index: 10;
 }
 
 .art-detail-back:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.15);
   transform: scale(1.05);
 }
 
@@ -2309,7 +2310,7 @@ body.lightbox-open { overflow: hidden; }
 
 .art-detail-title-row {
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #e5e5e5;
   padding-bottom: 1.5rem;
 }
 
@@ -2318,12 +2319,12 @@ body.lightbox-open { overflow: hidden; }
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 0.5rem;
-  color: var(--text-primary);
+  color: #1a1a1a;
 }
 
 .art-detail-meta {
   font-size: 1.1rem;
-  color: var(--text-secondary);
+  color: #555555;
 }
 
 .art-detail-artist {
@@ -2338,16 +2339,16 @@ body.lightbox-open { overflow: hidden; }
 .art-detail-desc {
   font-size: 1.05rem;
   line-height: 1.85;
-  color: var(--text-secondary);
+  color: #444444;
   margin-bottom: 2.5rem;
 }
 
 .art-detail-source {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: #666666;
   opacity: 0.75;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #e5e5e5;
   padding-top: 1.5rem;
 }
