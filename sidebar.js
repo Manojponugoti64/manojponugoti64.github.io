@@ -11,61 +11,54 @@
         nav.dataset.sidebarReady = '1';
 
         var inlineLinks = nav.querySelector('.nav-links');
-        // Read existing items so the sidebar mirrors whatever each page already had.
         var items = [];
         if (inlineLinks) {
             var anchors = inlineLinks.querySelectorAll('li > a');
             anchors.forEach(function (a) {
                 items.push({ href: a.getAttribute('href'), label: a.textContent.trim() });
             });
-            // Hide the inline list — the sidebar replaces it.
             inlineLinks.classList.add('nav-links-hidden');
         }
 
-        // Hamburger button
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'menu-toggle';
         btn.setAttribute('aria-label', 'Open menu');
         btn.setAttribute('aria-expanded', 'false');
         btn.innerHTML = '<span></span><span></span><span></span>';
-
-        // Insert hamburger as the first child of nav (top-left)
         nav.insertBefore(btn, nav.firstChild);
 
-        // Backdrop
         var backdrop = document.createElement('div');
         backdrop.className = 'sidebar-backdrop';
         document.body.appendChild(backdrop);
 
-        // Sidebar drawer
         var aside = document.createElement('aside');
         aside.className = 'sidebar';
         aside.setAttribute('aria-label', 'Site navigation');
         aside.setAttribute('aria-hidden', 'true');
 
-        // Detect path depth so links from /posts/foo.html work too
         var prefix = '';
         var path = location.pathname || '/';
-        // /posts/foo.html → ../, /write/ or /manage/ → ../, root → ''
         var depth = path.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
-        // pages live at root level: index.html, about.html, archive.html
-        // depth 0 = root, depth 1 = /posts/foo.html or /write/ etc.
         if (depth.length >= 1 && !/\.html?$/.test(depth[depth.length - 1]) || (depth.length >= 2)) {
-            // /write/, /manage/, /posts/foo.html → need ../
             prefix = '../';
         } else if (depth.length === 1 && /\.html?$/.test(depth[0])) {
-            // /about.html, /archive.html → no prefix
             prefix = '';
         }
 
-        // Build sidebar content. Use links from inline nav if present, otherwise default set.
         var defaults = [
             { href: prefix + 'index.html', label: 'Home' },
+            { href: prefix + 'photos.html', label: 'Photos' },
+            { href: prefix + 'music.html', label: 'Music' },
             { href: prefix + 'about.html', label: 'About' },
             { href: prefix + 'archive.html', label: 'Archive' }
         ];
         var navItems = items.length ? items : defaults;
+        var hasMusic = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'music'; });
+        if (!hasMusic) {
+            var insertAt = Math.min(2, navItems.length);
+            navItems.splice(insertAt, 0, { href: prefix + 'music.html', label: 'Music' });
+        }
 
         var html = '';
         html += '<div class="sidebar-header">';
@@ -112,7 +105,6 @@
             if (e.key === 'Escape') close();
         });
 
-        // Theme toggle inside sidebar — re-uses theme.js's storage + html data-theme
         var themeBtn = aside.querySelector('.sidebar-theme');
         var themeIcon = aside.querySelector('.sidebar-theme-icon');
         var themeLabel = aside.querySelector('.sidebar-theme-label');
