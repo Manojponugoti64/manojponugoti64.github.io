@@ -20,6 +20,21 @@
           "src": "music/dracula.mp3"
         }
       ]
+    },
+    {
+      "id": "onerepublic-singles",
+      "title": "Singles",
+      "artist": "OneRepublic",
+      "genre": "Pop Rock / Alternative",
+      "cover": "images/onerepublic_cover.png",
+      "tracks": [
+        {
+          "id": "what-you-wanted",
+          "title": "What You Wanted",
+          "duration": "04:06",
+          "src": "music/what-you-wanted.mp3"
+        }
+      ]
     }
   ]
 }
