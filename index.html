@@ -34,42 +34,290 @@
                 <li><a href="photos.html">Photos</a></li>
                 <li><a href="music.html">Music</a></li>
                 <li><a href="iss-tracker/">ISS Tracker</a></li>
-                <li><a href="about.html">About</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section class="posts-grid">
+        <!-- Homepage Premium Tabs -->
+        <div class="homepage-tabs">
+            <button class="home-tab-btn active" data-tab="about">About</button>
+            <button class="home-tab-btn" data-tab="writing">Writing</button>
+            <button class="home-tab-btn" data-tab="art">Art</button>
+        </div>
 
-            <article class="post-card">
-                <h2><a href="posts/the-solid-state-of-life.html">THE SOLID STATE OF LIFE</a></h2>
-                <div class="post-meta">May 20, 2026</div>
-                <p class="post-excerpt">
-                    Sometimes you have to work so hard it stops being discipline and becomes obsession. Not the kind people warn you about — not the hollow, performative grind. The other kind. The quiet kind...
-                </p>
-                <a href="posts/the-solid-state-of-life.html" class="read-more">Read more &rarr;</a>
-            </article>
+        <!-- About Tab Panel -->
+        <div id="tabPanelAbout" class="tab-panel active">
+            <div class="about-bio-container">
+                <h1>Manoj Ponugoti</h1>
+                <p>I photograph <mark class="highlight-tag">landscapes</mark> that exist for thirty seconds before the light shifts and they're gone. I track the <mark class="highlight-tag">night sky</mark>. I think about <mark class="highlight-tag">stars</mark> in a way that makes most other things feel briefly unimportant.</p>
+                <p>I write in quiet hours — <mark class="highlight-tag">quiet writing</mark>, short, sharp, the kind of sentences that arrive when everything unnecessary has been stripped away.</p>
+                <p>I am drawn to the place where <mark class="highlight-tag">machine intelligence</mark> meets human intuition: the idea that something built from data might one day perceive what the naked eye almost missed.</p>
+                <p>The rest is lived, not listed.</p>
+            </div>
+        </div>
 
-            <article class="post-card">
-                <h2><a href="posts/the-optimal-rate-of-failure.html">THE OPTIMAL RATE OF FAILURE</a></h2>
-                <div class="post-meta">April 28, 2026</div>
-                <p class="post-excerpt">
-                    The economist George Stigler once said, &quot;If you never miss a plane, you&#39;re spending too much time at the airport.&quot; It&#39;s a small line with a big idea tucked inside it. If you never fail at anything,...
-                </p>
-                <a href="posts/the-optimal-rate-of-failure.html" class="read-more">Read more &rarr;</a>
-            </article>
+        <!-- Writing Tab Panel -->
+        <div id="tabPanelWriting" class="tab-panel">
+            <section class="posts-grid">
+                <article class="post-card">
+                    <h2><a href="posts/the-solid-state-of-life.html">THE SOLID STATE OF LIFE</a></h2>
+                    <div class="post-meta">May 20, 2026</div>
+                    <p class="post-excerpt">
+                        Sometimes you have to work so hard it stops being discipline and becomes obsession. Not the kind people warn you about — not the hollow, performative grind. The other kind. The quiet kind...
+                    </p>
+                    <a href="posts/the-solid-state-of-life.html" class="read-more">Read more &rarr;</a>
+                </article>
 
-            <article class="post-card">
-                <h2><a href="posts/between-roots-and-waves-living-real.html">BETWEEN ROOTS AND WAVES: LIVING REAL</a></h2>
-                <div class="post-meta">April 27, 2026</div>
-                <p class="post-excerpt">
-                    There are places where life stops performing and simply exists unfiltered, unhurried, and unapologetically real. A shoreline, where the sea breathes in long, patient rhythms, and flowers spill over edges and pathways...
-                </p>
-                <a href="posts/between-roots-and-waves-living-real.html" class="read-more">Read more &rarr;</a>
-            </article>
+                <article class="post-card">
+                    <h2><a href="posts/the-optimal-rate-of-failure.html">THE OPTIMAL RATE OF FAILURE</a></h2>
+                    <div class="post-meta">April 28, 2026</div>
+                    <p class="post-excerpt">
+                        The economist George Stigler once said, &quot;If you never miss a plane, you&#39;re spending too much time at the airport.&quot; It&#39;s a small line with a big idea tucked inside it. If you never fail at anything,...
+                    </p>
+                    <a href="posts/the-optimal-rate-of-failure.html" class="read-more">Read more &rarr;</a>
+                </article>
+
+                <article class="post-card">
+                    <h2><a href="posts/between-roots-and-waves-living-real.html">BETWEEN ROOTS AND WAVES: LIVING REAL</a></h2>
+                    <div class="post-meta">April 27, 2026</div>
+                    <p class="post-excerpt">
+                        There are places where life stops performing and simply exists unfiltered, unhurried, and unapologetically real. A shoreline, where the sea breathes in long, patient rhythms, and flowers spill over edges and pathways...
+                    </p>
+                    <a href="posts/between-roots-and-waves-living-real.html" class="read-more">Read more &rarr;</a>
+                </article>
             </section>
+        </div>
+
+        <!-- Art Tab Panel -->
+        <div id="tabPanelArt" class="tab-panel">
+            <div class="art-gallery-masonry">
+                <!-- Art Card 1 -->
+                <div class="art-card" 
+                     data-title="Isadora Duncan" 
+                     data-artist="Abraham Walkowitz" 
+                     data-year="c. 1915" 
+                     data-source="MoMA Source Collection" 
+                     data-desc="An elegant watercolor and ink drawing of the legendary pioneer of modern dance, Isadora Duncan, captured in a fluid green dress. Part of Walkowitz's extensive series of drawings of Duncan, representing kinetic energy and spiritual expression through fluid lines and transparent green washes.">
+                    <div class="art-card-img-wrapper">
+                        <img src="gallery/art_isadora_duncan.png" alt="Isadora Duncan by Abraham Walkowitz">
+                    </div>
+                    <div class="art-card-info">
+                        <div class="art-card-title">Isadora Duncan</div>
+                        <div class="art-card-artist">Abraham Walkowitz</div>
+                    </div>
+                </div>
+
+                <!-- Art Card 2 -->
+                <div class="art-card" 
+                     data-title="Lilacs and Lilies" 
+                     data-artist="Pierre-Joseph Redouté" 
+                     data-year="1827" 
+                     data-source="MoMA Source Collection" 
+                     data-desc="An exquisite botanical watercolor study focusing on the lush layers and delicate petals of French Lilacs and wild Lilies. Rendered with extreme scientific accuracy and painterly grace, showcasing the subtle transitions of violet tones and emerald greens.">
+                    <div class="art-card-img-wrapper">
+                        <img src="gallery/art_lilacs_watercolor.png" alt="Lilacs and Lilies by Pierre-Joseph Redouté">
+                    </div>
+                    <div class="art-card-info">
+                        <div class="art-card-title">Lilacs and Lilies</div>
+                        <div class="art-card-artist">Pierre-Joseph Redouté</div>
+                    </div>
+                </div>
+
+                <!-- Art Card 3 -->
+                <div class="art-card" 
+                     data-title="Seated Woman in Contemplation" 
+                     data-artist="Gustav Klimt" 
+                     data-year="1908" 
+                     data-source="MoMA Source Collection" 
+                     data-desc="A delicate charcoal and pencil figure study on textured sketching paper, enhanced with soft warm washes. This piece displays fluid, expressive contours and classical draftsmanship, capturing a quiet, introspective moment of a seated female figure.">
+                    <div class="art-card-img-wrapper">
+                        <img src="gallery/art_seated_woman_sketch.png" alt="Seated Woman in Contemplation by Gustav Klimt">
+                    </div>
+                    <div class="art-card-info">
+                        <div class="art-card-title">Seated Woman in Contemplation</div>
+                        <div class="art-card-artist">Gustav Klimt</div>
+                    </div>
+                </div>
+
+                <!-- Art Card 4 -->
+                <div class="art-card" 
+                     data-title="Constructivist Composition No. 8" 
+                     data-artist="El Lissitzky" 
+                     data-year="1921" 
+                     data-source="MoMA Source Collection" 
+                     data-desc="A powerful, high-contrast geometric abstract composition in solid red, charcoal black, and cream. Embodying the revolutionary spirit of the Russian Avant-Garde, the piece uses sharp intersecting diagonals and bold circular geometries to represent dynamic movement and industrial space.">
+                    <div class="art-card-img-wrapper">
+                        <img src="gallery/art_constructivist_abstract.png" alt="Constructivist Composition No. 8 by El Lissitzky">
+                    </div>
+                    <div class="art-card-info">
+                        <div class="art-card-title">Constructivist Composition No. 8</div>
+                        <div class="art-card-artist">El Lissitzky</div>
+                    </div>
+                </div>
+
+                <!-- Art Card 5 -->
+                <div class="art-card" 
+                     data-title="Stroll in the Summer Garden" 
+                     data-artist="Claude Monet" 
+                     data-year="1886" 
+                     data-source="MoMA Source Collection" 
+                     data-desc="A vibrant and luminous impressionist oil painting depicting figures walking along a path surrounded by flowering rose bushes, lavender, and lush trees. Painted with visible, thick impasto oil brushstrokes that beautifully capture the fleeting effect of dappled afternoon sunlight.">
+                    <div class="art-card-img-wrapper">
+                        <img src="gallery/art_stroll_in_garden.png" alt="Stroll in the Summer Garden by Claude Monet">
+                    </div>
+                    <div class="art-card-info">
+                        <div class="art-card-title">Stroll in the Summer Garden</div>
+                        <div class="art-card-artist">Claude Monet</div>
+                    </div>
+                </div>
+
+                <!-- Art Card 6 -->
+                <div class="art-card" 
+                     data-title="The Astronomer's Observations" 
+                     data-artist="Leonardo da Vinci" 
+                     data-year="1502" 
+                     data-source="MoMA Source Collection" 
+                     data-desc="A beautiful Renaissance manuscript study illustrating stars, planets, and celestial spheres. Drawn in fine dark ink and sepia washes on weathered parchment paper, surrounded by retrograde celestial orbits and cryptic backwards annotations.">
+                    <div class="art-card-img-wrapper">
+                        <img src="gallery/art_astronomer_constellations.png" alt="The Astronomer's Observations by Leonardo da Vinci">
+                    </div>
+                    <div class="art-card-info">
+                        <div class="art-card-title">The Astronomer's Observations</div>
+                        <div class="art-card-artist">Leonardo da Vinci</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+
+    <!-- Immersive Museum Detail Overlay -->
+    <div id="artDetailOverlay" class="art-detail-overlay">
+        <div class="art-detail-hero">
+            <button class="art-detail-back" id="artDetailCloseBtn" aria-label="Close detail view">&larr;</button>
+            <img id="artDetailImg" src="" alt="">
+        </div>
+        <div class="art-detail-content">
+            <div class="art-detail-title-row">
+                <h1 id="artDetailTitle" class="art-detail-title"></h1>
+                <div class="art-detail-meta">
+                    <span id="artDetailArtist" class="art-detail-artist"></span>
+                    <span id="artDetailYear" class="art-detail-year"></span>
+                </div>
+            </div>
+            <p id="artDetailDesc" class="art-detail-desc"></p>
+            <div id="artDetailSource" class="art-detail-source"></div>
+        </div>
+    </div>
+
+    <!-- Tab Controller & Overlay JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Tab switching logic
+            var tabs = document.querySelectorAll('.home-tab-btn');
+            var panels = document.querySelectorAll('.tab-panel');
+
+            function switchTab(tabId) {
+                tabs.forEach(function (tab) {
+                    if (tab.getAttribute('data-tab') === tabId) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+
+                panels.forEach(function (panel) {
+                    var panelId = panel.id.replace('tabPanel', '').toLowerCase();
+                    if (panelId === tabId) {
+                        panel.classList.add('active');
+                    } else {
+                        panel.classList.remove('active');
+                    }
+                });
+
+                // Update hash without triggering reload
+                if (history.replaceState) {
+                    history.replaceState(null, null, '#' + tabId);
+                } else {
+                    location.hash = tabId;
+                }
+            }
+
+            tabs.forEach(function (tab) {
+                tab.addEventListener('click', function () {
+                    var tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+
+            // Activate tab via deep linking
+            var hash = location.hash.replace('#', '').toLowerCase();
+            if (hash && ['about', 'writing', 'art'].indexOf(hash) > -1) {
+                switchTab(hash);
+            }
+
+            // Listen for hashchange for history support
+            window.addEventListener('hashchange', function () {
+                var newHash = location.hash.replace('#', '').toLowerCase();
+                if (newHash && ['about', 'writing', 'art'].indexOf(newHash) > -1) {
+                    switchTab(newHash);
+                }
+            });
+
+            // Art detail overlay logic
+            var artCards = document.querySelectorAll('.art-card');
+            var overlay = document.getElementById('artDetailOverlay');
+            var overlayImg = document.getElementById('artDetailImg');
+            var overlayTitle = document.getElementById('artDetailTitle');
+            var overlayArtist = document.getElementById('artDetailArtist');
+            var overlayYear = document.getElementById('artDetailYear');
+            var overlayDesc = document.getElementById('artDetailDesc');
+            var overlaySource = document.getElementById('artDetailSource');
+            var closeBtn = document.getElementById('artDetailCloseBtn');
+
+            artCards.forEach(function (card) {
+                card.addEventListener('click', function () {
+                    var title = this.getAttribute('data-title');
+                    var artist = this.getAttribute('data-artist');
+                    var year = this.getAttribute('data-year');
+                    var desc = this.getAttribute('data-desc');
+                    var source = this.getAttribute('data-source');
+                    var imgSrc = this.querySelector('img').getAttribute('src');
+
+                    overlayImg.setAttribute('src', imgSrc);
+                    overlayImg.setAttribute('alt', title + ' by ' + artist);
+                    overlayTitle.textContent = title;
+                    overlayArtist.textContent = artist;
+                    overlayYear.textContent = year;
+                    overlayDesc.textContent = desc;
+                    overlaySource.textContent = source;
+
+                    overlay.classList.add('is-active');
+                    document.body.classList.add('sidebar-open'); // disable background scrolling
+                });
+            });
+
+            function closeOverlay() {
+                overlay.classList.remove('is-active');
+                document.body.classList.remove('sidebar-open');
+                // Optional: clear src after animation finishes to save memory
+                setTimeout(function () {
+                    if (!overlay.classList.contains('is-active')) {
+                        overlayImg.setAttribute('src', '');
+                    }
+                }, 350);
+            }
+
+            closeBtn.addEventListener('click', closeOverlay);
+
+            // Handle clicking outside/closing with Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && overlay.classList.contains('is-active')) {
+                    closeOverlay();
+                }
+            });
+        });
+    </script>
 
     <footer>
         <div class="footer-social">
