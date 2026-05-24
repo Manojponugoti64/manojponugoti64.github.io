@@ -41,9 +41,11 @@
         .bc-track-artist { color: var(--text-secondary); font-style: italic; font-size: 0.85rem; white-space: nowrap; }
         .bc-track-row.active .bc-track-title { color: var(--accent); }
         .bc-track-duration { color: var(--text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .bc-youtube-wrap { margin-top: 1rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #000; aspect-ratio: 16 / 9; }
+        .bc-youtube-wrap[hidden] { display: none; }
+        .bc-youtube-wrap iframe { display: block; width: 100%; height: 100%; border: 0; }
         .bc-footer-links { display: flex; gap: 1.25rem; margin-top: 0.9rem; font-size: 0.85rem; }
         .bc-footer-links a { cursor: pointer; color: var(--accent); }
-        .bc-source-note { margin: 0.8rem 0 0; color: var(--text-secondary); font-size: 0.82rem; font-style: italic; }
         .empty { color: var(--text-secondary); text-align: center; font-style: italic; }
         @media (max-width: 768px) { .bc-player-card { flex-direction: column; } .bc-cover-wrapper { width: 100%; height: 200px; } .bc-audio-controls { flex-wrap: wrap; } }
     </style>
@@ -101,6 +103,28 @@
             }
             function playIcon() { return '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'; }
             function pauseIcon() { return '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'; }
+            function stopYouTubePlayers() {
+                document.querySelectorAll('.bc-youtube-frame').forEach(frame => { frame.src = ''; });
+                document.querySelectorAll('.bc-youtube-wrap').forEach(wrap => { wrap.hidden = true; });
+            }
+            function playYouTubeTrack(releaseId, trackIdx, track) {
+                audio.pause();
+                audio.removeAttribute('src');
+                audio.load();
+                activeReleaseId = releaseId;
+                activeTrackIdx = trackIdx;
+                isPlaying = true;
+                stopYouTubePlayers();
+                const card = document.getElementById('player-' + releaseId);
+                const wrap = card && card.querySelector('.bc-youtube-wrap');
+                const frame = card && card.querySelector('.bc-youtube-frame');
+                if (wrap && frame) {
+                    frame.src = 'https://www.youtube.com/embed/' + encodeURIComponent(track.youtubeId) + '?autoplay=1&rel=0';
+                    wrap.hidden = false;
+                    wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                updateUI();
+            }
             function resolveTrackSrc(track) {
                 if (track.src) return Promise.resolve(track.src);
                 if (!track.itunesTrackId) return Promise.reject(new Error('No playable source found.'));
@@ -118,6 +142,11 @@
                 const release = releases.find(r => r.id === releaseId);
                 const track = release && release.tracks && release.tracks[trackIdx];
                 if (!track) return;
+                if (track.youtubeId) {
+                    playYouTubeTrack(releaseId, trackIdx, track);
+                    return;
+                }
+                stopYouTubePlayers();
                 if (activeReleaseId === releaseId && activeTrackIdx === trackIdx && audio.src) {
                     if (audio.paused) audio.play().catch(console.error);
                     else audio.pause();
@@ -139,9 +168,7 @@
                     return `<div class="bc-track-row" data-track-idx="${idx}"><span class="bc-track-title"><span>${idx + 1}.</span><span class="bc-track-main">${tr.title}</span>${artist}</span><span class="bc-track-duration">${tr.duration || '00:00'}</span></div>`;
                 }).join('');
                 const firstDuration = rel.tracks && rel.tracks[0] ? rel.tracks[0].duration : '00:00';
-                const openLink = rel.externalUrl ? `<a href="${rel.externalUrl}" target="_blank" rel="noopener">Open</a>` : '';
-                const note = rel.sourceNote ? `<p class="bc-source-note">${rel.sourceNote}</p>` : '';
-                return `<article class="bc-player-card" id="player-${rel.id}"><div class="bc-cover-wrapper">${cover}</div><div class="bc-player-body"><div class="bc-album-title">${rel.title}</div><div class="bc-artist-name">by ${rel.artist}</div><div class="bc-audio-controls"><button class="bc-play-btn" aria-label="Play">${playIcon()}</button><div class="bc-scrubber-container"><div class="bc-scrubber"><div class="bc-progress-fill"></div></div><div class="bc-time-display"><span class="bc-current-time">00:00</span><span>/</span><span class="bc-total-time">${firstDuration}</span></div></div><div class="bc-nav-btns"><button class="bc-nav-btn bc-prev-btn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button><button class="bc-nav-btn bc-next-btn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zm9-12h2v12h-2z"/></svg></button></div></div><div class="bc-tracklist">${tracks}</div><div class="bc-footer-links"><a class="bc-share-btn">Share</a>${openLink}</div>${note}</div></article>`;
+                return `<article class="bc-player-card" id="player-${rel.id}"><div class="bc-cover-wrapper">${cover}</div><div class="bc-player-body"><div class="bc-album-title">${rel.title}</div><div class="bc-artist-name">by ${rel.artist}</div><div class="bc-audio-controls"><button class="bc-play-btn" aria-label="Play">${playIcon()}</button><div class="bc-scrubber-container"><div class="bc-scrubber"><div class="bc-progress-fill"></div></div><div class="bc-time-display"><span class="bc-current-time">00:00</span><span>/</span><span class="bc-total-time">${firstDuration}</span></div></div><div class="bc-nav-btns"><button class="bc-nav-btn bc-prev-btn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button><button class="bc-nav-btn bc-next-btn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zm9-12h2v12h-2z"/></svg></button></div></div><div class="bc-tracklist">${tracks}</div><div class="bc-youtube-wrap" hidden><iframe class="bc-youtube-frame" title="Full song player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><div class="bc-footer-links"><a class="bc-share-btn">Share</a></div></div></article>`;
             }
             function bindCard(rel) {
                 const card = document.getElementById('player-' + rel.id);
@@ -165,13 +192,15 @@
                     const card = document.getElementById('player-' + rel.id);
                     if (!card) return;
                     const activeCard = rel.id === activeReleaseId;
+                    const activeTrack = activeCard && activeTrackIdx > -1 ? rel.tracks[activeTrackIdx] : null;
                     const btn = card.querySelector('.bc-play-btn');
                     btn.innerHTML = activeCard && isPlaying ? pauseIcon() : playIcon();
+                    btn.setAttribute('aria-label', activeCard && isPlaying ? 'Pause' : 'Play');
                     card.querySelectorAll('.bc-track-row').forEach(row => row.classList.toggle('active', activeCard && parseInt(row.dataset.trackIdx, 10) === activeTrackIdx));
-                    if (!activeCard) {
+                    if (!activeCard || (activeTrack && activeTrack.youtubeId)) {
                         card.querySelector('.bc-progress-fill').style.width = '0%';
                         card.querySelector('.bc-current-time').textContent = '00:00';
-                        card.querySelector('.bc-total-time').textContent = rel.tracks && rel.tracks[0] ? rel.tracks[0].duration : '00:00';
+                        card.querySelector('.bc-total-time').textContent = activeTrack ? (activeTrack.duration || '00:00') : (rel.tracks && rel.tracks[0] ? rel.tracks[0].duration : '00:00');
                     }
                 });
             }
