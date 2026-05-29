@@ -2493,14 +2493,15 @@ main {
   }
 }
 
-/* Hide on small screens to keep mobile clean */
+/* Scale down on smaller screens */
 @media (max-width: 768px) {
   .bougie-tr { width: 120px; top: -20px; right: -40px; }
   .bougie-bl { width: 100px; bottom: 20px; left: -35px; }
-  .bougie-petal-float { display: none; }
 }
 
 @media (max-width: 480px) {
-  .bougainvillea-wrap { display: none; }
+  .bougie-tr { width: 90px; top: -15px; right: -30px; }
+  .bougie-bl { width: 75px; bottom: 10px; left: -25px; }
+  .bougie-petal-float { width: 6px; height: 4px; }
 }
 
