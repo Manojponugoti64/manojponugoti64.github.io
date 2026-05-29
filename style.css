@@ -2352,3 +2352,155 @@ body.lightbox-open { overflow: hidden; }
   border-top: 1px solid #e5e5e5;
   padding-top: 1.5rem;
 }
+
+/* ===== Bougainvillea Floral Decorations ===== */
+
+.bougainvillea-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Make main position relative so the absolute bougie-wrap is contained */
+main {
+  position: relative;
+}
+
+.bougie {
+  position: absolute;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.08));
+}
+
+.bougie-tr {
+  top: -30px;
+  right: -60px;
+  width: 180px;
+  height: auto;
+  animation: bougieSway 6s ease-in-out infinite;
+}
+
+.bougie-bl {
+  bottom: 40px;
+  left: -50px;
+  width: 150px;
+  height: auto;
+  animation: bougieSway 7s ease-in-out infinite reverse;
+}
+
+.bougie-petal-group {
+  animation: bougieBreath 4s ease-in-out infinite;
+}
+
+/* Gentle swaying */
+@keyframes bougieSway {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25%      { transform: rotate(1.5deg) translateY(-3px); }
+  50%      { transform: rotate(-1deg) translateY(2px); }
+  75%      { transform: rotate(0.8deg) translateY(-1px); }
+}
+
+/* Subtle petal breathing */
+@keyframes bougieBreath {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.04); opacity: 0.9; }
+}
+
+/* Floating petals */
+.bougie-petal-float {
+  position: absolute;
+  width: 10px;
+  height: 7px;
+  background: #d44d8a;
+  border-radius: 50% 50% 50% 0;
+  opacity: 0;
+  pointer-events: none;
+  animation: petalFall linear infinite;
+}
+
+.bougie-float-1 {
+  top: 5%;
+  right: 12%;
+  width: 9px;
+  height: 6px;
+  background: #e0609a;
+  animation-duration: 8s;
+  animation-delay: 0s;
+}
+
+.bougie-float-2 {
+  top: 8%;
+  right: 18%;
+  width: 7px;
+  height: 5px;
+  background: #c73d7a;
+  animation-duration: 10s;
+  animation-delay: 2s;
+}
+
+.bougie-float-3 {
+  top: 3%;
+  right: 8%;
+  width: 11px;
+  height: 8px;
+  background: #e87ab0;
+  animation-duration: 12s;
+  animation-delay: 4s;
+}
+
+.bougie-float-4 {
+  top: 10%;
+  left: 5%;
+  width: 8px;
+  height: 6px;
+  background: #d44d8a;
+  animation-duration: 9s;
+  animation-delay: 1s;
+}
+
+.bougie-float-5 {
+  top: 6%;
+  left: 12%;
+  width: 6px;
+  height: 4px;
+  background: #e0609a;
+  animation-duration: 11s;
+  animation-delay: 3s;
+}
+
+@keyframes petalFall {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+  10% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(200px) translateX(30px) rotate(180deg);
+  }
+  80% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(420px) translateX(-20px) rotate(360deg);
+  }
+}
+
+/* Hide on small screens to keep mobile clean */
+@media (max-width: 768px) {
+  .bougie-tr { width: 120px; top: -20px; right: -40px; }
+  .bougie-bl { width: 100px; bottom: 20px; left: -35px; }
+  .bougie-petal-float { display: none; }
+}
+
+@media (max-width: 480px) {
+  .bougainvillea-wrap { display: none; }
+}
+
