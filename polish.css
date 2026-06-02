@@ -194,7 +194,7 @@ main {
   min-height: 150px;
   padding: 1rem;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   color: var(--text-primary);
   text-decoration: none;
@@ -232,7 +232,7 @@ main {
   color: var(--accent);
   font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -264,7 +264,7 @@ main {
 
 .now-card {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 1.2rem;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.024), transparent),
@@ -289,7 +289,7 @@ main {
   margin: 0.45rem 0 0.55rem;
   color: var(--accent);
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, 2vw, 1.9rem);
+  font-size: 1.9rem;
   line-height: 1.08;
 }
 
@@ -418,6 +418,10 @@ main {
 
   .now-card {
     padding: 1rem;
+  }
+
+  .now-card h2 {
+    font-size: 1.45rem;
   }
 
   .now-card-large {
