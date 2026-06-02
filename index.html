@@ -19,7 +19,7 @@
     <meta name="twitter:title" content="Manoj's Blog">
     <meta name="twitter:description" content="Thoughts on technology, life, and everything in between — from Manoj Kumar.">
     <meta name="twitter:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
-    <link rel="stylesheet" href="style.css?v=1.2">
+    <link rel="stylesheet" href="style.css?v=1.3">
     <script src="theme.js"></script>
     <script src="sidebar.js" defer></script>
     <script src="reading-time.js" defer></script>
@@ -181,9 +181,18 @@
 
     <!-- Immersive Museum Detail Overlay -->
     <div id="artDetailOverlay" class="art-detail-overlay">
-        <div class="art-detail-hero">
+        <div class="art-detail-hero" id="artDetailHero">
             <button class="art-detail-back" id="artDetailCloseBtn" aria-label="Close detail view">&larr;</button>
             <img id="artDetailImg" src="" alt="">
+            <!-- Magnifying Glass Loupe -->
+            <div class="art-loupe" id="artLoupe">
+                <div class="art-loupe-lens" id="artLoupeLens"></div>
+                <div class="art-loupe-ring"></div>
+            </div>
+            <div class="art-loupe-hint" id="artLoupeHint">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                <span>Hover to inspect</span>
+            </div>
         </div>
         <div class="art-detail-content">
             <div class="art-detail-title-row">
@@ -303,6 +312,89 @@
                 if (e.key === 'Escape' && overlay.classList.contains('is-active')) {
                     closeOverlay();
                 }
+            });
+
+            // ===== Magnifying Glass Loupe =====
+            var hero = document.getElementById('artDetailHero');
+            var loupe = document.getElementById('artLoupe');
+            var loupeLens = document.getElementById('artLoupeLens');
+            var loupeHint = document.getElementById('artLoupeHint');
+            var loupeSize = 160; // diameter in px
+            var zoomLevel = 2.5;
+            var loupeActive = false;
+
+            function showLoupe(pageX, pageY) {
+                if (!overlay.classList.contains('is-active')) return;
+                var img = overlayImg;
+                var rect = img.getBoundingClientRect();
+
+                // Cursor position relative to the image
+                var x = pageX - rect.left;
+                var y = pageY - rect.top;
+
+                // Clamp to image bounds
+                if (x < 0 || x > rect.width || y < 0 || y > rect.height) {
+                    loupe.style.opacity = '0';
+                    return;
+                }
+
+                // Position loupe centered on cursor
+                loupe.style.left = (pageX - hero.getBoundingClientRect().left - loupeSize / 2) + 'px';
+                loupe.style.top = (pageY - hero.getBoundingClientRect().top - loupeSize / 2) + 'px';
+                loupe.style.opacity = '1';
+
+                // Calculate background position for the zoomed lens
+                // Use the natural image dimensions for sharp zoom
+                var natW = img.naturalWidth;
+                var natH = img.naturalHeight;
+                var scaleX = natW / rect.width;
+                var scaleY = natH / rect.height;
+
+                var bgW = rect.width * zoomLevel;
+                var bgH = rect.height * zoomLevel;
+                var bgX = -(x * zoomLevel - loupeSize / 2);
+                var bgY = -(y * zoomLevel - loupeSize / 2);
+
+                loupeLens.style.backgroundImage = 'url(' + img.getAttribute('src') + ')';
+                loupeLens.style.backgroundSize = bgW + 'px ' + bgH + 'px';
+                loupeLens.style.backgroundPosition = bgX + 'px ' + bgY + 'px';
+
+                // Hide the hint after first interaction
+                if (loupeHint) {
+                    loupeHint.style.opacity = '0';
+                }
+            }
+
+            function hideLoupe() {
+                loupe.style.opacity = '0';
+            }
+
+            // Mouse events
+            hero.addEventListener('mousemove', function (e) {
+                showLoupe(e.clientX, e.clientY);
+            });
+            hero.addEventListener('mouseleave', function () {
+                hideLoupe();
+                if (loupeHint) loupeHint.style.opacity = '1';
+            });
+
+            // Touch events for mobile
+            hero.addEventListener('touchstart', function (e) {
+                // Don't trigger loupe if touching the back button
+                if (e.target === closeBtn || closeBtn.contains(e.target)) return;
+                e.preventDefault();
+                var touch = e.touches[0];
+                showLoupe(touch.clientX, touch.clientY);
+            }, { passive: false });
+
+            hero.addEventListener('touchmove', function (e) {
+                e.preventDefault();
+                var touch = e.touches[0];
+                showLoupe(touch.clientX, touch.clientY);
+            }, { passive: false });
+
+            hero.addEventListener('touchend', function () {
+                hideLoupe();
             });
         });
     </script>
