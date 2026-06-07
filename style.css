@@ -2108,13 +2108,13 @@ body.lightbox-open { overflow: hidden; }
 }
 
 .home-tab-btn.active {
-  color: #e27d80; /* Elegant soft rose */
-  background: rgba(247, 185, 188, 0.15); /* Delicate pink/peach highlight */
+  color: var(--accent);
+  background: rgba(232, 112, 64, 0.12);
 }
 
 [data-theme="light"] .home-tab-btn.active {
-  color: #c04c50;
-  background: rgba(247, 185, 188, 0.22);
+  color: var(--accent);
+  background: rgba(214, 90, 48, 0.1);
 }
 
 /* Tab Panels */
@@ -2151,16 +2151,16 @@ body.lightbox-open { overflow: hidden; }
 }
 
 .highlight-tag {
-  background: rgba(247, 185, 188, 0.18);
-  color: #e27d80;
+  background: rgba(232, 112, 64, 0.12);
+  color: var(--accent);
   border-radius: 4px;
   padding: 0.1rem 0.4rem;
   font-weight: 600;
 }
 
 [data-theme="light"] .highlight-tag {
-  background: rgba(247, 185, 188, 0.25);
-  color: #bf4346;
+  background: rgba(214, 90, 48, 0.1);
+  color: var(--accent);
 }
 
 /* Staggered Art Gallery (Masonry Layout) */
