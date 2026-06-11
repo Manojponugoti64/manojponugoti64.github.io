@@ -5,9 +5,12 @@
       "title": "Team of Rivals",
       "author": "Doris Kearns Goodwin",
       "status": "reading",
-      "description": "The political genius of Abraham Lincoln — how he assembled his cabinet from former rivals and led a divided nation through the Civil War.",
-      "cover": "",
-      "year": 2005
+      "genre": "History / Biography",
+      "year": 2005,
+      "rating": 5,
+      "cover": "https://covers.openlibrary.org/b/isbn/0684824906-L.jpg",
+      "quote": "His ambition was a little engine that knew no rest.",
+      "note": "Lincoln didn't push his rivals aside — he pulled them into his cabinet. This book is a masterclass in emotional intelligence, political strategy, and what it means to lead people who once wanted your job. Reading it slowly, one chapter at a time, and every page feels like a lesson."
     }
   ]
 }
