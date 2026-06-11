@@ -2452,4 +2452,279 @@ body.lightbox-open { overflow: hidden; }
 
 
 
+/* ╔═══════════════════════════════════════════════════════════╗
+   ║                    BOOKS SECTION                         ║
+   ╚═══════════════════════════════════════════════════════════╝ */
+
+/* ── Filters ── */
+.books-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+.books-filter-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 0.45rem 1.15rem;
+  border-radius: 99px;
+  font-family: 'Georgia', serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.books-filter-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+.books-filter-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ── Grid ── */
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.8rem;
+}
+
+/* ── Card ── */
+.book-card {
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  animation: bookFadeUp 0.55s ease both;
+}
+@keyframes bookFadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.book-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+}
+.book-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ── Cover ── */
+.book-cover-wrapper {
+  position: relative;
+  aspect-ratio: 3 / 4.2;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+.book-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+.book-card:hover .book-cover {
+  transform: scale(1.06);
+}
+
+/* ── Badge ── */
+.book-badge {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 99px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2;
+}
+.book-badge-reading {
+  background: rgba(56, 189, 126, 0.85);
+  color: #fff;
+}
+.book-badge-completed {
+  background: rgba(99, 133, 175, 0.85);
+  color: #fff;
+}
+.book-badge-want-to-read {
+  background: rgba(232, 112, 64, 0.85);
+  color: #fff;
+}
+
+/* ── Card Info ── */
+.book-card-info {
+  padding: 0.85rem 0.9rem 1rem;
+}
+.book-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.book-card-author {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+}
+.book-card-rating {
+  font-size: 0.82rem;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+
+/* ╔══════════════════════════════════════════════════════════╗
+   ║               BOOK DETAIL OVERLAY                       ║
+   ╚══════════════════════════════════════════════════════════╝ */
+.book-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.book-detail-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.book-detail-inner {
+  position: relative;
+  max-width: 500px;
+  width: 92%;
+  max-height: 90vh;
+  background: var(--bg-card);
+  border-radius: 18px;
+  overflow: hidden;
+  overflow-y: auto;
+  box-shadow: 0 28px 80px rgba(0,0,0,0.4);
+  transform: translateY(30px) scale(0.95);
+  transition: transform 0.35s ease;
+}
+.book-detail-overlay.is-open .book-detail-inner {
+  transform: translateY(0) scale(1);
+}
+.book-detail-back {
+  position: absolute;
+  top: 0.8rem;
+  left: 0.8rem;
+  z-index: 10;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.book-detail-back:hover { background: rgba(0,0,0,0.75); }
+
+.book-detail-hero {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+.book-detail-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.book-detail-content {
+  padding: 1.5rem 1.6rem 2rem;
+}
+.book-detail-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 99px;
+  margin-bottom: 0.6rem;
+}
+.book-detail-title {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+}
+.book-detail-meta {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+.book-detail-author {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+.book-detail-genre {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  opacity: 0.8;
+  padding: 0.1rem 0.6rem;
+  background: var(--bg-secondary);
+  border-radius: 99px;
+}
+.book-detail-rating {
+  font-size: 1.05rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+}
+.book-detail-quote {
+  font-style: italic;
+  color: var(--text-secondary);
+  padding: 0.8rem 1rem;
+  border-left: 3px solid var(--accent);
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  background: var(--bg-secondary);
+  border-radius: 0 10px 10px 0;
+}
+.book-detail-note {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .books-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .book-card-info { padding: 0.6rem 0.65rem 0.8rem; }
+  .book-card-title { font-size: 0.85rem; }
+  .book-detail-inner { max-width: 95%; border-radius: 14px; }
+}
+
 

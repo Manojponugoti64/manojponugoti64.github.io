@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Books - Manoj's Blog</title>
+    <link rel="canonical" href="https://manojponugoti64.github.io/books.html">
+    <link rel="alternate" type="application/rss+xml" title="Manoj's Blog" href="/feed.xml">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Manoj's Blog">
+    <meta property="og:title" content="Books — Manoj's Blog">
+    <meta property="og:description" content="Books I've read, am reading, and want to read — a personal library.">
+    <meta property="og:url" content="https://manojponugoti64.github.io/books.html">
+    <meta property="og:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
+    <link rel="stylesheet" href="style.css?v=1.8">
+    <script src="theme.js"></script>
+    <script src="sidebar.js?v=1.8" defer></script>
+    <script src="spotify.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a class="logo" href="index.html">Manoj's Blog</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="photos.html">Photos</a></li>
+                <li><a href="music.html">Music</a></li>
+                <li><a href="books.html" class="active">Books</a></li>
+                <li><a href="iss-tracker/">ISS Tracker</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-content">
+            <h1>Books</h1>
+            <p class="page-sub">What I&#39;m reading, what I&#39;ve finished, and what&#39;s waiting on the shelf.</p>
+
+            <div class="books-filters">
+                <button class="books-filter-btn active" data-filter="all">All Books</button>
+                <button class="books-filter-btn" data-filter="reading">Reading</button>
+                <button class="books-filter-btn" data-filter="completed">Completed</button>
+                <button class="books-filter-btn" data-filter="want-to-read">Want to Read</button>
+            </div>
+
+            <div id="booksGrid" class="books-grid" aria-live="polite"></div>
+            <p id="booksEmpty" class="photo-empty" style="display:none;">No books yet — check back soon.</p>
+        </div>
+    </main>
+
+    <!-- Book Detail Overlay -->
+    <div id="bookDetailOverlay" class="book-detail-overlay" aria-hidden="true">
+        <div class="book-detail-inner">
+            <button class="book-detail-back" id="bookDetailCloseBtn" aria-label="Close detail view">&larr;</button>
+            <div class="book-detail-hero">
+                <img id="bookDetailImg" src="" alt="">
+            </div>
+            <div class="book-detail-content">
+                <div class="book-detail-badge" id="bookDetailBadge"></div>
+                <h1 id="bookDetailTitle" class="book-detail-title"></h1>
+                <div class="book-detail-meta">
+                    <span id="bookDetailAuthor" class="book-detail-author"></span>
+                    <span id="bookDetailGenre" class="book-detail-genre"></span>
+                </div>
+                <div id="bookDetailRating" class="book-detail-rating"></div>
+                <blockquote id="bookDetailQuote" class="book-detail-quote"></blockquote>
+                <p id="bookDetailNote" class="book-detail-note"></p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-social">
+            <a href="https://github.com/Manojponugoti64" class="social-link social-link--icon-only" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            </a>
+            <a href="https://x.com/younghoax20" class="social-link social-link--icon-only" target="_blank" rel="noopener noreferrer" aria-label="Zorothepirate_ on X (@younghoax20)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var grid = document.getElementById('booksGrid');
+            var emptyMsg = document.getElementById('booksEmpty');
+            var overlay = document.getElementById('bookDetailOverlay');
+            var closeBtn = document.getElementById('bookDetailCloseBtn');
+            var filters = document.querySelectorAll('.books-filter-btn');
+
+            var allBooks = [];
+            var activeFilter = 'all';
+
+            /* ── Detail overlay helpers ── */
+            function openDetail(book) {
+                document.getElementById('bookDetailImg').src = book.cover;
+                document.getElementById('bookDetailImg').alt = book.title;
+                document.getElementById('bookDetailTitle').textContent = book.title;
+                document.getElementById('bookDetailAuthor').textContent = book.author;
+                document.getElementById('bookDetailGenre').textContent = book.genre;
+                document.getElementById('bookDetailQuote').textContent = '"' + book.quote + '"';
+                document.getElementById('bookDetailNote').textContent = book.note;
+
+                var badge = document.getElementById('bookDetailBadge');
+                badge.textContent = statusLabel(book.status);
+                badge.className = 'book-detail-badge book-badge-' + book.status;
+
+                var stars = '';
+                for (var s = 0; s < 5; s++) stars += s < book.rating ? '★' : '☆';
+                document.getElementById('bookDetailRating').textContent = stars;
+
+                overlay.classList.add('is-open');
+                overlay.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('lightbox-open');
+            }
+            function closeDetail() {
+                overlay.classList.remove('is-open');
+                overlay.setAttribute('aria-hidden', 'true');
+                document.body.classList.remove('lightbox-open');
+            }
+            closeBtn.addEventListener('click', closeDetail);
+            overlay.addEventListener('click', function (e) { if (e.target === overlay) closeDetail(); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDetail(); });
+
+            /* ── Status helpers ── */
+            function statusLabel(s) {
+                if (s === 'reading') return 'Currently Reading';
+                if (s === 'completed') return 'Completed';
+                if (s === 'want-to-read') return 'Want to Read';
+                return s;
+            }
+
+            /* ── Render grid ── */
+            function renderBooks(books) {
+                grid.innerHTML = '';
+                if (!books.length) { emptyMsg.style.display = ''; return; }
+                emptyMsg.style.display = 'none';
+
+                books.forEach(function (book, idx) {
+                    var card = document.createElement('button');
+                    card.type = 'button';
+                    card.className = 'book-card';
+                    card.setAttribute('aria-label', 'View details: ' + book.title);
+                    card.style.animationDelay = (idx * 0.07) + 's';
+
+                    var coverWrap = document.createElement('div');
+                    coverWrap.className = 'book-cover-wrapper';
+                    var img = document.createElement('img');
+                    img.className = 'book-cover';
+                    img.src = book.cover;
+                    img.alt = book.title + ' by ' + book.author;
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                    coverWrap.appendChild(img);
+
+                    var badge = document.createElement('span');
+                    badge.className = 'book-badge book-badge-' + book.status;
+                    badge.textContent = statusLabel(book.status);
+
+                    var info = document.createElement('div');
+                    info.className = 'book-card-info';
+
+                    var title = document.createElement('div');
+                    title.className = 'book-card-title';
+                    title.textContent = book.title;
+
+                    var author = document.createElement('div');
+                    author.className = 'book-card-author';
+                    author.textContent = book.author;
+
+                    var stars = document.createElement('div');
+                    stars.className = 'book-card-rating';
+                    var starStr = '';
+                    for (var s = 0; s < 5; s++) starStr += s < book.rating ? '★' : '☆';
+                    stars.textContent = starStr;
+
+                    info.appendChild(title);
+                    info.appendChild(author);
+                    info.appendChild(stars);
+
+                    card.appendChild(coverWrap);
+                    card.appendChild(badge);
+                    card.appendChild(info);
+
+                    card.addEventListener('click', function () { openDetail(book); });
+                    grid.appendChild(card);
+                });
+            }
+
+            /* ── Filtering ── */
+            function applyFilter() {
+                var filtered = activeFilter === 'all'
+                    ? allBooks
+                    : allBooks.filter(function (b) { return b.status === activeFilter; });
+                renderBooks(filtered);
+            }
+
+            filters.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    filters.forEach(function (b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    activeFilter = btn.dataset.filter;
+                    applyFilter();
+                });
+            });
+
+            /* ── Load manifest ── */
+            fetch('books/manifest.json?cb=' + Date.now())
+                .then(function (r) {
+                    if (!r.ok) throw new Error('Failed to load books (' + r.status + ').');
+                    return r.json();
+                })
+                .then(function (data) {
+                    allBooks = (data && data.books) || [];
+                    applyFilter();
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    emptyMsg.style.display = '';
+                });
+        })();
+    </script>
+</body>
+</html>

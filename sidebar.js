@@ -50,6 +50,7 @@
             { href: prefix + 'index.html', label: 'Home' },
             { href: prefix + 'photos.html', label: 'Photos' },
             { href: prefix + 'music.html', label: 'Music' },
+            { href: prefix + 'books.html', label: 'Books' },
             { href: prefix + 'archive.html', label: 'Archive' }
         ];
         var navItems = items.length ? items : defaults;

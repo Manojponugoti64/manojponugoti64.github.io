@@ -1,0 +1,48 @@
+{
+  "books": [
+    {
+      "id": "cosmos",
+      "title": "Cosmos",
+      "author": "Carl Sagan",
+      "genre": "Science / Astronomy",
+      "cover": "images/book_cosmos_cover.png",
+      "status": "completed",
+      "rating": 5,
+      "quote": "The cosmos is within us. We are made of star-stuff. We are a way for the universe to know itself.",
+      "note": "The book that made me look up. Sagan writes about the universe the way a poet writes about love — with reverence, wonder, and an ache for what we don't yet understand. Every chapter is a door into something vast."
+    },
+    {
+      "id": "the-camera",
+      "title": "The Camera",
+      "author": "Ansel Adams",
+      "genre": "Photography / Art",
+      "cover": "images/book_camera_cover.png",
+      "status": "reading",
+      "rating": 5,
+      "quote": "You don't take a photograph, you make it.",
+      "note": "Adams treats the camera not as a gadget but as an extension of vision. Reading this while learning photography changed how I see light, shadow, and the patience a single frame demands."
+    },
+    {
+      "id": "zen-motorcycle",
+      "title": "Zen and the Art of Motorcycle Maintenance",
+      "author": "Robert M. Pirsig",
+      "genre": "Philosophy / Memoir",
+      "cover": "images/book_zen_cover.png",
+      "status": "completed",
+      "rating": 4,
+      "quote": "The only Zen you find on the tops of mountains is the Zen you bring up there.",
+      "note": "Part road trip, part philosophy lecture, part quiet breakdown. Pirsig asks what quality really means, and by the end you realize the question matters more than any answer."
+    },
+    {
+      "id": "godel-escher-bach",
+      "title": "Gödel, Escher, Bach",
+      "author": "Douglas Hofstadter",
+      "genre": "Mathematics / Philosophy",
+      "cover": "images/book_geb_cover.png",
+      "status": "want-to-read",
+      "rating": 5,
+      "quote": "In the end, we are self-perceiving, self-inventing, locked-in mirages that are little miracles of self-reference.",
+      "note": "A book about loops, recursion, and the strange way consciousness emerges from matter. It sits on the shelf waiting — I know once I start, everything else stops."
+    }
+  ]
+}
