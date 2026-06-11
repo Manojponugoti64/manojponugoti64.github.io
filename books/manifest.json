@@ -1,3 +1,13 @@
 {
-  "books": []
+  "books": [
+    {
+      "id": "team-of-rivals",
+      "title": "Team of Rivals",
+      "author": "Doris Kearns Goodwin",
+      "status": "reading",
+      "description": "The political genius of Abraham Lincoln — how he assembled his cabinet from former rivals and led a divided nation through the Civil War.",
+      "cover": "",
+      "year": 2005
+    }
+  ]
 }
