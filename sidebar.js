@@ -71,6 +71,13 @@
             html += '<li><a href="' + it.href + '">' + it.label + '</a></li>';
         }
         html += '</ul></nav>';
+        html += '<div class="sidebar-books">';
+        html += '<span class="sidebar-books-label">Currently Reading</span>';
+        html += '<div class="sidebar-book-item">';
+        html += '<span class="sidebar-book-title">Team of Rivals</span>';
+        html += '<span class="sidebar-book-author">Doris Kearns Goodwin &mdash; on Abraham Lincoln</span>';
+        html += '</div>';
+        html += '</div>';
         html += '<div class="sidebar-footer">';
         html += '<button type="button" class="sidebar-theme" aria-label="Toggle dark and light mode"><span class="sidebar-theme-icon">\u263E</span><span class="sidebar-theme-label">Dark mode</span></button>';
         html += '</div>';

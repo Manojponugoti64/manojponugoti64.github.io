@@ -2728,3 +2728,35 @@ body.lightbox-open { overflow: hidden; }
 }
 
 
+
+/* Sidebar — currently reading */
+.sidebar-books {
+  padding: 1rem 1.25rem 0.75rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+
+.sidebar-books-label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  opacity: .5;
+  margin-bottom: .5rem;
+}
+
+.sidebar-book-item {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.sidebar-book-title {
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.sidebar-book-author {
+  font-size: .75rem;
+  opacity: .6;
+  font-style: italic;
+}
