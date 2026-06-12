@@ -154,54 +154,43 @@
         style.textContent = [
             '.bougainvillea-landing-live {',
             '  position: relative;',
-            '  min-height: min(78vh, 640px);',
-            '  display: grid;',
-            '  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);',
-            '  gap: clamp(1.5rem, 5vw, 4rem);',
-            '  align-items: center;',
+            '  display: block;',
+            '  width: 100%;',
+            '  aspect-ratio: 16 / 8;',
+            '  min-height: min(72vh, 600px);',
             '  overflow: hidden;',
-            '  margin: 0 0 2.5rem;',
-            '  padding: clamp(2.25rem, 6vw, 5rem);',
-            '  border: 1px solid rgba(216, 90, 48, 0.35);',
-            '  border-radius: 8px;',
-            '  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.18);',
+            '  margin: 0 0 3rem;',
+            '  border-radius: 20px;',
+            '  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);',
             '}',
-            '.boug-live-copy { position: relative; z-index: 2; max-width: 560px; }',
-            '.boug-live-eyebrow { margin: 0 0 0.85rem; color: #2f766f; font-family: Georgia, serif; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; }',
-            '[data-theme="dark"] .boug-live-eyebrow, :root:not([data-theme="light"]) .boug-live-eyebrow { color: #87c9bd; }',
-            '.bougainvillea-landing-live h1 { margin: 0; color: var(--accent); font-size: clamp(3.1rem, 9vw, 6.4rem); line-height: 0.92; letter-spacing: 0; text-align: left; }',
-            '.bougainvillea-landing-live h1 span { display: block; color: var(--text-primary); }',
-            '.boug-live-text { max-width: 500px; margin: 1.25rem 0 0; color: var(--text-secondary); font-size: clamp(1.08rem, 2.2vw, 1.28rem); line-height: 1.55; }',
-            '.boug-live-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }',
-            '.boug-live-actions a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0.8rem 1.1rem; border-radius: 8px; border: 1px solid rgba(216, 90, 48, 0.38); font-weight: 700; }',
-            '.boug-live-actions a:first-child { background: var(--accent); color: #fff; }',
-            '.boug-live-actions a:last-child { color: var(--accent); background: rgba(255, 255, 255, 0.12); }',
-            '.boug-live-garden { position: relative; z-index: 1; min-height: 360px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15); }',
-            '.boug-live-photo { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; opacity: 0.95; }',
-            '.bougainvillea-landing-live:hover .boug-live-photo { transform: scale(1.04); }',
-            '[data-theme="dark"] .boug-live-photo, :root:not([data-theme="light"]) .boug-live-photo { opacity: 0.8; filter: brightness(0.8) saturate(0.95); }',
+            '.boug-live-garden { position: absolute; inset: 0; overflow: hidden; }',
+            '.boug-live-photo { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.01); transition: transform 8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; will-change: transform; }',
+            '.bougainvillea-landing-live:hover .boug-live-photo { transform: scale(1.08); }',
+            '.boug-live-garden::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,0.10) 100%); }',
+            '[data-theme="dark"] .boug-live-photo, :root:not([data-theme="light"]) .boug-live-photo { opacity: 0.92; filter: brightness(0.86) saturate(1.02); }',
+            '[data-theme="dark"] .boug-live-garden::after, :root:not([data-theme="light"]) .boug-live-garden::after { background: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.28) 100%); }',
             '@media (max-width: 760px) {',
-            '  .bougainvillea-landing-live { grid-template-columns: 1fr; min-height: auto; padding: 2rem 1.35rem; }',
-            '  .boug-live-garden { min-height: 280px; }',
-            '  .boug-live-actions a { flex: 1 1 150px; }',
+            '  .bougainvillea-landing-live { aspect-ratio: 4 / 5; min-height: auto; border-radius: 16px; margin-bottom: 2rem; }',
             '}'
         ].join('\n');
         document.head.appendChild(style);
 
         var hero = document.createElement('section');
         hero.className = 'bougainvillea-landing-live';
-        hero.setAttribute('aria-label', 'Bougainvillea landing feature');
-        hero.innerHTML = [
-            '<div class="boug-live-copy">',
-            '  <p class="boug-live-eyebrow">Blooming now</p>',
-            '  <h1>Manoj\'s <span>Blog</span></h1>',
-            '  <p class="boug-live-text">Photographs, music, essays, and small bright thoughts framed with a bougainvillea garden glow.</p>',
-            '  <div class="boug-live-actions"><a href="#writing">Read writing</a><a href="photos.html">View photos</a></div>',
-            '</div>',
-            '<div class="boug-live-garden" aria-hidden="true">',
-            '  <img class="boug-live-photo" src="images/bougainvillea-real.jpg" alt="Vibrant Bougainvillea blossoms in full bloom">',
-            '</div>'
-        ].join('');
+        hero.setAttribute('aria-label', 'Bougainvillea garden');
+
+        var garden = document.createElement('div');
+        garden.className = 'boug-live-garden';
+
+        var photo = document.createElement('img');
+        photo.className = 'boug-live-photo';
+        photo.src = 'images/bougainvillea-real.jpg';
+        photo.alt = 'Vibrant bougainvillea blossoms in full bloom';
+        photo.loading = 'eager';
+        photo.decoding = 'async';
+
+        garden.appendChild(photo);
+        hero.appendChild(garden);
         main.insertBefore(hero, main.firstElementChild);
     });
 })();
