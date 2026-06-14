@@ -71,6 +71,21 @@
           "src": "music/set-fire-to-the-rain.mp3"
         }
       ]
+    },
+    {
+      "id": "coldplay-parachutes",
+      "title": "Parachutes",
+      "artist": "Coldplay",
+      "genre": "Alternative Rock / Britpop",
+      "cover": "images/coldplay_parachutes_cover.jpg",
+      "tracks": [
+        {
+          "id": "yellow",
+          "title": "Yellow",
+          "duration": "00:30",
+          "src": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/66/f3/1a/66f31a76-a6ed-cb4c-f353-23310a7ae9a8/mzaf_10593596652344378873.plus.aac.p.m4a"
+        }
+      ]
     }
   ]
 }
