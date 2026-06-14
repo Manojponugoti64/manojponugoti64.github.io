@@ -92,6 +92,21 @@
           "src": "music/sparks.mp3"
         }
       ]
+    },
+    {
+      "id": "coldplay-a-rush-of-blood-to-the-head",
+      "title": "A Rush of Blood to the Head",
+      "artist": "Coldplay",
+      "genre": "Alternative Rock / Indie",
+      "cover": "images/coldplay_a_rush_of_blood_cover.png",
+      "tracks": [
+        {
+          "id": "the-scientist",
+          "title": "The Scientist",
+          "duration": "05:12",
+          "src": "music/the_scientist.mp3"
+        }
+      ]
     }
   ]
 }
