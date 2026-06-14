@@ -84,6 +84,12 @@
           "title": "Yellow",
           "duration": "04:29",
           "src": "music/yellow.mp3"
+        },
+        {
+          "id": "sparks",
+          "title": "Sparks",
+          "duration": "03:47",
+          "src": "music/sparks.mp3"
         }
       ]
     }
