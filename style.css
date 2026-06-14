@@ -1715,89 +1715,132 @@ body.lightbox-open { overflow: hidden; }
 }
 
 /* ===== Music Page & Bandcamp-style Player ===== */
+/* ===========================================================
+   Music page — refined redesign
+   =========================================================== */
 .music-filters {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 0.6rem;
+  margin-bottom: 2.5rem;
   justify-content: center;
   flex-wrap: wrap;
 }
 .music-filter-btn {
-  background: var(--bg-card);
+  background: transparent;
   border: 1px solid var(--border);
   color: var(--text-secondary);
-  padding: 0.5rem 1.2rem;
-  border-radius: 20px;
+  padding: 0.55rem 1.35rem;
+  border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
   font-weight: 500;
-  transition: all 0.25s ease;
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
 }
 .music-filter-btn:hover {
   color: var(--accent);
   border-color: var(--accent);
+  transform: translateY(-1px);
 }
 .music-filter-btn.active {
-  background: var(--accent);
-  color: #1a1a1a;
-  border-color: var(--accent);
-  font-weight: bold;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 6px 18px -6px var(--accent);
 }
 
 .music-sections {
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 3.5rem;
 }
 .music-group-title {
-  font-size: 1.3rem;
-  color: var(--accent);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.18em;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 1.75rem;
 }
 
 .bc-player-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 1.75rem;
 }
 
+/* Card -------------------------------------------------- */
 .bc-player-card {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.8rem;
-  box-shadow: 0 4px 15px var(--shadow);
+  border-radius: 18px;
+  padding: 1.9rem;
+  box-shadow: 0 10px 30px -16px var(--shadow);
   display: flex;
   gap: 2rem;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  animation: bcCardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* soft accent wash bleeding from the top-left, behind the cover */
+.bc-player-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(420px 220px at 0% 0%, rgba(232, 112, 64, 0.10), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 .bc-player-card:hover {
-  border-color: var(--accent-dark);
-  box-shadow: 0 6px 20px var(--shadow);
+  border-color: var(--accent);
+  box-shadow: 0 22px 50px -24px var(--shadow);
+  transform: translateY(-3px);
+}
+.bc-player-card:hover::before { opacity: 1; }
+.bc-player-card > * { position: relative; z-index: 1; }
+.bc-player-grid .bc-player-card:nth-child(2) { animation-delay: 0.06s; }
+.bc-player-grid .bc-player-card:nth-child(3) { animation-delay: 0.12s; }
+.bc-player-grid .bc-player-card:nth-child(4) { animation-delay: 0.18s; }
+.bc-player-grid .bc-player-card:nth-child(5) { animation-delay: 0.24s; }
+
+@keyframes bcCardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
+/* Cover ------------------------------------------------- */
 .bc-cover-wrapper {
   flex: 0 0 auto;
-  width: 160px;
-  height: 160px;
-  border-radius: 6px;
+  width: 172px;
+  height: 172px;
+  border-radius: 14px;
   overflow: hidden;
-  background: var(--bg-secondary);
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
   border: 1px solid var(--border);
   position: relative;
+  box-shadow: 0 14px 32px -14px var(--shadow);
+}
+.bc-cover-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  pointer-events: none;
 }
 .bc-cover-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #000;
   display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.bc-player-card:hover .bc-cover-img { transform: scale(1.05); }
 .bc-cover-placeholder {
   width: 100%;
   height: 100%;
@@ -1809,65 +1852,82 @@ body.lightbox-open { overflow: hidden; }
   background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--border) 100%);
 }
 
+/* Body / meta ------------------------------------------ */
 .bc-player-body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* critical for text-overflow in flexbox child */
+  min-width: 0;
 }
 
 .bc-meta {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 .bc-album-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--accent);
-  margin-bottom: 0.2rem;
-  line-height: 1.2;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.15rem;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
 }
 .bc-artist-name {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 500;
   color: var(--accent);
-  line-height: 1.2;
+  line-height: 1.3;
+}
+.bc-genre-tag {
+  display: inline-block;
+  margin-top: 0.6rem;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
-/* Controls section mimicking the proceduralia widget */
+/* Controls --------------------------------------------- */
 .bc-audio-controls {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  gap: 1.1rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 0.75rem 1.2rem;
+  border-radius: 14px;
+  padding: 0.7rem 1rem;
   margin-bottom: 1.2rem;
 }
 
 .bc-play-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  width: 44px;
-  height: 44px;
-  border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border: none;
+  color: #fff;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  box-shadow: 0 8px 18px -8px var(--accent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 .bc-play-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(232, 112, 64, 0.05);
+  transform: scale(1.07);
+  box-shadow: 0 10px 22px -8px var(--accent);
+  filter: brightness(1.05);
 }
+.bc-play-btn:active { transform: scale(0.96); }
 .bc-play-btn svg {
   width: 18px;
   height: 18px;
   fill: currentColor;
+  margin-left: 1px;
 }
 
 .bc-scrubber-container {
@@ -1881,27 +1941,43 @@ body.lightbox-open { overflow: hidden; }
   width: 100%;
   height: 6px;
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 999px;
   position: relative;
   cursor: pointer;
 }
+.bc-scrubber:hover { height: 8px; transition: height 0.15s ease; }
 .bc-progress-fill {
   height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  border-radius: 999px;
   width: 0%;
   position: absolute;
   top: 0;
   left: 0;
 }
+.bc-progress-fill::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(232, 112, 64, 0.35);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.bc-scrubber:hover .bc-progress-fill::after { opacity: 1; }
 .bc-time-display {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
 }
 .bc-time-separator {
   color: var(--border);
@@ -1910,25 +1986,26 @@ body.lightbox-open { overflow: hidden; }
 
 .bc-nav-btns {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-shrink: 0;
 }
 .bc-nav-btn {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  border-radius: 50%;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 .bc-nav-btn:hover {
   color: var(--accent);
-  background: rgba(232, 112, 64, 0.05);
+  background: rgba(232, 112, 64, 0.08);
+  transform: scale(1.08);
 }
 .bc-nav-btn svg {
   width: 16px;
@@ -1936,11 +2013,11 @@ body.lightbox-open { overflow: hidden; }
   fill: currentColor;
 }
 
-/* Playlist / Tracklist */
+/* Tracklist -------------------------------------------- */
 .bc-tracklist {
   display: flex;
   flex-direction: column;
-  border-radius: 6px;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border);
 }
@@ -1948,64 +2025,103 @@ body.lightbox-open { overflow: hidden; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1.1rem;
   border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, padding-left 0.2s ease;
   user-select: none;
 }
 .bc-track-row:last-child {
   border-bottom: none;
 }
 .bc-track-row:hover {
-  background: rgba(232, 112, 64, 0.05);
+  background: rgba(232, 112, 64, 0.06);
+  padding-left: 1.3rem;
 }
 .bc-track-row.active {
-  background: rgba(232, 112, 64, 0.08);
+  background: linear-gradient(90deg, rgba(232, 112, 64, 0.12), transparent);
   font-weight: 600;
-  border-left: 3px solid var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 .bc-track-title {
   color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+}
+.bc-track-number {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  min-width: 1.2em;
 }
 .bc-track-row.active .bc-track-title {
   color: var(--accent);
 }
+/* "now playing" pulsing dot on the active track */
+.bc-track-row.active .bc-track-number {
+  position: relative;
+  color: transparent;
+}
+.bc-track-row.active .bc-track-number::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(232, 112, 64, 0.5);
+  animation: bcPulse 1.6s ease-out infinite;
+}
+@keyframes bcPulse {
+  0% { box-shadow: 0 0 0 0 rgba(232, 112, 64, 0.5); }
+  70% { box-shadow: 0 0 0 7px rgba(232, 112, 64, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 112, 64, 0); }
+}
 .bc-track-duration {
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
 }
 
-/* Download / Share links */
+/* Footer links ----------------------------------------- */
 .bc-footer-links {
   display: flex;
   gap: 1.5rem;
-  margin-top: 1rem;
+  margin-top: 1.1rem;
   font-size: 0.85rem;
 }
 .bc-footer-links a {
-  color: var(--accent);
+  color: var(--text-secondary);
   font-weight: 500;
   cursor: pointer;
+  transition: color 0.2s ease;
 }
 .bc-footer-links a:hover {
-  text-decoration: underline;
-  color: var(--accent-hover);
+  color: var(--accent);
 }
 
 @media (max-width: 768px) {
   .bc-player-card {
     flex-direction: column;
     gap: 1.5rem;
+    padding: 1.5rem;
   }
   .bc-cover-wrapper {
     width: 100%;
-    height: 200px;
+    height: 240px;
   }
+  .bc-album-title { font-size: 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bc-player-card { animation: none; }
+  .bc-track-row.active .bc-track-number::before { animation: none; }
+  .bc-cover-img, .bc-player-card, .bc-play-btn { transition: none; }
 }
 
 /* ===== /manage/ Music Panel ===== */

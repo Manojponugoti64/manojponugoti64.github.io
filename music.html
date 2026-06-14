@@ -17,7 +17,7 @@
     <meta property="og:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
-    <link rel="stylesheet" href="style.css?v=1.7">
+    <link rel="stylesheet" href="style.css?v=1.9">
     <script src="theme.js"></script>
     <script src="sidebar.js?v=1.7" defer></script>
     <script src="spotify.js" defer></script>
@@ -286,7 +286,9 @@
                         </div>
                         <div class="bc-player-body">
                             <div class="bc-meta">
+                                <div class="bc-album-title">${rel.title || ''}</div>
                                 <div class="bc-artist-name">${rel.artist}</div>
+                                ${rel.genre ? `<div class="bc-genre-tag">${rel.genre}</div>` : ''}
                             </div>
                             
                             <div class="bc-audio-controls">
