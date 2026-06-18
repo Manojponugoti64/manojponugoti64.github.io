@@ -2875,3 +2875,27 @@ body.lightbox-open { overflow: hidden; }
   opacity: .6;
   font-style: italic;
 }
+
+/* Landing page — featured quote */
+.about-quote {
+  margin: 1.75rem 0 0;
+  padding: 0.25rem 0 0.25rem 1.6rem;
+  border-left: 2px solid var(--accent);
+  border-radius: 0;
+}
+.about-quote p {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--text-primary);
+  margin: 0;
+}
+.about-quote cite {
+  display: block;
+  margin-top: 1.1rem;
+  font-style: normal;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
