@@ -166,18 +166,23 @@
             '.boug-live-garden { position: absolute; inset: 0; overflow: hidden; }',
             '.boug-live-photo { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.01); transition: transform 8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; will-change: transform; }',
             '.bougainvillea-landing-live:hover .boug-live-photo { transform: scale(1.08); }',
-            '.boug-live-garden::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0) 38%, rgba(0,0,0,0.10) 100%); }',
+            '.boug-live-garden::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.42) 46%, rgba(0,0,0,0.10) 100%); }',
             '[data-theme="dark"] .boug-live-photo, :root:not([data-theme="light"]) .boug-live-photo { opacity: 0.92; filter: brightness(0.86) saturate(1.02); }',
-            '[data-theme="dark"] .boug-live-garden::after, :root:not([data-theme="light"]) .boug-live-garden::after { background: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.28) 100%); }',
+            '[data-theme="dark"] .boug-live-garden::after, :root:not([data-theme="light"]) .boug-live-garden::after { background: linear-gradient(90deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.52) 46%, rgba(0,0,0,0.22) 100%); }',
+            '.boug-live-quote { position: relative; z-index: 2; width: min(88%, 720px); padding: clamp(1.4rem, 4vw, 3.4rem); color: #fff; }',
+            '.boug-live-quote-text { margin: 0; font-family: Georgia, serif; font-size: clamp(1.35rem, 4vw, 3.45rem); line-height: 1.14; font-weight: 600; letter-spacing: 0; text-wrap: balance; text-shadow: 0 12px 34px rgba(0,0,0,0.55); }',
+            '.boug-live-quote-byline { display: block; margin-top: 1.1rem; color: rgba(255,255,255,0.82); font-size: clamp(0.92rem, 1.8vw, 1.1rem); font-style: normal; font-weight: 600; letter-spacing: 0; }',
             '@media (max-width: 760px) {',
             '  .bougainvillea-landing-live { aspect-ratio: 4 / 5; min-height: auto; border-radius: 16px; margin-bottom: 2rem; }',
+            '  .boug-live-quote { width: 100%; padding: 1.3rem; }',
+            '  .boug-live-quote-text { font-size: clamp(1.15rem, 7vw, 2.2rem); line-height: 1.16; }',
             '}'
         ].join('\n');
         document.head.appendChild(style);
 
         var hero = document.createElement('section');
         hero.className = 'bougainvillea-landing-live';
-        hero.setAttribute('aria-label', 'Bougainvillea garden');
+        hero.setAttribute('aria-label', 'DavidSHolz landing quote');
 
         var garden = document.createElement('div');
         garden.className = 'boug-live-garden';
@@ -189,8 +194,22 @@
         photo.loading = 'eager';
         photo.decoding = 'async';
 
+        var quote = document.createElement('div');
+        quote.className = 'boug-live-quote';
+
+        var quoteText = document.createElement('p');
+        quoteText.className = 'boug-live-quote-text';
+        quoteText.textContent = 'i wish i could do more - i wish i had a thousand hands and a thousand eyes and a thousand years and army of angels and a thousand stars that lit the sky so bright that the night would never come and that our sleepless dreams would fill this world';
+
+        var quoteByline = document.createElement('cite');
+        quoteByline.className = 'boug-live-quote-byline';
+        quoteByline.textContent = '- by DavidSHolz';
+
+        quote.appendChild(quoteText);
+        quote.appendChild(quoteByline);
         garden.appendChild(photo);
         hero.appendChild(garden);
+        hero.appendChild(quote);
         main.insertBefore(hero, main.firstElementChild);
     });
 })();
