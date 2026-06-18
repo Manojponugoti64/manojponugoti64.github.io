@@ -166,7 +166,7 @@
             '.boug-live-garden { position: absolute; inset: 0; overflow: hidden; }',
             '.boug-live-photo { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.01); transition: transform 8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; will-change: transform; }',
             '.bougainvillea-landing-live:hover .boug-live-photo { transform: scale(1.08); }',
-            '.boug-live-garden::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.42) 46%, rgba(0,0,0,0.10) 100%); }',
+            '.boug-live-garden::after { content: none; }',
             '[data-theme="dark"] .boug-live-photo, :root:not([data-theme="light"]) .boug-live-photo { opacity: 0.92; filter: brightness(0.86) saturate(1.02); }',
             '[data-theme="dark"] .boug-live-garden::after, :root:not([data-theme="light"]) .boug-live-garden::after { background: linear-gradient(90deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.52) 46%, rgba(0,0,0,0.22) 100%); }',
             '.boug-live-quote { position: relative; z-index: 2; width: min(88%, 720px); padding: clamp(1.4rem, 4vw, 3.4rem); color: #fff; }',
@@ -194,22 +194,8 @@
         photo.loading = 'eager';
         photo.decoding = 'async';
 
-        var quote = document.createElement('div');
-        quote.className = 'boug-live-quote';
-
-        var quoteText = document.createElement('p');
-        quoteText.className = 'boug-live-quote-text';
-        quoteText.textContent = 'i wish i could do more - i wish i had a thousand hands and a thousand eyes and a thousand years and army of angels and a thousand stars that lit the sky so bright that the night would never come and that our sleepless dreams would fill this world';
-
-        var quoteByline = document.createElement('cite');
-        quoteByline.className = 'boug-live-quote-byline';
-        quoteByline.textContent = '- by DavidSHolz';
-
-        quote.appendChild(quoteText);
-        quote.appendChild(quoteByline);
         garden.appendChild(photo);
         hero.appendChild(garden);
-        hero.appendChild(quote);
         main.insertBefore(hero, main.firstElementChild);
     });
 })();
