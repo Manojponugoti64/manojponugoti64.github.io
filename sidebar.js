@@ -168,14 +168,9 @@
             '.bougainvillea-landing-live:hover .boug-live-photo { transform: scale(1.08); }',
             '.boug-live-garden::after { content: none; }',
             '[data-theme="dark"] .boug-live-photo, :root:not([data-theme="light"]) .boug-live-photo { opacity: 0.92; filter: brightness(0.86) saturate(1.02); }',
-            '[data-theme="dark"] .boug-live-garden::after, :root:not([data-theme="light"]) .boug-live-garden::after { background: linear-gradient(90deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.52) 46%, rgba(0,0,0,0.22) 100%); }',
-            '.boug-live-quote { position: relative; z-index: 2; width: min(88%, 720px); padding: clamp(1.4rem, 4vw, 3.4rem); color: #fff; }',
-            '.boug-live-quote-text { margin: 0; font-family: Georgia, serif; font-size: clamp(1.35rem, 4vw, 3.45rem); line-height: 1.14; font-weight: 600; letter-spacing: 0; text-wrap: balance; text-shadow: 0 12px 34px rgba(0,0,0,0.55); }',
-            '.boug-live-quote-byline { display: block; margin-top: 1.1rem; color: rgba(255,255,255,0.82); font-size: clamp(0.92rem, 1.8vw, 1.1rem); font-style: normal; font-weight: 600; letter-spacing: 0; }',
+            '[data-theme="dark"] .boug-live-garden::after, :root:not([data-theme="light"]) .boug-live-garden::after { background: none; }',
             '@media (max-width: 760px) {',
             '  .bougainvillea-landing-live { aspect-ratio: 4 / 5; min-height: auto; border-radius: 16px; margin-bottom: 2rem; }',
-            '  .boug-live-quote { width: 100%; padding: 1.3rem; }',
-            '  .boug-live-quote-text { font-size: clamp(1.15rem, 7vw, 2.2rem); line-height: 1.16; }',
             '}'
         ].join('\n');
         document.head.appendChild(style);
