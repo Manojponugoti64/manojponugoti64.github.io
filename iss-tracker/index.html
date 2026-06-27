@@ -3,13 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>ISS Live Tracker - Manoj's Blog</title>
     <link rel="stylesheet" href="../style.css">
+    <!-- Leaflet map library (CSS + JS from CDN) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="../theme.js"></script>
     <script src="../sidebar.js" defer></script>
+    <style>
+        .iss-map {
+            width: 100%;
+            max-width: 900px;
+            height: 460px;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            background: #0b1021;
+            z-index: 0;
+        }
+
+        .iss-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            max-width: 900px;
+            margin: 1.5rem 0;
+        }
+
+        .iss-stat {
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            background: rgba(47,118,111,0.08);
+            border: 1px solid rgba(47,118,111,0.22);
+        }
+
+        .iss-stat .label {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            opacity: 0.7;
+            margin-bottom: 0.35rem;
+        }
+
+        .iss-stat .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .iss-status {
+            max-width: 900px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .iss-status .dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #2f766f;
+            margin-right: 0.45rem;
+            vertical-align: middle;
+            animation: iss-pulse 1.6s ease-in-out infinite;
+        }
+
+        .iss-status.error .dot { background: #c0392b; animation: none; }
+
+        @keyframes iss-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.25; }
+        }
+
+        .iss-leaflet-icon { font-size: 26px; line-height: 1; text-align: center; }
+    </style>
 </head>
 <body>
     <header>
@@ -29,17 +99,30 @@
             <h1>ISS Live Tracker</h1>
             <p class="page-sub">Watch the International Space Station as it orbits Earth in real time.</p>
 
-            <div class="iss-frame-wrap">
-                <iframe
-                    src="https://iss-widget-atdgzfyi.devinapps.com"
-                    width="100%" height="500"
-                    style="border:0; border-radius:12px; max-width:900px;"
-                    loading="lazy"
-                    title="ISS Live Tracker"
-                    allowfullscreen></iframe>
+            <p class="iss-status" id="iss-status"><span class="dot"></span>Connecting to the ISS&hellip;</p>
+
+            <div id="iss-map" class="iss-map" aria-label="Live map showing the position of the International Space Station"></div>
+
+            <div class="iss-stats">
+                <div class="iss-stat">
+                    <span class="label">Latitude</span>
+                    <span class="value" id="iss-lat">&mdash;</span>
+                </div>
+                <div class="iss-stat">
+                    <span class="label">Longitude</span>
+                    <span class="value" id="iss-lon">&mdash;</span>
+                </div>
+                <div class="iss-stat">
+                    <span class="label">Altitude</span>
+                    <span class="value" id="iss-alt">&mdash;</span>
+                </div>
+                <div class="iss-stat">
+                    <span class="label">Speed</span>
+                    <span class="value" id="iss-vel">&mdash;</span>
+                </div>
             </div>
 
-            <p class="iss-note">The ISS travels at about 28,000 km/h and circles Earth roughly every 90 minutes — every dot you see on the map is a moment of human presence in orbit.</p>
+            <p class="iss-note">The ISS travels at about 28,000 km/h and circles Earth roughly every 90 minutes &mdash; every point on the trail is a moment of human presence in orbit.</p>
         </div>
     </main>
 
@@ -51,5 +134,80 @@
             </a>
         </div>
     </footer>
+
+    <script>
+    (function () {
+        // Public, key-free, HTTPS + CORS-enabled ISS position API.
+        var API = 'https://api.wheretheiss.at/v1/satellites/25544';
+        var POLL_MS = 5000;
+
+        var statusEl = document.getElementById('iss-status');
+        var latEl = document.getElementById('iss-lat');
+        var lonEl = document.getElementById('iss-lon');
+        var altEl = document.getElementById('iss-alt');
+        var velEl = document.getElementById('iss-vel');
+
+        // --- Map setup ---
+        var map = L.map('iss-map', { worldCopyJump: true, minZoom: 1 }).setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            noWrap: false
+        }).addTo(map);
+
+        var issIcon = L.divIcon({
+            className: 'iss-leaflet-icon',
+            html: '🛰️', // satellite emoji
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+        var marker = L.marker([0, 0], { icon: issIcon, title: 'ISS' }).addTo(map);
+        var trail = L.polyline([], { color: '#2f766f', weight: 2, opacity: 0.7 }).addTo(map);
+        var trailPoints = [];
+        var followCount = 0;
+
+        function fmt(n, digits) { return Number(n).toFixed(digits); }
+
+        function setStatus(text, isError) {
+            statusEl.innerHTML = '<span class="dot"></span>' + text;
+            statusEl.classList.toggle('error', !!isError);
+        }
+
+        function update(data) {
+            var lat = data.latitude, lon = data.longitude;
+
+            marker.setLatLng([lat, lon]);
+            trailPoints.push([lat, lon]);
+            if (trailPoints.length > 90) trailPoints.shift(); // keep ~one orbit
+            trail.setLatLngs(trailPoints);
+
+            // Keep the ISS centered for the first few updates, then let the user pan freely.
+            if (followCount < 3) { map.panTo([lat, lon]); followCount++; }
+
+            latEl.textContent = fmt(lat, 2) + '°';
+            lonEl.textContent = fmt(lon, 2) + '°';
+            altEl.textContent = fmt(data.altitude, 0) + ' km';
+            velEl.textContent = fmt(data.velocity, 0) + ' km/h';
+
+            var when = new Date().toLocaleTimeString();
+            setStatus('Live &middot; updated ' + when + ' &middot; over ' +
+                      (lat >= 0 ? 'N' : 'S') + ' ' + (lon >= 0 ? 'E' : 'W'), false);
+        }
+
+        function tick() {
+            fetch(API, { cache: 'no-store' })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(update)
+                .catch(function (err) {
+                    setStatus('Connection lost &mdash; retrying&hellip; (' + err.message + ')', true);
+                });
+        }
+
+        tick();
+        setInterval(tick, POLL_MS);
+    })();
+    </script>
 </body>
 </html>
