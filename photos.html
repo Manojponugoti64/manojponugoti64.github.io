@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=1.7">
-    <link rel="stylesheet" href="photos.css?v=1.0">
+    <link rel="stylesheet" href="photos.css?v=1.1">
     <script src="theme.js"></script>
     <script src="sidebar.js?v=1.7" defer></script>
     <script src="spotify.js" defer></script>
@@ -47,6 +47,10 @@
             <p class="pg-sub">Moments, snapshots, and the places I&#39;ve wandered through &mdash; light I couldn&#39;t walk past.</p>
             <div class="pg-rule"><span id="pgCount" class="pg-count"></span></div>
         </header>
+
+        <div id="pgNewsflash"></div>
+        <div id="pgSpotlightHost"></div>
+        <div id="pgFilters" class="pg-filters" role="tablist" aria-label="Filter photographs by album"></div>
 
         <div id="pgGrid" class="pg-grid" aria-live="polite"></div>
         <p id="pgStatus" class="pg-status" style="display:none;"></p>
@@ -87,8 +91,43 @@
         var grid = document.getElementById('pgGrid');
         var statusEl = document.getElementById('pgStatus');
         var countEl = document.getElementById('pgCount');
+        var filtersEl = document.getElementById('pgFilters');
+        var spotlightHost = document.getElementById('pgSpotlightHost');
+        var newsflashEl = document.getElementById('pgNewsflash');
         var prefersReduced = window.matchMedia &&
             window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        var DAY = 86400000;
+        var NEW_WINDOW = 14 * DAY;          // a photo counts as "NEW" for 14 days
+        var LASTVISIT_KEY = 'pg_last_visit';
+
+        function readLastVisit() {
+            try { return parseInt(localStorage.getItem(LASTVISIT_KEY), 10) || 0; } catch (e) { return 0; }
+        }
+        function writeLastVisit(t) {
+            try { localStorage.setItem(LASTVISIT_KEY, String(t)); } catch (e) {}
+        }
+        var lastVisit = readLastVisit();    // captured BEFORE we overwrite it below
+
+        function relDate(ts) {
+            var diff = Date.now() - ts;
+            if (diff < 0) return 'just now';
+            var d = Math.floor(diff / DAY);
+            if (d <= 0) return 'today';
+            if (d === 1) return 'yesterday';
+            if (d < 7) return d + ' days ago';
+            if (d < 14) return 'a week ago';
+            if (d < 30) return Math.floor(d / 7) + ' weeks ago';
+            if (d < 60) return 'a month ago';
+            if (d < 365) return Math.floor(d / 30) + ' months ago';
+            return new Date(ts).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+        }
+        function isNew(p) { return (Date.now() - p.uploaded) < NEW_WINDOW; }
+        function isFresh(p) { return lastVisit > 0 && p.uploaded > lastVisit; }
+
+        var allPhotos = [];   // newest-first, full set
+        var viewPhotos = [];  // currently filtered set the grid + lightbox use
+        var activeTag = 'All';
 
         // ----- Lightbox -----
         var lb = document.getElementById('pgLightbox');
@@ -101,7 +140,6 @@
         var lbPrev = lb.querySelector('.pg-lb-prev');
         var lbNext = lb.querySelector('.pg-lb-next');
 
-        var photos = [];        // newest-first, matches grid order
         var current = 0;
         var zoomed = false;
         var lastFocused = null;
@@ -113,9 +151,9 @@
         }
 
         function preload(i) {
-            if (i < 0 || i >= photos.length) return;
+            if (i < 0 || i >= viewPhotos.length) return;
             var im = new Image();
-            im.src = photos[i].src;
+            im.src = viewPhotos[i].src;
         }
 
         function resetZoom() {
@@ -126,15 +164,15 @@
         }
 
         function show(i) {
-            current = (i + photos.length) % photos.length;
-            var p = photos[current];
+            current = (i + viewPhotos.length) % viewPhotos.length;
+            var p = viewPhotos[current];
             resetZoom();
             lbImg.src = p.src;
             lbImg.alt = p.caption || 'Photograph ' + (current + 1);
             lbCap.textContent = p.caption || '';
             lbCap.style.display = p.caption ? '' : 'none';
             lbDot.style.display = p.caption ? '' : 'none';
-            lbCount.textContent = (current + 1) + ' / ' + photos.length;
+            lbCount.textContent = relDate(p.uploaded) + '  ·  ' + (current + 1) + ' / ' + viewPhotos.length;
             preload(current + 1);
             preload(current - 1);
         }
@@ -214,7 +252,7 @@
         function buildTile(p, index) {
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'pg-card';
+            btn.className = 'pg-card' + (isFresh(p) ? ' is-fresh' : '');
             btn.setAttribute('aria-label', 'View photo' + (p.caption ? ': ' + p.caption : ' ' + (index + 1)));
 
             var img = document.createElement('img');
@@ -223,6 +261,13 @@
             img.loading = 'lazy';
             img.decoding = 'async';
             btn.appendChild(img);
+
+            if (isNew(p)) {
+                var badge = document.createElement('span');
+                badge.className = 'pg-badge';
+                badge.textContent = 'New';
+                btn.appendChild(badge);
+            }
 
             var hint = document.createElement('span');
             hint.className = 'pg-zoom-hint';
@@ -248,6 +293,93 @@
             return btn;
         }
 
+        // ----- grid rendering (filtered) -----
+        function buildGrid(list) {
+            grid.innerHTML = '';
+            var frag = document.createDocumentFragment();
+            list.forEach(function (p, i) { frag.appendChild(buildTile(p, i)); });
+            grid.appendChild(frag);
+        }
+
+        function setFilter(tag) {
+            activeTag = tag;
+            viewPhotos = (tag === 'All') ? allPhotos.slice()
+                : allPhotos.filter(function (p) { return (p.tags || []).indexOf(tag) > -1; });
+            Array.prototype.forEach.call(filtersEl.children, function (chip) {
+                var on = chip.getAttribute('data-tag') === tag;
+                chip.classList.toggle('is-active', on);
+                chip.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+            buildGrid(viewPhotos);
+        }
+
+        // ----- album filter chips -----
+        function buildFilters() {
+            var counts = {};
+            allPhotos.forEach(function (p) {
+                (p.tags || []).forEach(function (t) { counts[t] = (counts[t] || 0) + 1; });
+            });
+            var tags = Object.keys(counts).sort(function (a, b) {
+                return counts[b] - counts[a] || a.localeCompare(b);
+            });
+            if (!tags.length) return; // no albums yet — skip the chip row entirely
+            var ordered = ['All'].concat(tags);
+            ordered.forEach(function (t) {
+                var chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'pg-chip' + (t === 'All' ? ' is-active' : '');
+                chip.setAttribute('role', 'tab');
+                chip.setAttribute('data-tag', t);
+                chip.setAttribute('aria-selected', t === 'All' ? 'true' : 'false');
+                var n = (t === 'All') ? allPhotos.length : counts[t];
+                chip.innerHTML = t + '<span class="pg-chip-count">' + n + '</span>';
+                chip.addEventListener('click', function () { setFilter(t); });
+                filtersEl.appendChild(chip);
+            });
+        }
+
+        // ----- featured spotlight (rotates daily) -----
+        function buildSpotlight() {
+            if (!allPhotos.length) return;
+            var idx = Math.floor(Date.now() / DAY) % allPhotos.length;
+            var p = allPhotos[idx];
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'pg-spotlight';
+            btn.setAttribute('aria-label', 'Open featured photo' + (p.caption ? ': ' + p.caption : ''));
+            btn.innerHTML =
+                '<img src="' + p.src + '" alt="' + (p.caption || 'Featured photograph').replace(/"/g, '&quot;') + '" decoding="async">' +
+                '<div class="pg-spotlight-body">' +
+                  '<p class="pg-spotlight-eyebrow">Photo of the Day</p>' +
+                  '<p class="pg-spotlight-cap">' + (p.caption || 'A moment worth returning to.') + '</p>' +
+                  '<p class="pg-spotlight-date">' + relDate(p.uploaded) + '</p>' +
+                '</div>';
+            btn.addEventListener('click', function () {
+                if (activeTag !== 'All') setFilter('All');
+                var i = viewPhotos.indexOf(p);
+                openLightbox(i > -1 ? i : 0);
+            });
+            spotlightHost.appendChild(btn);
+        }
+
+        // ----- "new since your last visit" banner -----
+        function buildNewsflash() {
+            var freshCount = allPhotos.filter(isFresh).length;
+            if (freshCount <= 0) return;
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'pg-newsflash';
+            b.innerHTML = '<span class="pg-spark">✦</span> <span><strong>' + freshCount +
+                '</strong> new ' + (freshCount === 1 ? 'photograph' : 'photographs') +
+                ' since your last visit</span>';
+            b.addEventListener('click', function () {
+                if (activeTag !== 'All') setFilter('All');
+                var fresh = grid.querySelector('.pg-card.is-fresh');
+                if (fresh) fresh.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'center' });
+            });
+            newsflashEl.appendChild(b);
+        }
+
         // ----- load manifest -----
         fetch('gallery/manifest.json?cb=' + Date.now())
             .then(function (r) {
@@ -255,12 +387,16 @@
                 return r.json();
             })
             .then(function (data) {
-                photos = ((data && data.photos) || []).slice().reverse(); // newest first
-                if (!photos.length) { setStatus('No photographs yet — check back soon.'); return; }
-                countEl.textContent = photos.length + (photos.length === 1 ? ' Photograph' : ' Photographs');
-                var frag = document.createDocumentFragment();
-                photos.forEach(function (p, i) { frag.appendChild(buildTile(p, i)); });
-                grid.appendChild(frag);
+                allPhotos = ((data && data.photos) || []).slice().reverse(); // newest first
+                if (!allPhotos.length) { setStatus('No photographs yet — check back soon.'); return; }
+                countEl.textContent = allPhotos.length + (allPhotos.length === 1 ? ' Photograph' : ' Photographs');
+
+                buildNewsflash();   // uses old lastVisit
+                buildSpotlight();
+                buildFilters();
+                setFilter('All');   // renders the grid
+
+                writeLastVisit(Date.now()); // mark this visit for next time
             })
             .catch(function (err) {
                 console.error(err);

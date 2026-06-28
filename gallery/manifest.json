@@ -3,47 +3,56 @@
     {
       "src": "gallery/1777459205179-ewpji-2026-04-29-16-00-17.jpg",
       "uploaded": 1777459205179,
-      "caption": ""
+      "caption": "Days are long, decades are short.",
+      "tags": []
     },
     {
       "src": "gallery/1777791084000-basketball-night.jpg",
       "uploaded": 1777791084000,
-      "caption": "Late night, lit-up rim, the kind of quiet only a court at midnight gives you."
+      "caption": "Late night, lit-up rim, the kind of quiet only a court at midnight gives you.",
+      "tags": ["Night"]
     },
     {
       "src": "gallery/1778307438000-pamban-bridge.jpg",
       "uploaded": 1778307438000,
-      "caption": ""
+      "caption": "The Pamban bridge, reaching out across the sea.",
+      "tags": ["Travel"]
     },
     {
       "src": "gallery/1778310918000-temple-night.jpg",
       "uploaded": 1778310918000,
-      "caption": ""
+      "caption": "A temple aglow, mirrored in still night water.",
+      "tags": ["Travel", "Night"]
     },
     {
       "src": "gallery/1778311996000-thanjavur-temple.jpg",
       "uploaded": 1778311996000,
-      "caption": ""
+      "caption": "Brihadeeswara — a thousand years of stone, Thanjavur.",
+      "tags": ["Travel"]
     },
     {
       "src": "gallery/1779240116939-bridge-river.jpg",
       "uploaded": 1779240116939,
-      "caption": "concrete and clouds"
+      "caption": "concrete and clouds",
+      "tags": ["Travel"]
     },
     {
       "src": "gallery/1780511789509-moon-night.jpg",
       "uploaded": 1780511789509,
-      "caption": "A quiet sphere in the twilight gradient, watching over the city as day fades into dark."
+      "caption": "A quiet sphere in the twilight gradient, watching over the city as day fades into dark.",
+      "tags": ["Night", "Sky"]
     },
     {
       "src": "gallery/1782000000000-twilight-crescent-moon.jpg",
       "uploaded": 1782000000000,
-      "caption": "A crescent moon over a quiet street at dusk, palm trees fading into deep blue."
+      "caption": "A crescent moon over a quiet street at dusk, palm trees fading into deep blue.",
+      "tags": ["Night", "Sky"]
     },
     {
       "src": "gallery/1782100000000-bougainvillea-arch.jpg",
       "uploaded": 1782100000000,
-      "caption": "A cascading arch of white bougainvillea framing a soft twilight sky."
+      "caption": "A cascading arch of white bougainvillea framing a soft twilight sky.",
+      "tags": ["Flora", "Sky"]
     }
   ]
 }
