@@ -1,0 +1,374 @@
+/* ============================================================
+   Photos — first-principles gallery redesign
+   Self-contained & namespaced (.pg-*) so it never collides with
+   the shared style.css. Inherits the site's theme tokens
+   (--bg-primary, --accent, etc.) so dark/light mode just works.
+   ============================================================ */
+
+:root {
+  --pg-gap: 18px;
+  --pg-radius: 14px;
+  --pg-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --pg-shadow: 0 1px 2px rgba(0, 0, 0, 0.16), 0 8px 24px -12px rgba(0, 0, 0, 0.35);
+  --pg-shadow-hover: 0 18px 50px -18px rgba(0, 0, 0, 0.55);
+}
+
+/* ---- Layout shell -------------------------------------------------- */
+.pg-main {
+  max-width: 1240px;
+  margin: 2.5rem auto 0;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+}
+
+/* ---- Editorial hero header ---------------------------------------- */
+.pg-hero {
+  text-align: center;
+  padding: clamp(1.5rem, 5vw, 3.5rem) 0 clamp(1.75rem, 4vw, 2.75rem);
+  position: relative;
+}
+.pg-eyebrow {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 1rem;
+  opacity: 0;
+  animation: pgFadeUp 0.7s var(--pg-ease) 0.05s forwards;
+}
+.pg-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(2.9rem, 9vw, 5.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0;
+  opacity: 0;
+  animation: pgFadeUp 0.8s var(--pg-ease) 0.12s forwards;
+}
+.pg-title em {
+  font-style: italic;
+  font-weight: 500;
+  background: linear-gradient(120deg, var(--accent) 0%, #ff9a6b 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.pg-sub {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+  color: var(--text-secondary);
+  margin: 1rem auto 0;
+  max-width: 46ch;
+  opacity: 0;
+  animation: pgFadeUp 0.8s var(--pg-ease) 0.2s forwards;
+}
+.pg-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin: 1.6rem auto 0;
+  opacity: 0;
+  animation: pgFadeUp 0.8s var(--pg-ease) 0.28s forwards;
+}
+.pg-rule::before,
+.pg-rule::after {
+  content: "";
+  height: 1px;
+  width: clamp(40px, 12vw, 110px);
+  background: linear-gradient(90deg, transparent, var(--border));
+}
+.pg-rule::after { background: linear-gradient(90deg, var(--border), transparent); }
+.pg-count {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---- Masonry grid (preserves aspect ratios) ----------------------- */
+.pg-grid {
+  columns: 3 320px;
+  column-gap: var(--pg-gap);
+  margin: 0 auto;
+  padding-bottom: 4rem;
+}
+@media (max-width: 760px) { .pg-grid { columns: 2 150px; column-gap: 12px; } }
+@media (max-width: 430px) { .pg-grid { columns: 1; } }
+
+.pg-card {
+  display: block;
+  width: 100%;
+  margin: 0 0 var(--pg-gap);
+  padding: 0;
+  border: 0;
+  background: var(--bg-secondary);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: zoom-in;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--pg-radius);
+  box-shadow: var(--pg-shadow);
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  transition: transform 0.4s var(--pg-ease), box-shadow 0.4s var(--pg-ease);
+
+  /* reveal-on-scroll base state */
+  opacity: 0;
+  transform: translateY(22px);
+}
+.pg-card.is-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.7s var(--pg-ease), transform 0.7s var(--pg-ease),
+              box-shadow 0.4s var(--pg-ease);
+}
+.pg-card.is-in:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--pg-shadow-hover);
+}
+.pg-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  background: var(--bg-secondary);
+  transition: transform 0.7s var(--pg-ease), filter 0.5s ease;
+  will-change: transform;
+}
+.pg-card:hover img {
+  transform: scale(1.045);
+  filter: saturate(1.06) brightness(1.03);
+}
+
+/* subtle ring + inner highlight for crispness on any background */
+.pg-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+.pg-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* caption ribbon, only present when a caption exists */
+.pg-cap {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 2.2rem 1.05rem 0.95rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1.02rem;
+  line-height: 1.4;
+  color: #fff;
+  background: linear-gradient(0deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.4) 55%, transparent 100%);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.35s var(--pg-ease), transform 0.35s var(--pg-ease);
+  pointer-events: none;
+}
+.pg-card:hover .pg-cap,
+.pg-card:focus-visible .pg-cap {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* expand-corner glyph hint */
+.pg-card .pg-zoom-hint {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s var(--pg-ease), transform 0.3s var(--pg-ease);
+}
+.pg-card:hover .pg-zoom-hint { opacity: 1; transform: scale(1); }
+.pg-card .pg-zoom-hint svg { width: 15px; height: 15px; }
+
+/* ---- Empty / error states ---------------------------------------- */
+.pg-status {
+  text-align: center;
+  color: var(--text-secondary);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  padding: 4rem 1rem 6rem;
+}
+.pg-status.is-error { color: #e0795a; }
+
+/* skeleton shimmer while the manifest loads */
+.pg-skeleton {
+  border-radius: var(--pg-radius);
+  margin: 0 0 var(--pg-gap);
+  background: linear-gradient(100deg,
+    var(--bg-secondary) 30%, var(--border) 50%, var(--bg-secondary) 70%);
+  background-size: 200% 100%;
+  animation: pgShimmer 1.4s ease-in-out infinite;
+  break-inside: avoid;
+}
+
+/* ============================================================
+   Lightbox — immersive viewer
+   ============================================================ */
+.pg-lb {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  background: rgba(10, 9, 8, 0.86);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.32s var(--pg-ease), visibility 0s linear 0.32s;
+}
+.pg-lb.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.32s var(--pg-ease);
+}
+body.pg-lb-open { overflow: hidden; }
+
+.pg-lb-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: clamp(3rem, 7vh, 5rem) clamp(3.5rem, 8vw, 7rem) 1rem;
+  position: relative;
+}
+@media (max-width: 760px) {
+  .pg-lb-stage { padding: 3.25rem 0.75rem 0.5rem; }
+}
+
+.pg-lb-img {
+  max-width: 100%;
+  max-height: calc(100vh - 8.5rem);
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  cursor: zoom-in;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: pan-y;
+  transform: scale(0.96);
+  opacity: 0;
+  transition: transform 0.4s var(--pg-ease), opacity 0.4s var(--pg-ease);
+}
+.pg-lb.is-open .pg-lb-img { transform: scale(1); opacity: 1; }
+.pg-lb-img.is-zoomed { cursor: zoom-out; }
+
+/* controls */
+.pg-lb-btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0.78;
+  transition: opacity 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  z-index: 2;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.pg-lb-btn:hover { opacity: 1; background: rgba(255, 255, 255, 0.16); }
+.pg-lb-btn svg { width: 22px; height: 22px; }
+
+.pg-lb-close {
+  top: 1.1rem;
+  right: 1.2rem;
+  width: 44px;
+  height: 44px;
+  font-size: 1.5rem;
+}
+.pg-lb-close:hover { transform: rotate(90deg); }
+
+.pg-lb-nav {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+}
+.pg-lb-nav:hover { transform: translateY(-50%) scale(1.06); }
+.pg-lb-prev { left: 1.4rem; }
+.pg-lb-next { right: 1.4rem; }
+@media (max-width: 760px) {
+  .pg-lb-nav { width: 42px; height: 42px; }
+  .pg-lb-prev { left: 0.6rem; }
+  .pg-lb-next { right: 0.6rem; }
+  .pg-lb-close { top: 0.7rem; right: 0.7rem; width: 40px; height: 40px; }
+}
+
+/* meta bar */
+.pg-lb-meta {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.4rem 1.5rem 1.6rem;
+  text-align: center;
+}
+.pg-lb-cap {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  color: #f0ebe4;
+  line-height: 1.45;
+  max-width: 60ch;
+}
+.pg-lb-count {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.pg-lb-dot { color: rgba(255,255,255,0.3); }
+
+/* ---- keyframes ---------------------------------------------------- */
+@keyframes pgFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pgShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---- respect reduced motion -------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .pg-eyebrow, .pg-title, .pg-sub, .pg-rule { animation: none; opacity: 1; }
+  .pg-card { opacity: 1; transform: none; transition: box-shadow 0.3s ease; }
+  .pg-card img, .pg-card:hover img,
+  .pg-lb-img, .pg-lb-close:hover, .pg-lb-nav:hover { transition: none; transform: none; }
+  .pg-skeleton { animation: none; }
+}

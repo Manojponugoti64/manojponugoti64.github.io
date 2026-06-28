@@ -6,18 +6,22 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Photos - Manoj's Blog</title>
+    <title>Photographs — Manoj's Blog</title>
     <link rel="canonical" href="https://manojponugoti64.github.io/photos.html">
     <link rel="alternate" type="application/rss+xml" title="Manoj's Blog" href="/feed.xml">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Manoj's Blog">
-    <meta property="og:title" content="Photos — Manoj's Blog">
+    <meta property="og:title" content="Photographs — Manoj's Blog">
     <meta property="og:description" content="Places I've been, light I couldn't walk past — a photo gallery.">
     <meta property="og:url" content="https://manojponugoti64.github.io/photos.html">
     <meta property="og:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=1.7">
+    <link rel="stylesheet" href="photos.css?v=1.0">
     <script src="theme.js"></script>
     <script src="sidebar.js?v=1.7" defer></script>
     <script src="spotify.js" defer></script>
@@ -36,31 +40,36 @@
         </nav>
     </header>
 
-    <main>
-        <div class="page-content">
-            <h1>Photos</h1>
-            <p class="page-sub">Moments, snapshots, places I&#39;ve been.</p>
+    <main class="pg-main">
+        <header class="pg-hero">
+            <p class="pg-eyebrow">The Gallery</p>
+            <h1 class="pg-title">Photo<em>graphs</em></h1>
+            <p class="pg-sub">Moments, snapshots, and the places I&#39;ve wandered through &mdash; light I couldn&#39;t walk past.</p>
+            <div class="pg-rule"><span id="pgCount" class="pg-count"></span></div>
+        </header>
 
-            <div id="photoGrid" class="photo-grid photo-grid-masonry" aria-live="polite"></div>
-            <p id="photoEmpty" class="photo-empty" style="display:none;">No photos yet — check back soon.</p>
-            <p id="photoError" class="photo-error" style="display:none;"></p>
-        </div>
+        <div id="pgGrid" class="pg-grid" aria-live="polite"></div>
+        <p id="pgStatus" class="pg-status" style="display:none;"></p>
     </main>
 
-    <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-label="Photo viewer">
-        <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
-        <button type="button" class="lightbox-nav lightbox-prev" aria-label="Previous photo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    <!-- Immersive lightbox -->
+    <div id="pgLightbox" class="pg-lb" role="dialog" aria-modal="true" aria-label="Photo viewer" aria-hidden="true">
+        <button type="button" class="pg-lb-btn pg-lb-close" aria-label="Close (Esc)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
-        <button type="button" class="lightbox-nav lightbox-next" aria-label="Next photo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        <button type="button" class="pg-lb-btn pg-lb-nav pg-lb-prev" aria-label="Previous photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <div class="lightbox-stage">
-            <img id="lightboxImg" alt="">
+        <button type="button" class="pg-lb-btn pg-lb-nav pg-lb-next" aria-label="Next photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <div class="pg-lb-stage">
+            <img id="pgLightboxImg" class="pg-lb-img" alt="">
         </div>
-        <div class="lightbox-meta">
-            <span id="lightboxCaption" class="lightbox-caption"></span>
-            <span id="lightboxCount" class="lightbox-count"></span>
+        <div class="pg-lb-meta">
+            <span id="pgLightboxCap" class="pg-lb-cap"></span>
+            <span class="pg-lb-dot" aria-hidden="true">&bull;</span>
+            <span id="pgLightboxCount" class="pg-lb-count"></span>
         </div>
     </div>
 
@@ -74,142 +83,190 @@
     </footer>
 
     <script>
-        (function () {
-            var grid = document.getElementById('photoGrid');
-            var emptyMsg = document.getElementById('photoEmpty');
-            var lb = document.getElementById('lightbox');
-            var lbImg = document.getElementById('lightboxImg');
-            var lbStage = lb.querySelector('.lightbox-stage');
-            var lbClose = lb.querySelector('.lightbox-close');
-            var lbPrev = lb.querySelector('.lightbox-prev');
-            var lbNext = lb.querySelector('.lightbox-next');
-            var lbCaption = document.getElementById('lightboxCaption');
-            var lbCount = document.getElementById('lightboxCount');
+    (function () {
+        var grid = document.getElementById('pgGrid');
+        var statusEl = document.getElementById('pgStatus');
+        var countEl = document.getElementById('pgCount');
+        var prefersReduced = window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-            var photos = [];      // ordered list shown in the grid
-            var currentIdx = -1;
-            var zoomed = false;
+        // ----- Lightbox -----
+        var lb = document.getElementById('pgLightbox');
+        var lbImg = document.getElementById('pgLightboxImg');
+        var lbCap = document.getElementById('pgLightboxCap');
+        var lbDot = lb.querySelector('.pg-lb-dot');
+        var lbCount = document.getElementById('pgLightboxCount');
+        var lbStage = lb.querySelector('.pg-lb-stage');
+        var lbClose = lb.querySelector('.pg-lb-close');
+        var lbPrev = lb.querySelector('.pg-lb-prev');
+        var lbNext = lb.querySelector('.pg-lb-next');
 
-            function show(i) {
-                if (i < 0 || i >= photos.length) return;
-                currentIdx = i;
-                var p = photos[i];
-                lbImg.src = p.src;
-                lbImg.alt = p.caption || '';
-                lbCaption.textContent = p.caption || '';
-                lbCount.textContent = (i + 1) + ' / ' + photos.length;
-                resetZoom();
-                lbPrev.style.visibility = (i === 0) ? 'hidden' : 'visible';
-                lbNext.style.visibility = (i === photos.length - 1) ? 'hidden' : 'visible';
-            }
-            function open(i) {
-                show(i);
-                lb.classList.add('is-open');
-                lb.setAttribute('aria-hidden', 'false');
-                document.body.classList.add('lightbox-open');
-            }
-            function close() {
-                lb.classList.remove('is-open');
-                lb.setAttribute('aria-hidden', 'true');
-                document.body.classList.remove('lightbox-open');
-                resetZoom();
-                /* defer src clear so the closing transition isn't ugly */
-                setTimeout(function () { if (!lb.classList.contains('is-open')) lbImg.src = ''; }, 240);
-            }
-            function next() { if (currentIdx < photos.length - 1) show(currentIdx + 1); }
-            function prev() { if (currentIdx > 0) show(currentIdx - 1); }
+        var photos = [];        // newest-first, matches grid order
+        var current = 0;
+        var zoomed = false;
+        var lastFocused = null;
 
-            function resetZoom() {
-                zoomed = false;
-                lbImg.style.transform = '';
-                lbImg.style.transformOrigin = '';
-                lbImg.classList.remove('is-zoomed');
-            }
-            function toggleZoom(e) {
-                if (zoomed) { resetZoom(); return; }
-                var r = lbImg.getBoundingClientRect();
-                var x = ((e.clientX - r.left) / r.width) * 100;
-                var y = ((e.clientY - r.top) / r.height) * 100;
-                lbImg.style.transformOrigin = x + '% ' + y + '%';
-                lbImg.style.transform = 'scale(2)';
-                lbImg.classList.add('is-zoomed');
-                zoomed = true;
-            }
+        function setStatus(msg, isError) {
+            statusEl.textContent = msg;
+            statusEl.style.display = '';
+            statusEl.classList.toggle('is-error', !!isError);
+        }
 
-            /* --- bindings --- */
-            lbClose.addEventListener('click', close);
-            lbPrev.addEventListener('click', function (e) { e.stopPropagation(); prev(); });
-            lbNext.addEventListener('click', function (e) { e.stopPropagation(); next(); });
-            lbImg.addEventListener('click', function (e) { e.stopPropagation(); toggleZoom(e); });
-            lb.addEventListener('click', function (e) {
-                /* click on backdrop (not image, not buttons) closes */
-                if (e.target === lb || e.target === lbStage) close();
-            });
-            document.addEventListener('keydown', function (e) {
-                if (!lb.classList.contains('is-open')) return;
-                if (e.key === 'Escape') close();
-                else if (e.key === 'ArrowRight') next();
-                else if (e.key === 'ArrowLeft') prev();
-            });
+        function preload(i) {
+            if (i < 0 || i >= photos.length) return;
+            var im = new Image();
+            im.src = photos[i].src;
+        }
 
-            /* swipe (and unzoom on swipe) */
-            var touchStartX = null, touchStartY = null;
-            lb.addEventListener('touchstart', function (e) {
-                if (e.touches.length !== 1) return;
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            }, { passive: true });
-            lb.addEventListener('touchend', function (e) {
-                if (touchStartX === null) return;
-                var t = e.changedTouches[0];
-                var dx = t.clientX - touchStartX;
-                var dy = t.clientY - touchStartY;
-                touchStartX = touchStartY = null;
-                if (zoomed) return;  /* swipe doesn't navigate while zoomed */
-                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
-                    if (dx < 0) next(); else prev();
-                } else if (dy > 100 && Math.abs(dy) > Math.abs(dx)) {
-                    /* swipe down to dismiss */
-                    close();
+        function resetZoom() {
+            zoomed = false;
+            lbImg.classList.remove('is-zoomed');
+            lbImg.style.transform = '';
+            lbImg.style.transformOrigin = '';
+        }
+
+        function show(i) {
+            current = (i + photos.length) % photos.length;
+            var p = photos[current];
+            resetZoom();
+            lbImg.src = p.src;
+            lbImg.alt = p.caption || 'Photograph ' + (current + 1);
+            lbCap.textContent = p.caption || '';
+            lbCap.style.display = p.caption ? '' : 'none';
+            lbDot.style.display = p.caption ? '' : 'none';
+            lbCount.textContent = (current + 1) + ' / ' + photos.length;
+            preload(current + 1);
+            preload(current - 1);
+        }
+        function openLightbox(i) {
+            lastFocused = document.activeElement;
+            show(i);
+            lb.classList.add('is-open');
+            lb.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('pg-lb-open');
+            lbClose.focus();
+        }
+        function closeLightbox() {
+            lb.classList.remove('is-open');
+            lb.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('pg-lb-open');
+            resetZoom();
+            setTimeout(function () { if (!lb.classList.contains('is-open')) lbImg.src = ''; }, 320);
+            if (lastFocused && lastFocused.focus) lastFocused.focus();
+        }
+        function next() { show(current + 1); }
+        function prev() { show(current - 1); }
+
+        // click image to zoom toward the cursor
+        lbImg.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (zoomed) { resetZoom(); return; }
+            var r = lbImg.getBoundingClientRect();
+            var x = ((e.clientX - r.left) / r.width) * 100;
+            var y = ((e.clientY - r.top) / r.height) * 100;
+            lbImg.style.transformOrigin = x + '% ' + y + '%';
+            lbImg.style.transform = 'scale(2.2)';
+            lbImg.classList.add('is-zoomed');
+            zoomed = true;
+        });
+
+        lbClose.addEventListener('click', closeLightbox);
+        lbNext.addEventListener('click', function (e) { e.stopPropagation(); next(); });
+        lbPrev.addEventListener('click', function (e) { e.stopPropagation(); prev(); });
+        // click on the empty backdrop/stage (not the image) closes
+        lb.addEventListener('click', function (e) {
+            if (e.target === lb || e.target === lbStage) closeLightbox();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (!lb.classList.contains('is-open')) return;
+            if (e.key === 'Escape') closeLightbox();
+            else if (e.key === 'ArrowRight') next();
+            else if (e.key === 'ArrowLeft') prev();
+        });
+
+        // touch: swipe to navigate, swipe-down to dismiss
+        var tx = null, ty = null;
+        lb.addEventListener('touchstart', function (e) {
+            if (e.touches.length !== 1) return;
+            tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+        }, { passive: true });
+        lb.addEventListener('touchend', function (e) {
+            if (tx === null) return;
+            var t = e.changedTouches[0];
+            var dx = t.clientX - tx, dy = t.clientY - ty;
+            tx = ty = null;
+            if (zoomed) return;
+            if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) { dx < 0 ? next() : prev(); }
+            else if (dy > 100 && Math.abs(dy) > Math.abs(dx)) { closeLightbox(); }
+        }, { passive: true });
+
+        // ----- reveal-on-scroll -----
+        var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-in');
+                    io.unobserve(entry.target);
                 }
-            }, { passive: true });
+            });
+        }, { rootMargin: '0px 0px -6% 0px', threshold: 0.04 }) : null;
 
-            /* --- load gallery --- */
-            fetch('gallery/manifest.json?cb=' + Date.now())
-                .then(function (r) {
-                    if (!r.ok) throw new Error('Failed to load gallery (' + r.status + ').');
-                    return r.json();
-                })
-                .then(function (data) {
-                    var raw = (data && data.photos) || [];
-                    if (!raw.length) { emptyMsg.style.display = ''; return; }
-                    photos = raw.slice().reverse();  /* newest first */
-                    photos.forEach(function (p, idx) {
-                        var btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'photo-tile photo-tile-masonry';
-                        btn.setAttribute('aria-label', 'Open photo' + (p.caption ? ': ' + p.caption : ''));
-                        var img = document.createElement('img');
-                        img.src = p.src;
-                        img.alt = p.caption || '';
-                        img.loading = 'lazy';
-                        img.decoding = 'async';
-                        btn.appendChild(img);
-                        if (p.caption) {
-                            var cap = document.createElement('span');
-                            cap.className = 'photo-tile-caption';
-                            cap.textContent = p.caption;
-                            btn.appendChild(cap);
-                        }
-                        btn.addEventListener('click', function () { open(idx); });
-                        grid.appendChild(btn);
-                    });
-                })
-                .catch(function (err) {
-                    console.error(err);
-                    emptyMsg.style.display = '';
-                });
-        })();
+        function buildTile(p, index) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'pg-card';
+            btn.setAttribute('aria-label', 'View photo' + (p.caption ? ': ' + p.caption : ' ' + (index + 1)));
+
+            var img = document.createElement('img');
+            img.src = p.src;
+            img.alt = p.caption || '';
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            btn.appendChild(img);
+
+            var hint = document.createElement('span');
+            hint.className = 'pg-zoom-hint';
+            hint.setAttribute('aria-hidden', 'true');
+            hint.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
+            btn.appendChild(hint);
+
+            if (p.caption) {
+                var cap = document.createElement('figcaption');
+                cap.className = 'pg-cap';
+                cap.textContent = p.caption;
+                btn.appendChild(cap);
+            }
+
+            btn.addEventListener('click', function () { openLightbox(index); });
+
+            if (io && !prefersReduced) {
+                btn.style.transitionDelay = (Math.min(index, 8) * 0.05) + 's';
+                io.observe(btn);
+            } else {
+                btn.classList.add('is-in');
+            }
+            return btn;
+        }
+
+        // ----- load manifest -----
+        fetch('gallery/manifest.json?cb=' + Date.now())
+            .then(function (r) {
+                if (!r.ok) throw new Error('Failed to load gallery (' + r.status + ').');
+                return r.json();
+            })
+            .then(function (data) {
+                photos = ((data && data.photos) || []).slice().reverse(); // newest first
+                if (!photos.length) { setStatus('No photographs yet — check back soon.'); return; }
+                countEl.textContent = photos.length + (photos.length === 1 ? ' Photograph' : ' Photographs');
+                var frag = document.createDocumentFragment();
+                photos.forEach(function (p, i) { frag.appendChild(buildTile(p, i)); });
+                grid.appendChild(frag);
+            })
+            .catch(function (err) {
+                console.error(err);
+                setStatus('Couldn’t load the gallery right now. Please try again later.', true);
+            });
+    })();
     </script>
 </body>
 </html>
