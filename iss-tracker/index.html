@@ -3,26 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>ISS Space Hub — Manoj's Blog</title>
-    <link rel="canonical" href="https://manojponugoti64.github.io/iss-tracker/">
-    <link rel="alternate" type="application/rss+xml" title="Manoj's Blog" href="/feed.xml">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Manoj's Blog">
-    <meta property="og:title" content="ISS Space Hub — Manoj's Blog">
-    <meta property="og:description" content="Live ISS tracker, NASA APOD, tonight's moon phase, and the next visible passes overhead.">
-    <meta property="og:url" content="https://manojponugoti64.github.io/iss-tracker/">
-    <meta property="og:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://manojponugoti64.github.io/assets/og-image.jpg">
+    <title>ISS Live Tracker - Manoj's Blog</title>
     <link rel="stylesheet" href="../style.css">
+    <!-- Leaflet map library (CSS + JS from CDN) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- satellite.js: orbital propagation for computing ISS pass times from your location -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/5.0.0/satellite.min.js"></script>
     <script src="../theme.js"></script>
     <script src="../sidebar.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.0/dist/satellite.min.js" defer></script>
-    <script src="../space-hub.js" defer></script>
-    <script src="../spotify.js" defer></script>
+    <style>
+        .iss-map {
+            width: 100%;
+            max-width: 900px;
+            height: 460px;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            background: #0b1021;
+            z-index: 0;
+        }
+
+        .iss-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            max-width: 900px;
+            margin: 1.5rem 0;
+        }
+
+        .iss-stat {
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            background: rgba(47,118,111,0.08);
+            border: 1px solid rgba(47,118,111,0.22);
+        }
+
+        .iss-stat .label {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            opacity: 0.7;
+            margin-bottom: 0.35rem;
+        }
+
+        .iss-stat .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .iss-status {
+            max-width: 900px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .iss-status .dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #2f766f;
+            margin-right: 0.45rem;
+            vertical-align: middle;
+            animation: iss-pulse 1.6s ease-in-out infinite;
+        }
+
+        .iss-status.error .dot { background: #c0392b; animation: none; }
+
+        @keyframes iss-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.25; }
+        }
+
+        .iss-leaflet-icon { font-size: 26px; line-height: 1; text-align: center; }
+
+        /* --- Talk to the ISS section --- */
+        .iss-talk {
+            max-width: 900px;
+            margin: 3rem 0 1rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(47,118,111,0.25);
+        }
+        .iss-talk h2 { margin: 0 0 0.4rem; }
+        .iss-talk .sub { opacity: 0.8; margin: 0 0 1.6rem; }
+
+        .iss-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.1rem;
+        }
+        .iss-card {
+            padding: 1.3rem 1.4rem;
+            border-radius: 12px;
+            background: rgba(47,118,111,0.07);
+            border: 1px solid rgba(47,118,111,0.2);
+        }
+        .iss-card h3 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+        .iss-card p { margin: 0.4rem 0; font-size: 0.92rem; line-height: 1.5; }
+        .iss-card .freq {
+            font-family: ui-monospace, "SF Mono", Menlo, monospace;
+            font-weight: 600;
+            color: #2f766f;
+        }
+        .iss-card a { color: #b84d2e; font-weight: 600; }
+
+        /* Pass predictor */
+        .iss-passes { margin: 2rem 0 0; }
+        .iss-btn {
+            appearance: none;
+            cursor: pointer;
+            border: 1px solid rgba(47,118,111,0.45);
+            background: rgba(47,118,111,0.12);
+            color: inherit;
+            font: inherit;
+            font-weight: 600;
+            padding: 0.7rem 1.3rem;
+            border-radius: 10px;
+            transition: background 0.15s ease;
+        }
+        .iss-btn:hover { background: rgba(47,118,111,0.22); }
+        .iss-btn:disabled { opacity: 0.55; cursor: progress; }
+
+        .iss-pass-list { list-style: none; padding: 0; margin: 1.2rem 0 0; }
+        .iss-pass-list li {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 1.2rem;
+            align-items: baseline;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid rgba(47,118,111,0.16);
+        }
+        .iss-pass-list .when { font-weight: 600; min-width: 13rem; }
+        .iss-pass-list .meta { opacity: 0.78; font-size: 0.9rem; }
+        .iss-pass-msg { margin-top: 1rem; font-size: 0.9rem; opacity: 0.85; }
+    </style>
 </head>
 <body>
     <header>
@@ -31,69 +150,73 @@
             <ul class="nav-links">
                 <li><a href="../index.html">Home</a></li>
                 <li><a href="../photos.html">Photos</a></li>
-                <li><a href="../music.html">Music</a></li>
                 <li><a href="../iss-tracker/">ISS Tracker</a></li>
+                <li><a href="../about.html">About</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
         <div class="page-content">
-            <h1>ISS Space Hub</h1>
-            <p class="page-sub">A small window on what's happening above your head.</p>
+            <h1>ISS Live Tracker</h1>
+            <p class="page-sub">Watch the International Space Station as it orbits Earth in real time.</p>
 
-            <div class="iss-frame-wrap">
-                <iframe
-                    src="https://iss-widget-atdgzfyi.devinapps.com"
-                    width="100%" height="500"
-                    style="border:0; border-radius:12px; max-width:900px;"
-                    loading="lazy"
-                    title="ISS Live Tracker"
-                    allowfullscreen></iframe>
+            <p class="iss-status" id="iss-status"><span class="dot"></span>Connecting to the ISS&hellip;</p>
+
+            <div id="iss-map" class="iss-map" aria-label="Live map showing the position of the International Space Station"></div>
+
+            <div class="iss-stats">
+                <div class="iss-stat">
+                    <span class="label">Latitude</span>
+                    <span class="value" id="iss-lat">&mdash;</span>
+                </div>
+                <div class="iss-stat">
+                    <span class="label">Longitude</span>
+                    <span class="value" id="iss-lon">&mdash;</span>
+                </div>
+                <div class="iss-stat">
+                    <span class="label">Altitude</span>
+                    <span class="value" id="iss-alt">&mdash;</span>
+                </div>
+                <div class="iss-stat">
+                    <span class="label">Speed</span>
+                    <span class="value" id="iss-vel">&mdash;</span>
+                </div>
             </div>
 
-            <p class="iss-note">The ISS travels at about 28,000 km/h and circles Earth roughly every 90 minutes — every dot you see on the map is a moment of human presence in orbit.</p>
+            <p class="iss-note">The ISS travels at about 28,000 km/h and circles Earth roughly every 90 minutes &mdash; every point on the trail is a moment of human presence in orbit.</p>
 
-            <div class="hub-grid">
-                <article class="hub-card" id="hub-apod">
-                    <header class="hub-head">
-                        <h2 class="hub-title">Astronomy Picture of the Day</h2>
-                        <span class="hub-source">NASA APOD</span>
-                    </header>
-                    <div class="hub-apod-media"></div>
-                    <h3 class="hub-apod-title"></h3>
-                    <p class="hub-apod-date"></p>
-                    <p class="hub-apod-explanation"></p>
-                    <a class="hub-apod-more" href="#" target="_blank" rel="noopener" style="display:none;">View full size →</a>
-                    <p class="hub-status"></p>
-                </article>
+            <section class="iss-talk">
+                <h2>Talk to the ISS</h2>
+                <p class="sub">There's no internet chat with the crew &mdash; but people really do talk to them by <strong>amateur (ham) radio</strong>. The station carries radio gear through the <a href="https://www.ariss.org/" target="_blank" rel="noopener">ARISS</a> program. When it passes overhead, anyone can listen; licensed hams can make contact.</p>
 
-                <article class="hub-card" id="hub-moon">
-                    <header class="hub-head">
-                        <h2 class="hub-title">Tonight's Moon</h2>
-                        <span class="hub-source">Computed locally</span>
-                    </header>
-                    <div class="hub-moon-emoji" aria-hidden="true">🌑</div>
-                    <h3 class="hub-moon-name">—</h3>
-                    <p class="hub-moon-illum">—</p>
-                    <p class="hub-moon-age">—</p>
-                    <p class="hub-moon-next">—</p>
-                </article>
+                <div class="iss-cards">
+                    <div class="iss-card">
+                        <h3>🎙️ Hear the crew (no licence needed)</h3>
+                        <p>During a scheduled contact, the astronauts' voices come down on FM at <span class="freq">145.800 MHz</span>. Any handheld scanner or radio &mdash; even an SDR dongle &mdash; can receive it when the ISS is above your horizon.</p>
+                    </div>
+                    <div class="iss-card">
+                        <h3>📡 Send a message (licensed hams)</h3>
+                        <p>The ISS runs an <strong>APRS</strong> packet digipeater on <span class="freq">145.825 MHz</span>. Licensed operators can send short text messages and have the station relay them. There's also a voice cross-band repeater used between scheduled events.</p>
+                    </div>
+                    <div class="iss-card">
+                        <h3>🏫 Scheduled school contacts</h3>
+                        <p>ARISS arranges live Q&amp;A calls between students and astronauts. Schools and groups can <a href="https://www.ariss.org/contact-us.html" target="_blank" rel="noopener">apply to host a contact</a>.</p>
+                    </div>
+                    <div class="iss-card">
+                        <h3>📺 Watch right now</h3>
+                        <p>NASA streams the station live. <a href="https://www.nasa.gov/nasa-live/" target="_blank" rel="noopener">Open the NASA Live feed</a> to see Earth from orbit and catch crew broadcasts.</p>
+                    </div>
+                </div>
 
-                <article class="hub-card" id="hub-passes">
-                    <header class="hub-head">
-                        <h2 class="hub-title">Next ISS passes overhead</h2>
-                        <span class="hub-source">Live TLE · satellite.js</span>
-                    </header>
-                    <p class="hub-pass-prompt">
-                        See when the ISS will fly over your sky in the next 48 hours.
-                        We'll only use your location to compute passes — nothing leaves your device.
-                    </p>
-                    <button type="button" class="hub-pass-btn">Find passes from my location</button>
-                    <ul class="hub-pass-list"></ul>
-                    <p class="hub-status"></p>
-                </article>
-            </div>
+                <div class="iss-passes">
+                    <h3>When is it over me?</h3>
+                    <p class="sub">To hear or reach the ISS, it has to be above your local horizon. Share your location and I'll compute the next visible passes from live orbital data.</p>
+                    <button class="iss-btn" id="iss-pass-btn" type="button">Find passes over my location</button>
+                    <p class="iss-pass-msg" id="iss-pass-msg"></p>
+                    <ul class="iss-pass-list" id="iss-pass-list"></ul>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -105,5 +228,207 @@
             </a>
         </div>
     </footer>
+
+    <script>
+    (function () {
+        // Public, key-free, HTTPS + CORS-enabled ISS position API.
+        var API = 'https://api.wheretheiss.at/v1/satellites/25544';
+        var POLL_MS = 5000;
+
+        var statusEl = document.getElementById('iss-status');
+        var latEl = document.getElementById('iss-lat');
+        var lonEl = document.getElementById('iss-lon');
+        var altEl = document.getElementById('iss-alt');
+        var velEl = document.getElementById('iss-vel');
+
+        // --- Map setup ---
+        var map = L.map('iss-map', { worldCopyJump: true, minZoom: 1 }).setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            noWrap: false
+        }).addTo(map);
+
+        var issIcon = L.divIcon({
+            className: 'iss-leaflet-icon',
+            html: '🛰️', // satellite emoji
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+        var marker = L.marker([0, 0], { icon: issIcon, title: 'ISS' }).addTo(map);
+        var trail = L.polyline([], { color: '#2f766f', weight: 2, opacity: 0.7 }).addTo(map);
+        var trailPoints = [];
+        var followCount = 0;
+
+        function fmt(n, digits) { return Number(n).toFixed(digits); }
+
+        function setStatus(text, isError) {
+            statusEl.innerHTML = '<span class="dot"></span>' + text;
+            statusEl.classList.toggle('error', !!isError);
+        }
+
+        function update(data) {
+            var lat = data.latitude, lon = data.longitude;
+
+            marker.setLatLng([lat, lon]);
+            trailPoints.push([lat, lon]);
+            if (trailPoints.length > 90) trailPoints.shift(); // keep ~one orbit
+            trail.setLatLngs(trailPoints);
+
+            // Keep the ISS centered for the first few updates, then let the user pan freely.
+            if (followCount < 3) { map.panTo([lat, lon]); followCount++; }
+
+            latEl.textContent = fmt(lat, 2) + '°';
+            lonEl.textContent = fmt(lon, 2) + '°';
+            altEl.textContent = fmt(data.altitude, 0) + ' km';
+            velEl.textContent = fmt(data.velocity, 0) + ' km/h';
+
+            var when = new Date().toLocaleTimeString();
+            setStatus('Live &middot; updated ' + when + ' &middot; over ' +
+                      (lat >= 0 ? 'N' : 'S') + ' ' + (lon >= 0 ? 'E' : 'W'), false);
+        }
+
+        function tick() {
+            fetch(API, { cache: 'no-store' })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(update)
+                .catch(function (err) {
+                    setStatus('Connection lost &mdash; retrying&hellip; (' + err.message + ')', true);
+                });
+        }
+
+        tick();
+        setInterval(tick, POLL_MS);
+    })();
+    </script>
+
+    <script>
+    // --- "When is it over me?" : compute upcoming ISS passes from the user's location ---
+    (function () {
+        var TLE_URL = 'https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=TLE';
+        var MIN_ELEVATION = 10;   // degrees above horizon for a usable pass
+        var HORIZON_HOURS = 48;   // how far ahead to look
+        var STEP_SEC = 30;        // sampling resolution
+
+        var btn = document.getElementById('iss-pass-btn');
+        var msg = document.getElementById('iss-pass-msg');
+        var list = document.getElementById('iss-pass-list');
+
+        function say(text) { msg.innerHTML = text; }
+
+        function fetchTLE() {
+            return fetch(TLE_URL, { cache: 'no-store' })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.text();
+                })
+                .then(function (txt) {
+                    var lines = txt.trim().split('\n').map(function (l) { return l.trim(); });
+                    // Format is: name / line1 / line2
+                    var l1 = lines.find(function (l) { return l.charAt(0) === '1'; });
+                    var l2 = lines.find(function (l) { return l.charAt(0) === '2'; });
+                    if (!l1 || !l2) throw new Error('Could not parse orbital data');
+                    return satellite.twoline2satrec(l1, l2);
+                });
+        }
+
+        function elevationAt(satrec, observerGd, date) {
+            var pv = satellite.propagate(satrec, date);
+            if (!pv.position) return null;
+            var gmst = satellite.gstime(date);
+            var ecf = satellite.eciToEcf(pv.position, gmst);
+            var look = satellite.ecfToLookAngles(observerGd, ecf);
+            return look.elevation * 180 / Math.PI; // radians -> degrees
+        }
+
+        function computePasses(satrec, lat, lon) {
+            var observerGd = {
+                latitude: satellite.degreesToRadians(lat),
+                longitude: satellite.degreesToRadians(lon),
+                height: 0.05 // km above sea level (approx)
+            };
+            var passes = [];
+            var now = new Date();
+            var end = new Date(now.getTime() + HORIZON_HOURS * 3600 * 1000);
+            var inPass = false, current = null;
+
+            for (var t = now.getTime(); t <= end.getTime(); t += STEP_SEC * 1000) {
+                var d = new Date(t);
+                var el = elevationAt(satrec, observerGd, d);
+                if (el === null) continue;
+
+                if (el >= MIN_ELEVATION && !inPass) {
+                    inPass = true;
+                    current = { start: d, maxEl: el, end: d };
+                } else if (el >= MIN_ELEVATION && inPass) {
+                    if (el > current.maxEl) current.maxEl = el;
+                    current.end = d;
+                } else if (el < MIN_ELEVATION && inPass) {
+                    inPass = false;
+                    passes.push(current);
+                    current = null;
+                    if (passes.length >= 5) break;
+                }
+            }
+            return passes;
+        }
+
+        function fmtTime(d) {
+            return d.toLocaleString(undefined, {
+                weekday: 'short', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function render(passes) {
+            list.innerHTML = '';
+            if (!passes.length) {
+                say('No passes above ' + MIN_ELEVATION + '&deg; in the next ' + HORIZON_HOURS +
+                    ' hours from your location. The orbit drifts daily &mdash; try again tomorrow.');
+                return;
+            }
+            say('Next ISS passes over you (above ' + MIN_ELEVATION + '&deg;). Tune <span class="freq">145.800 MHz</span> FM while it\'s up.');
+            passes.forEach(function (p) {
+                var durMin = Math.round((p.end - p.start) / 60000);
+                var li = document.createElement('li');
+                li.innerHTML =
+                    '<span class="when">' + fmtTime(p.start) + '</span>' +
+                    '<span class="meta">peak ' + Math.round(p.maxEl) + '&deg; elevation</span>' +
+                    '<span class="meta">~' + durMin + ' min visible</span>';
+                list.appendChild(li);
+            });
+        }
+
+        function run() {
+            if (typeof satellite === 'undefined') {
+                say('Orbital library failed to load &mdash; check your connection and reload.');
+                return;
+            }
+            if (!navigator.geolocation) {
+                say('Your browser does not support location access, so passes can\'t be computed here.');
+                return;
+            }
+            btn.disabled = true;
+            say('Getting your location&hellip;');
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                say('Fetching live orbital data&hellip;');
+                fetchTLE()
+                    .then(function (satrec) {
+                        var passes = computePasses(satrec, pos.coords.latitude, pos.coords.longitude);
+                        render(passes);
+                    })
+                    .catch(function (err) { say('Could not compute passes: ' + err.message); })
+                    .finally(function () { btn.disabled = false; });
+            }, function (err) {
+                say('Location access was denied, so passes can\'t be computed (' + err.message + ').');
+                btn.disabled = false;
+            }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+        }
+
+        btn.addEventListener('click', run);
+    })();
+    </script>
 </body>
 </html>
