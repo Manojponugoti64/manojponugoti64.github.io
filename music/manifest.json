@@ -107,6 +107,21 @@
           "src": "music/the_scientist.mp3"
         }
       ]
+    },
+    {
+      "id": "playboi-carti-timeless",
+      "title": "Timeless - Single",
+      "artist": "Playboi Carti & The Weeknd",
+      "genre": "Hip-Hop / R&B",
+      "cover": "images/timeless_cover.png",
+      "tracks": [
+        {
+          "id": "timeless",
+          "title": "Timeless (feat. Playboi Carti)",
+          "duration": "04:16",
+          "src": "music/timeless.mp3"
+        }
+      ]
     }
   ]
 }
