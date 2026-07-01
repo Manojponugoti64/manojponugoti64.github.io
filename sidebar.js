@@ -147,12 +147,16 @@
     ready(function () {
         if (!isHomePage()) return;
         var main = document.querySelector('main');
-        if (!main || document.querySelector('.photo-of-day-landing')) return;
+        if (!main || document.querySelector('.landing-hero')) return;
+
+        // Permanent landing hero: fixed white-bougainvillea photo (no rotation).
+        var HERO_SRC = 'gallery/1782100000000-bougainvillea-arch.jpg';
+        var HERO_ALT = 'A cascading arch of white bougainvillea framing a soft twilight sky';
 
         var style = document.createElement('style');
-        style.id = 'photo-of-day-landing-style';
+        style.id = 'landing-hero-style';
         style.textContent = [
-            '.photo-of-day-landing {',
+            '.landing-hero {',
             '  position: relative;',
             '  display: block;',
             '  width: 100%;',
@@ -164,88 +168,29 @@
             '  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);',
             '  background: var(--bg-secondary, #2d2d2d);',
             '}',
-            '.pod-live-frame { position: absolute; inset: 0; overflow: hidden; }',
-            '.pod-live-photo { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transform: scale(1.01); transition: transform 8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease; will-change: transform; }',
-            '.pod-live-photo.is-loaded { opacity: 1; }',
-            '.photo-of-day-landing:hover .pod-live-photo.is-loaded { transform: scale(1.08); }',
-            '[data-theme="dark"] .pod-live-photo, :root:not([data-theme="light"]) .pod-live-photo { filter: brightness(0.9) saturate(1.02); }',
-            // Bottom gradient so the caption stays legible over any photo.
-            '.pod-live-scrim { position: absolute; left: 0; right: 0; bottom: 0; padding: 2.4rem 1.6rem 1.4rem; background: linear-gradient(to top, rgba(0,0,0,0.62), rgba(0,0,0,0.18) 60%, transparent); pointer-events: none; }',
-            '.pod-live-badge { display: inline-block; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: rgba(232,112,64,0.92); }',
-            '.pod-live-caption { margin: 0.6rem 0 0; color: #fff; font-size: 1.12rem; line-height: 1.45; max-width: 40rem; text-shadow: 0 1px 6px rgba(0,0,0,0.4); }',
-            '.pod-live-date { margin: 0.15rem 0 0; color: rgba(255,255,255,0.82); font-size: 0.82rem; font-weight: 600; text-shadow: 0 1px 6px rgba(0,0,0,0.4); }',
+            '.landing-hero-photo { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transform: scale(1.01); transition: transform 8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease; will-change: transform; }',
+            '.landing-hero-photo.is-loaded { opacity: 1; }',
+            '.landing-hero:hover .landing-hero-photo.is-loaded { transform: scale(1.08); }',
+            '[data-theme="dark"] .landing-hero-photo, :root:not([data-theme="light"]) .landing-hero-photo { filter: brightness(0.92) saturate(1.02); }',
             '@media (max-width: 760px) {',
-            '  .photo-of-day-landing { aspect-ratio: 4 / 5; min-height: auto; border-radius: 16px; margin-bottom: 2rem; }',
-            '  .pod-live-caption { font-size: 1rem; }',
+            '  .landing-hero { aspect-ratio: 4 / 5; min-height: auto; border-radius: 16px; margin-bottom: 2rem; }',
             '}'
         ].join('\n');
         document.head.appendChild(style);
 
         var hero = document.createElement('section');
-        hero.className = 'photo-of-day-landing';
-        hero.setAttribute('aria-label', 'Photo of the day');
-
-        var frame = document.createElement('div');
-        frame.className = 'pod-live-frame';
+        hero.className = 'landing-hero';
+        hero.setAttribute('aria-label', 'White bougainvillea');
 
         var photo = document.createElement('img');
-        photo.className = 'pod-live-photo';
+        photo.className = 'landing-hero-photo';
         photo.loading = 'eager';
         photo.decoding = 'async';
+        photo.alt = HERO_ALT;
+        photo.onload = function () { photo.classList.add('is-loaded'); };
+        photo.src = HERO_SRC;
 
-        var scrim = document.createElement('div');
-        scrim.className = 'pod-live-scrim';
-        var badge = document.createElement('span');
-        badge.className = 'pod-live-badge';
-        badge.textContent = 'Photo of the day';
-        var caption = document.createElement('p');
-        caption.className = 'pod-live-caption';
-        var dateLine = document.createElement('p');
-        dateLine.className = 'pod-live-date';
-
-        scrim.appendChild(badge);
-        scrim.appendChild(caption);
-        scrim.appendChild(dateLine);
-        frame.appendChild(photo);
-        hero.appendChild(frame);
-        hero.appendChild(scrim);
+        hero.appendChild(photo);
         main.insertBefore(hero, main.firstElementChild);
-
-        // Whole-day index in the viewer's local timezone, so the photo changes
-        // once at local midnight and stays put for the rest of the day.
-        var now = new Date();
-        var dayNumber = Math.floor(
-            (now - new Date(now.getFullYear(), 0, 0)) / 86400000
-        ) + now.getFullYear() * 366;
-        dateLine.textContent = now.toLocaleDateString(undefined, {
-            weekday: 'long', month: 'long', day: 'numeric'
-        });
-
-        function show(photos, index, attemptsLeft) {
-            if (!photos.length || attemptsLeft < 0) return;
-            var p = photos[index % photos.length];
-            photo.onload = function () {
-                photo.classList.add('is-loaded');
-                caption.textContent = p.caption || '';
-            };
-            // Skip gracefully if a file is missing so the hero never breaks.
-            photo.onerror = function () {
-                show(photos, index + 1, attemptsLeft - 1);
-            };
-            photo.alt = p.caption || 'Photo of the day';
-            photo.src = p.src + '?cb=' + dayNumber;
-        }
-
-        fetch('gallery/manifest.json?cb=' + dayNumber)
-            .then(function (r) {
-                if (!r.ok) throw new Error('manifest ' + r.status);
-                return r.json();
-            })
-            .then(function (data) {
-                var photos = (data && data.photos) || [];
-                if (!photos.length) { hero.parentNode.removeChild(hero); return; }
-                show(photos, dayNumber, photos.length);
-            })
-            .catch(function (err) { console.error(err); });
     });
 })();
