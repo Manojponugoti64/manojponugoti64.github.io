@@ -52,7 +52,7 @@
             { href: prefix + 'music.html', label: 'Music' },
             { href: prefix + 'books.html', label: 'Books' },
             { href: prefix + 'archive.html', label: 'Archive' },
-            { href: 'https://manojkumar520199.substack.com', label: 'Newsletter' }
+            { href: 'https://manojkumar520199.substack.com', label: 'Substack' }
         ];
         var navItems = items.length ? items : defaults;
         var hasMusic = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'music'; });
@@ -60,9 +60,12 @@
             var insertAt = Math.min(2, navItems.length);
             navItems.splice(insertAt, 0, { href: prefix + 'music.html', label: 'Music' });
         }
-        var hasNewsletter = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'newsletter'; });
-        if (!hasNewsletter) {
-            navItems.push({ href: 'https://manojkumar520199.substack.com', label: 'Newsletter' });
+        var hasSubstack = navItems.some(function (it) {
+            var l = (it.label || '').toLowerCase();
+            return l === 'substack' || l === 'newsletter';
+        });
+        if (!hasSubstack) {
+            navItems.push({ href: 'https://manojkumar520199.substack.com', label: 'Substack' });
         }
 
         var html = '';
