@@ -51,13 +51,18 @@
             { href: prefix + 'photos.html', label: 'Photos' },
             { href: prefix + 'music.html', label: 'Music' },
             { href: prefix + 'books.html', label: 'Books' },
-            { href: prefix + 'archive.html', label: 'Archive' }
+            { href: prefix + 'archive.html', label: 'Archive' },
+            { href: 'https://manojkumar520199.substack.com', label: 'Newsletter' }
         ];
         var navItems = items.length ? items : defaults;
         var hasMusic = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'music'; });
         if (!hasMusic) {
             var insertAt = Math.min(2, navItems.length);
             navItems.splice(insertAt, 0, { href: prefix + 'music.html', label: 'Music' });
+        }
+        var hasNewsletter = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'newsletter'; });
+        if (!hasNewsletter) {
+            navItems.push({ href: 'https://manojkumar520199.substack.com', label: 'Newsletter' });
         }
 
         var html = '';
@@ -68,7 +73,8 @@
         html += '<nav class="sidebar-nav"><ul>';
         for (var i = 0; i < navItems.length; i++) {
             var it = navItems[i];
-            html += '<li><a href="' + it.href + '">' + it.label + '</a></li>';
+            var ext = /^https?:\/\//.test(it.href) ? ' target="_blank" rel="noopener"' : '';
+            html += '<li><a href="' + it.href + '"' + ext + '>' + it.label + '</a></li>';
         }
         html += '</ul></nav>';
         html += '<div class="sidebar-books">';

@@ -3026,3 +3026,52 @@ body.lightbox-open { overflow: hidden; }
   .tab-panel.active .post-card,
   .tab-panel.active .art-card { animation: none; }
 }
+
+/* ============================================================
+   SUBSTACK NEWSLETTER CTA
+   ============================================================ */
+.substack-cta {
+  margin: 4rem auto 1rem;
+  padding: 2.75rem 1.5rem 0.5rem;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.substack-cta-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.9rem;
+}
+
+.substack-cta h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem;
+}
+
+.substack-cta p {
+  color: var(--text-secondary);
+  font-size: 1.02rem;
+  max-width: 32rem;
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+}
+
+.substack-cta iframe {
+  width: 100%;
+  max-width: 480px;
+  height: 320px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+@media (max-width: 560px) {
+  .substack-cta h2 { font-size: 1.6rem; }
+}
