@@ -10,49 +10,78 @@
       "src": "gallery/1777791084000-basketball-night.jpg",
       "uploaded": 1777791084000,
       "caption": "Late night, lit-up rim, the kind of quiet only a court at midnight gives you.",
-      "tags": ["Night"]
+      "tags": [
+        "Night"
+      ]
     },
     {
       "src": "gallery/1778307438000-pamban-bridge.jpg",
       "uploaded": 1778307438000,
       "caption": "The Pamban bridge, reaching out across the sea.",
-      "tags": ["Travel"]
+      "tags": [
+        "Travel"
+      ]
     },
     {
       "src": "gallery/1778310918000-temple-night.jpg",
       "uploaded": 1778310918000,
       "caption": "A temple aglow, mirrored in still night water.",
-      "tags": ["Travel", "Night"]
+      "tags": [
+        "Travel",
+        "Night"
+      ]
     },
     {
       "src": "gallery/1778311996000-thanjavur-temple.jpg",
       "uploaded": 1778311996000,
-      "caption": "Brihadeeswara — a thousand years of stone, Thanjavur.",
-      "tags": ["Travel"]
+      "caption": "Brihadeeswara \u2014 a thousand years of stone, Thanjavur.",
+      "tags": [
+        "Travel"
+      ]
     },
     {
       "src": "gallery/1779240116939-bridge-river.jpg",
       "uploaded": 1779240116939,
       "caption": "concrete and clouds",
-      "tags": ["Travel"]
+      "tags": [
+        "Travel"
+      ]
     },
     {
       "src": "gallery/1780511789509-moon-night.jpg",
       "uploaded": 1780511789509,
       "caption": "A quiet sphere in the twilight gradient, watching over the city as day fades into dark.",
-      "tags": ["Night", "Sky"]
+      "tags": [
+        "Night",
+        "Sky"
+      ]
     },
     {
       "src": "gallery/1782000000000-twilight-crescent-moon.jpg",
       "uploaded": 1782000000000,
       "caption": "A crescent moon over a quiet street at dusk, palm trees fading into deep blue.",
-      "tags": ["Night", "Sky"]
+      "tags": [
+        "Night",
+        "Sky"
+      ]
     },
     {
       "src": "gallery/1782100000000-bougainvillea-arch.jpg",
       "uploaded": 1782100000000,
       "caption": "A cascading arch of white bougainvillea framing a soft twilight sky.",
-      "tags": ["Flora", "Sky"]
+      "tags": [
+        "Flora",
+        "Sky"
+      ]
+    },
+    {
+      "src": "gallery/1783077453397-k7dxp-tree-canopy-dusk.jpg",
+      "uploaded": 1783077453397,
+      "caption": "Looking up at dusk \u2014 the canopy holds the last of the light.",
+      "tags": [
+        "Flora",
+        "Sky"
+      ]
     }
   ]
 }
