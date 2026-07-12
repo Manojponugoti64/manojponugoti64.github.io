@@ -74,6 +74,7 @@
             <span id="pgLightboxCap" class="pg-lb-cap"></span>
             <span class="pg-lb-dot" aria-hidden="true">&bull;</span>
             <span id="pgLightboxCount" class="pg-lb-count"></span>
+            <div id="pgLightboxDots" class="pg-lb-carousel-dots" style="display:none;"></div>
         </div>
     </div>
 
@@ -145,10 +146,14 @@
         var lbClose = lb.querySelector('.pg-lb-close');
         var lbPrev = lb.querySelector('.pg-lb-prev');
         var lbNext = lb.querySelector('.pg-lb-next');
+        var lbDots = document.getElementById('pgLightboxDots');
 
         var current = 0;
         var zoomed = false;
         var lastFocused = null;
+        var lightboxPhotos = [];
+        var currentLightboxIndex = 0;
+        var sliding = false;
 
         function setStatus(msg, isError) {
             statusEl.textContent = msg;
@@ -169,27 +174,113 @@
             lbImg.style.transformOrigin = '';
         }
 
+        function updateDots() {
+            lbDots.innerHTML = '';
+            var isCarousel = lightboxPhotos[0] && lightboxPhotos[0].isCarouselItem;
+            if (!isCarousel || lightboxPhotos.length <= 1) {
+                lbDots.style.display = 'none';
+                return;
+            }
+            lbDots.style.display = 'flex';
+            for (var idx = 0; idx < lightboxPhotos.length; idx++) {
+                var dot = document.createElement('span');
+                dot.className = 'pg-lb-carousel-dot' + (idx === currentLightboxIndex ? ' is-active' : '');
+                dot.addEventListener('click', (function(targetIdx) {
+                    return function() {
+                        if (targetIdx === currentLightboxIndex || sliding) return;
+                        var dir = targetIdx > currentLightboxIndex ? 'next' : 'prev';
+                        if (!prefersReduced) {
+                            transitionTo(targetIdx, dir);
+                        } else {
+                            show(targetIdx);
+                        }
+                    }
+                })(idx));
+                lbDots.appendChild(dot);
+            }
+        }
+
         function show(i) {
-            current = (i + viewPhotos.length) % viewPhotos.length;
-            var p = viewPhotos[current];
+            currentLightboxIndex = (i + lightboxPhotos.length) % lightboxPhotos.length;
+            var p = lightboxPhotos[currentLightboxIndex];
             resetZoom();
             lbImg.src = p.src;
-            lbImg.alt = p.caption || 'Photograph ' + (current + 1);
+            lbImg.alt = p.caption || 'Photograph ' + (currentLightboxIndex + 1);
             lbCap.textContent = p.caption || '';
             lbCap.style.display = p.caption ? '' : 'none';
             lbDot.style.display = p.caption ? '' : 'none';
-            lbCount.textContent = relDate(p.uploaded) + '  ·  ' + (current + 1) + ' / ' + viewPhotos.length;
-            preload(current + 1);
-            preload(current - 1);
+            lbCount.textContent = (p.isCarouselItem ? 'Slide ' : '') + (currentLightboxIndex + 1) + ' / ' + lightboxPhotos.length;
+            updateDots();
+            
+            if (lightboxPhotos.length > 1) {
+                var nIdx = (currentLightboxIndex + 1) % lightboxPhotos.length;
+                var pIdx = (currentLightboxIndex - 1 + lightboxPhotos.length) % lightboxPhotos.length;
+                var imN = new Image(); imN.src = lightboxPhotos[nIdx].src;
+                var imP = new Image(); imP.src = lightboxPhotos[pIdx].src;
+            }
         }
+
+        function transitionTo(nextIdx, direction) {
+            if (sliding) return;
+            sliding = true;
+            
+            var outClass = direction === 'next' ? 'slide-left-out' : 'slide-right-out';
+            var inClass = direction === 'next' ? 'slide-left-in' : 'slide-right-in';
+            
+            lbImg.classList.add(outClass);
+            
+            setTimeout(function() {
+                currentLightboxIndex = nextIdx;
+                var p = lightboxPhotos[currentLightboxIndex];
+                resetZoom();
+                lbImg.src = p.src;
+                lbImg.alt = p.caption || 'Photograph';
+                lbCap.textContent = p.caption || '';
+                lbCap.style.display = p.caption ? '' : 'none';
+                lbDot.style.display = p.caption ? '' : 'none';
+                lbCount.textContent = (p.isCarouselItem ? 'Slide ' : '') + (currentLightboxIndex + 1) + ' / ' + lightboxPhotos.length;
+                
+                updateDots();
+                
+                lbImg.classList.remove(outClass);
+                lbImg.classList.add(inClass);
+                
+                lbImg.offsetWidth; // force reflow
+                
+                lbImg.classList.remove(inClass);
+                
+                setTimeout(function() {
+                    sliding = false;
+                }, 300);
+            }, 300);
+        }
+
         function openLightbox(i) {
             lastFocused = document.activeElement;
-            show(i);
+            var p = viewPhotos[i];
+            
+            if (p.carousel && p.carousel.length > 0) {
+                lightboxPhotos = p.carousel.map(function(src) {
+                    return {
+                        src: src,
+                        caption: p.caption,
+                        uploaded: p.uploaded,
+                        isCarouselItem: true
+                    };
+                });
+                currentLightboxIndex = 0;
+            } else {
+                lightboxPhotos = viewPhotos;
+                currentLightboxIndex = i;
+            }
+            
+            show(currentLightboxIndex);
             lb.classList.add('is-open');
             lb.setAttribute('aria-hidden', 'false');
             document.body.classList.add('pg-lb-open');
             lbClose.focus();
         }
+
         function closeLightbox() {
             lb.classList.remove('is-open');
             lb.setAttribute('aria-hidden', 'true');
@@ -198,12 +289,31 @@
             setTimeout(function () { if (!lb.classList.contains('is-open')) lbImg.src = ''; }, 320);
             if (lastFocused && lastFocused.focus) lastFocused.focus();
         }
-        function next() { show(current + 1); }
-        function prev() { show(current - 1); }
+
+        function next() {
+            if (lightboxPhotos.length <= 1) return;
+            var nIdx = (currentLightboxIndex + 1) % lightboxPhotos.length;
+            if (!prefersReduced) {
+                transitionTo(nIdx, 'next');
+            } else {
+                show(nIdx);
+            }
+        }
+
+        function prev() {
+            if (lightboxPhotos.length <= 1) return;
+            var pIdx = (currentLightboxIndex - 1 + lightboxPhotos.length) % lightboxPhotos.length;
+            if (!prefersReduced) {
+                transitionTo(pIdx, 'prev');
+            } else {
+                show(pIdx);
+            }
+        }
 
         // click image to zoom toward the cursor
         lbImg.addEventListener('click', function (e) {
             e.stopPropagation();
+            if (sliding) return;
             if (zoomed) { resetZoom(); return; }
             var r = lbImg.getBoundingClientRect();
             var x = ((e.clientX - r.left) / r.width) * 100;
@@ -236,7 +346,7 @@
             tx = e.touches[0].clientX; ty = e.touches[0].clientY;
         }, { passive: true });
         lb.addEventListener('touchend', function (e) {
-            if (tx === null) return;
+            if (tx === null || sliding) return;
             var t = e.changedTouches[0];
             var dx = t.clientX - tx, dy = t.clientY - ty;
             tx = ty = null;
@@ -275,11 +385,18 @@
                 btn.appendChild(badge);
             }
 
-            var hint = document.createElement('span');
-            hint.className = 'pg-zoom-hint';
-            hint.setAttribute('aria-hidden', 'true');
-            hint.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
-            btn.appendChild(hint);
+            if (p.carousel && p.carousel.length > 1) {
+                var carouselBadge = document.createElement('span');
+                carouselBadge.className = 'pg-carousel-badge';
+                carouselBadge.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; display: inline-block; vertical-align: -2px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>' + p.carousel.length;
+                btn.appendChild(carouselBadge);
+            } else {
+                var hint = document.createElement('span');
+                hint.className = 'pg-zoom-hint';
+                hint.setAttribute('aria-hidden', 'true');
+                hint.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
+                btn.appendChild(hint);
+            }
 
             if (p.caption) {
                 var cap = document.createElement('figcaption');

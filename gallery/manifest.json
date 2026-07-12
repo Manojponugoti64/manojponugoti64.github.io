@@ -91,6 +91,20 @@
         "Flora",
         "Sky"
       ]
+    },
+    {
+      "src": "gallery/boug-carousel-3.jpg",
+      "carousel": [
+        "gallery/boug-carousel-3.jpg",
+        "gallery/boug-carousel-1.jpg",
+        "gallery/boug-carousel-2.jpg",
+        "gallery/boug-carousel-4.jpg"
+      ],
+      "uploaded": 1783841692580,
+      "caption": "Bougainvillea studies.",
+      "tags": [
+        "Flora"
+      ]
     }
   ]
 }
