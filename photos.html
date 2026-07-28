@@ -258,8 +258,9 @@
         function openLightbox(i) {
             lastFocused = document.activeElement;
             var p = viewPhotos[i];
+            var isCarousel = !!(p.carousel && p.carousel.length > 0);
             
-            if (p.carousel && p.carousel.length > 0) {
+            if (isCarousel) {
                 lightboxPhotos = p.carousel.map(function(src) {
                     return {
                         src: src,
@@ -275,6 +276,7 @@
             }
             
             show(currentLightboxIndex);
+            lb.classList.toggle('is-carousel', isCarousel);
             lb.classList.add('is-open');
             lb.setAttribute('aria-hidden', 'false');
             document.body.classList.add('pg-lb-open');
@@ -283,6 +285,7 @@
 
         function closeLightbox() {
             lb.classList.remove('is-open');
+            lb.classList.remove('is-carousel');
             lb.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('pg-lb-open');
             resetZoom();
@@ -416,11 +419,113 @@
             return btn;
         }
 
+        function buildFullscreenCarousel(p, index) {
+            var sources = (p.carousel && p.carousel.length) ? p.carousel : [p.src];
+            var section = document.createElement('section');
+            section.className = 'pg-full-carousel';
+            section.setAttribute('aria-label', 'Fullscreen photo carousel');
+
+            var viewport = document.createElement('div');
+            viewport.className = 'pg-full-viewport';
+            var track = document.createElement('div');
+            track.className = 'pg-full-track';
+
+            sources.forEach(function (src, slideIndex) {
+                var slide = document.createElement('button');
+                slide.type = 'button';
+                slide.className = 'pg-full-slide';
+                slide.setAttribute('aria-label', 'Open photo ' + (slideIndex + 1) + ' of ' + sources.length + ' fullscreen');
+
+                var img = document.createElement('img');
+                img.src = src;
+                img.alt = p.caption || 'Photograph ' + (slideIndex + 1);
+                img.decoding = 'async';
+                if (slideIndex > 0) img.loading = 'lazy';
+                slide.appendChild(img);
+                slide.addEventListener('click', function () {
+                    openLightbox(index);
+                    if (slideIndex > 0) show(slideIndex);
+                });
+                track.appendChild(slide);
+            });
+
+            var count = document.createElement('span');
+            count.className = 'pg-full-count';
+            count.textContent = '1 / ' + sources.length;
+
+            var previous = document.createElement('button');
+            previous.type = 'button';
+            previous.className = 'pg-full-arrow pg-full-prev';
+            previous.setAttribute('aria-label', 'Previous slide');
+            previous.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
+
+            var nextButton = document.createElement('button');
+            nextButton.type = 'button';
+            nextButton.className = 'pg-full-arrow pg-full-next';
+            nextButton.setAttribute('aria-label', 'Next slide');
+            nextButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
+
+            var dots = document.createElement('div');
+            dots.className = 'pg-full-dots';
+            sources.forEach(function (_, dotIndex) {
+                var dot = document.createElement('button');
+                dot.type = 'button';
+                dot.className = 'pg-full-dot' + (dotIndex === 0 ? ' is-active' : '');
+                dot.setAttribute('aria-label', 'Go to slide ' + (dotIndex + 1));
+                dot.addEventListener('click', function () {
+                    viewport.scrollTo({ left: dotIndex * viewport.clientWidth, behavior: prefersReduced ? 'auto' : 'smooth' });
+                });
+                dots.appendChild(dot);
+            });
+
+            function currentSlide() {
+                return Math.max(0, Math.min(sources.length - 1,
+                    Math.round(viewport.scrollLeft / Math.max(1, viewport.clientWidth))));
+            }
+            function updateControls() {
+                var active = currentSlide();
+                count.textContent = (active + 1) + ' / ' + sources.length;
+                previous.disabled = active === 0;
+                nextButton.disabled = active === sources.length - 1;
+                Array.prototype.forEach.call(dots.children, function (dot, dotIndex) {
+                    dot.classList.toggle('is-active', dotIndex === active);
+                });
+            }
+            function move(direction) {
+                var target = Math.max(0, Math.min(sources.length - 1, currentSlide() + direction));
+                viewport.scrollTo({ left: target * viewport.clientWidth, behavior: prefersReduced ? 'auto' : 'smooth' });
+            }
+
+            previous.addEventListener('click', function () { move(-1); });
+            nextButton.addEventListener('click', function () { move(1); });
+            viewport.addEventListener('scroll', updateControls, { passive: true });
+            window.addEventListener('resize', updateControls);
+
+            viewport.appendChild(track);
+            section.appendChild(viewport);
+            section.appendChild(previous);
+            section.appendChild(nextButton);
+            section.appendChild(count);
+            section.appendChild(dots);
+            updateControls();
+            return section;
+        }
+
         // ----- grid rendering (filtered) -----
         function buildGrid(list) {
             grid.innerHTML = '';
+            grid.classList.add('is-built');
             var frag = document.createDocumentFragment();
-            list.forEach(function (p, i) { frag.appendChild(buildTile(p, i)); });
+            var masonry = document.createElement('div');
+            masonry.className = 'pg-masonry';
+            list.forEach(function (p, i) {
+                if (p.display === 'fullscreen') {
+                    frag.appendChild(buildFullscreenCarousel(p, i));
+                } else {
+                    masonry.appendChild(buildTile(p, i));
+                }
+            });
+            if (masonry.children.length) frag.appendChild(masonry);
             grid.appendChild(frag);
         }
 
