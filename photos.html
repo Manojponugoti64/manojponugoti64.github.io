@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=1.7">
-    <link rel="stylesheet" href="photos.css?v=1.4">
+    <link rel="stylesheet" href="photos.css?v=1.5">
     <script src="theme.js"></script>
     <script src="sidebar.js?v=1.9" defer></script>
     <script src="spotify.js" defer></script>
@@ -58,6 +58,11 @@
 
     <!-- Immersive lightbox -->
     <div id="pgLightbox" class="pg-lb" role="dialog" aria-modal="true" aria-label="Photo viewer" aria-hidden="true">
+        <div class="pg-lb-backdrop" aria-hidden="true">
+            <div class="pg-lb-bg pg-lb-bg--a is-visible"><img alt="" decoding="async"></div>
+            <div class="pg-lb-bg pg-lb-bg--b"><img alt="" decoding="async"></div>
+            <div class="pg-lb-bg-scrim"></div>
+        </div>
         <button type="button" class="pg-lb-btn pg-lb-close" aria-label="Close (Esc)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
@@ -155,6 +160,11 @@
         var lbPrev = lb.querySelector('.pg-lb-prev');
         var lbNext = lb.querySelector('.pg-lb-next');
         var lbDots = document.getElementById('pgLightboxDots');
+        var lbBgA = lb.querySelector('.pg-lb-bg--a');
+        var lbBgB = lb.querySelector('.pg-lb-bg--b');
+        var lbBgImgA = lbBgA.querySelector('img');
+        var lbBgImgB = lbBgB.querySelector('img');
+        var activeBgLayer = 'a';
 
         var zoomed = false;
         var lastFocused = null;
@@ -206,6 +216,30 @@
             lbCap.style.display = p.caption ? '' : 'none';
             lbDot.style.display = p.caption ? '' : 'none';
             lbCount.textContent = (p.isCarouselItem ? 'Slide ' : '') + (currentLightboxIndex + 1) + ' / ' + lightboxPhotos.length;
+            updateAmbientBackground(p.src, true);
+        }
+
+        function updateAmbientBackground(src, animate) {
+            if (!src) return;
+            var nextLayer = activeBgLayer === 'a' ? lbBgB : lbBgA;
+            var nextImg = activeBgLayer === 'a' ? lbBgImgB : lbBgImgA;
+            var currentLayer = activeBgLayer === 'a' ? lbBgA : lbBgB;
+
+            if (!animate || prefersReduced) {
+                lbBgImgA.src = src;
+                lbBgImgB.src = src;
+                lbBgA.classList.add('is-visible');
+                lbBgB.classList.remove('is-visible');
+                activeBgLayer = 'a';
+                return;
+            }
+
+            if (nextImg.src === src && nextLayer.classList.contains('is-visible')) return;
+
+            nextImg.src = src;
+            nextLayer.classList.add('is-visible');
+            currentLayer.classList.remove('is-visible');
+            activeBgLayer = activeBgLayer === 'a' ? 'b' : 'a';
         }
 
         function preloadAdjacent() {
@@ -448,6 +482,7 @@
             }
 
             mountTrackStage();
+            lb.classList.toggle('is-carousel', isCarouselOpen());
             lb.classList.add('is-open');
             lb.setAttribute('aria-hidden', 'false');
             document.body.classList.add('pg-lb-open');
@@ -455,7 +490,7 @@
         }
 
         function closeLightbox() {
-            lb.classList.remove('is-open');
+            lb.classList.remove('is-open', 'is-carousel');
             lb.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('pg-lb-open');
             resetZoom();
