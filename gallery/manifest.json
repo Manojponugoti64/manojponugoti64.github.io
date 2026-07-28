@@ -140,6 +140,20 @@
         "Nature",
         "Sky"
       ]
+    },
+    {
+      "src": "gallery/1785254400001-looking-up-trees.jpg",
+      "carousel": [
+        "gallery/1785254400001-looking-up-trees.jpg",
+        "gallery/1785254400002-canopy-streetlight.jpg",
+        "gallery/1785254400003-streetlight-sky.jpg"
+      ],
+      "uploaded": 1785254400001,
+      "caption": "",
+      "tags": [
+        "Flora",
+        "Sky"
+      ]
     }
   ]
 }
