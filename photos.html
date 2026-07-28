@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=1.7">
-    <link rel="stylesheet" href="photos.css?v=1.1">
+    <link rel="stylesheet" href="photos.css?v=1.3">
     <script src="theme.js"></script>
     <script src="sidebar.js?v=1.9" defer></script>
     <script src="spotify.js" defer></script>
@@ -154,6 +154,7 @@
         var lightboxPhotos = [];
         var currentLightboxIndex = 0;
         var sliding = false;
+        var SLIDE_TRANSITION_MS = 120;
 
         function setStatus(msg, isError) {
             statusEl.textContent = msg;
@@ -251,8 +252,8 @@
                 
                 setTimeout(function() {
                     sliding = false;
-                }, 300);
-            }, 300);
+                }, SLIDE_TRANSITION_MS);
+            }, SLIDE_TRANSITION_MS);
         }
 
         function openLightbox(i) {
@@ -351,7 +352,7 @@
             var dx = t.clientX - tx, dy = t.clientY - ty;
             tx = ty = null;
             if (zoomed) return;
-            if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) { dx < 0 ? next() : prev(); }
+            if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) { dx < 0 ? next() : prev(); }
             else if (dy > 100 && Math.abs(dy) > Math.abs(dx)) { closeLightbox(); }
         }, { passive: true });
 
@@ -368,7 +369,7 @@
         function buildTile(p, index) {
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'pg-card' + (isFresh(p) ? ' is-fresh' : '');
+            btn.className = 'pg-card' + (p.showNew !== false && isFresh(p) ? ' is-fresh' : '');
             btn.setAttribute('aria-label', 'View photo' + (p.caption ? ': ' + p.caption : ' ' + (index + 1)));
 
             var img = document.createElement('img');
@@ -378,7 +379,7 @@
             img.decoding = 'async';
             btn.appendChild(img);
 
-            if (isNew(p)) {
+            if (p.showNew !== false && isNew(p)) {
                 var badge = document.createElement('span');
                 badge.className = 'pg-badge';
                 badge.textContent = 'New';
