@@ -79,20 +79,31 @@
                     return (a.setOrder || 0) - (b.setOrder || 0);
                 });
 
+                var slideCount = photos.length;
                 var carousel = document.createElement('section');
                 carousel.className = 'photo-carousel';
                 carousel.setAttribute('aria-label', 'Photo slideshow');
 
-                var viewport = document.createElement('div');
-                viewport.className = 'photo-carousel-viewport';
+                var stage = document.createElement('div');
+                stage.className = 'photo-carousel-stage';
+                stage.tabIndex = 0;
                 var track = document.createElement('div');
                 track.className = 'photo-carousel-track';
+
+                var suppressClick = false;
 
                 photos.forEach(function (p, index) {
                     var slide = document.createElement('div');
                     slide.className = 'photo-carousel-slide';
-                    slide.setAttribute('aria-label', 'Photo ' + (index + 1) + ' of ' + photos.length);
-                    slide.appendChild(makePhotoButton(p, 'photo-carousel-image'));
+                    slide.setAttribute('aria-label', 'Photo ' + (index + 1) + ' of ' + slideCount);
+                    var btn = makePhotoButton(p, 'photo-carousel-image');
+                    btn.addEventListener('click', function (e) {
+                        if (suppressClick) {
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                        }
+                    }, true);
+                    slide.appendChild(btn);
                     track.appendChild(slide);
                 });
 
@@ -110,52 +121,187 @@
 
                 var count = document.createElement('span');
                 count.className = 'photo-carousel-count';
-                count.textContent = '1 / ' + photos.length;
+                count.textContent = '1 / ' + slideCount;
 
                 var dots = document.createElement('div');
                 dots.className = 'photo-carousel-dots';
-                photos.forEach(function (_, index) {
+                photos.forEach(function (_, dotIndex) {
                     var dot = document.createElement('button');
                     dot.type = 'button';
-                    dot.className = 'photo-carousel-dot' + (index === 0 ? ' is-active' : '');
-                    dot.setAttribute('aria-label', 'Go to photo ' + (index + 1));
-                    dot.addEventListener('click', function () {
-                        viewport.scrollTo({ left: index * viewport.clientWidth, behavior: 'smooth' });
-                    });
+                    dot.className = 'photo-carousel-dot' + (dotIndex === 0 ? ' is-active' : '');
+                    dot.setAttribute('aria-label', 'Go to photo ' + (dotIndex + 1));
                     dots.appendChild(dot);
                 });
 
-                function currentIndex() {
-                    return Math.max(0, Math.min(photos.length - 1,
-                        Math.round(viewport.scrollLeft / viewport.clientWidth)));
+                var index = 0;
+                var pointerId = null;
+                var startX = 0;
+                var startY = 0;
+                var startOffset = 0;
+                var dragDelta = 0;
+                var dragAxis = null;
+                var samples = [];
+                var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                var SNAP_MS = reduceMotion ? 140 : 420;
+                var FLICK_VELOCITY = 0.42;
+                var DRAG_CLICK_THRESHOLD = 8;
+
+                function stageWidth() {
+                    return stage.clientWidth || 1;
                 }
-                function updatePosition() {
-                    var index = currentIndex();
-                    count.textContent = (index + 1) + ' / ' + photos.length;
+
+                function baseOffset() {
+                    return -index * stageWidth();
+                }
+
+                function rubberBandOffset(rawOffset) {
+                    var min = -(slideCount - 1) * stageWidth();
+                    var max = 0;
+                    if (rawOffset > max) return max + (rawOffset - max) * 0.3;
+                    if (rawOffset < min) return min + (rawOffset - min) * 0.3;
+                    return rawOffset;
+                }
+
+                function applyTransform(px, animate) {
+                    track.classList.toggle('is-dragging', !animate && pointerId !== null);
+                    track.classList.toggle('is-animating', !!animate);
+                    track.style.transitionDuration = animate ? SNAP_MS + 'ms' : '0ms';
+                    track.style.transform = 'translate3d(' + px + 'px, 0, 0)';
+                }
+
+                function updateUI() {
+                    count.textContent = (index + 1) + ' / ' + slideCount;
                     Array.prototype.forEach.call(dots.children, function (dot, dotIndex) {
                         dot.classList.toggle('is-active', dotIndex === index);
                     });
                     previous.disabled = index === 0;
-                    next.disabled = index === photos.length - 1;
-                }
-                function go(direction) {
-                    var index = Math.max(0, Math.min(photos.length - 1, currentIndex() + direction));
-                    viewport.scrollTo({ left: index * viewport.clientWidth, behavior: 'smooth' });
+                    next.disabled = index === slideCount - 1;
+                    stage.setAttribute('data-index', String(index));
                 }
 
-                previous.addEventListener('click', function () { go(-1); });
-                next.addEventListener('click', function () { go(1); });
-                viewport.addEventListener('scroll', updatePosition, { passive: true });
-                window.addEventListener('resize', updatePosition);
+                function goTo(targetIndex, animate) {
+                    index = Math.max(0, Math.min(slideCount - 1, targetIndex));
+                    applyTransform(baseOffset(), animate !== false);
+                    updateUI();
+                }
 
-                viewport.appendChild(track);
-                carousel.appendChild(viewport);
+                function nearestIndex(offset) {
+                    return Math.max(0, Math.min(slideCount - 1, Math.round(-offset / stageWidth())));
+                }
+
+                function finishDrag() {
+                    var velocity = 0;
+                    if (samples.length >= 2) {
+                        var first = samples[0];
+                        var last = samples[samples.length - 1];
+                        var dt = last.t - first.t;
+                        if (dt > 0) velocity = (last.x - first.x) / dt;
+                    }
+
+                    var rawOffset = startOffset + dragDelta;
+                    var target = index;
+                    if (Math.abs(velocity) > FLICK_VELOCITY) {
+                        target = velocity < 0 ? index + 1 : index - 1;
+                    } else {
+                        target = nearestIndex(rawOffset);
+                    }
+
+                    dragDelta = 0;
+                    samples = [];
+                    goTo(target, true);
+                }
+
+                function resetDragState() {
+                    pointerId = null;
+                    dragAxis = null;
+                    track.classList.remove('is-dragging');
+                }
+
+                function onPointerDown(e) {
+                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    if (e.target.closest('.photo-carousel-arrow, .photo-carousel-dot')) return;
+
+                    pointerId = e.pointerId;
+                    suppressClick = false;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    startOffset = baseOffset();
+                    dragDelta = 0;
+                    dragAxis = null;
+                    samples = [{ x: e.clientX, t: performance.now() }];
+                    track.classList.add('is-dragging');
+                    track.style.transitionDuration = '0ms';
+                    stage.setPointerCapture(e.pointerId);
+                }
+
+                function onPointerMove(e) {
+                    if (e.pointerId !== pointerId) return;
+
+                    var dx = e.clientX - startX;
+                    var dy = e.clientY - startY;
+                    if (!dragAxis && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+                        dragAxis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+                        if (dragAxis === 'y') {
+                            resetDragState();
+                            try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
+                            return;
+                        }
+                    }
+                    if (dragAxis !== 'x') return;
+
+                    e.preventDefault();
+                    dragDelta = dx;
+                    if (Math.abs(dragDelta) > DRAG_CLICK_THRESHOLD) suppressClick = true;
+
+                    samples.push({ x: e.clientX, t: performance.now() });
+                    if (samples.length > 8) samples.shift();
+
+                    applyTransform(rubberBandOffset(startOffset + dragDelta), false);
+                }
+
+                function onPointerUp(e) {
+                    if (e.pointerId !== pointerId) return;
+                    var wasDragging = dragAxis === 'x';
+                    resetDragState();
+                    try { stage.releasePointerCapture(e.pointerId); } catch (_) {}
+                    if (wasDragging) finishDrag();
+                    if (suppressClick) {
+                        setTimeout(function () { suppressClick = false; }, 0);
+                    }
+                }
+
+                stage.addEventListener('pointerdown', onPointerDown);
+                stage.addEventListener('pointermove', onPointerMove, { passive: false });
+                stage.addEventListener('pointerup', onPointerUp);
+                stage.addEventListener('pointercancel', onPointerUp);
+
+                previous.addEventListener('click', function () { goTo(index - 1, true); });
+                next.addEventListener('click', function () { goTo(index + 1, true); });
+                Array.prototype.forEach.call(dots.children, function (dot, dotIndex) {
+                    dot.addEventListener('click', function () { goTo(dotIndex, true); });
+                });
+
+                stage.addEventListener('keydown', function (e) {
+                    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(index - 1, true); }
+                    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(index + 1, true); }
+                });
+
+                var resizeTimer;
+                window.addEventListener('resize', function () {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(function () {
+                        applyTransform(baseOffset(), false);
+                    }, 100);
+                });
+
+                stage.appendChild(track);
+                carousel.appendChild(stage);
                 carousel.appendChild(previous);
                 carousel.appendChild(next);
                 carousel.appendChild(count);
                 carousel.appendChild(dots);
                 grid.appendChild(carousel);
-                updatePosition();
+                goTo(0, false);
             }
 
             function renderSinglePhotos(photos) {
