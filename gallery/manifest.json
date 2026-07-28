@@ -24,6 +24,27 @@
       "src": "gallery/1783844506-evening-lake-natural.jpg",
       "uploaded": 1783844506,
       "caption": "Serene waters stretch toward distant hills under a dramatic cloudy sky, with tall grass framing the peaceful shoreline."
+    },
+    {
+      "src": "gallery/1785254400001-looking-up-trees.jpg",
+      "uploaded": 1785254400001,
+      "caption": "",
+      "set": "looking-up-2026-07-28",
+      "setOrder": 1
+    },
+    {
+      "src": "gallery/1785254400002-canopy-streetlight.jpg",
+      "uploaded": 1785254400002,
+      "caption": "",
+      "set": "looking-up-2026-07-28",
+      "setOrder": 2
+    },
+    {
+      "src": "gallery/1785254400003-streetlight-sky.jpg",
+      "uploaded": 1785254400003,
+      "caption": "",
+      "set": "looking-up-2026-07-28",
+      "setOrder": 3
     }
   ]
 }

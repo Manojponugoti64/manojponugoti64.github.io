@@ -29,7 +29,7 @@
             <h1>Photos</h1>
             <p class="page-sub">Moments, snapshots, places I&#39;ve been.</p>
 
-            <div id="photoGrid" class="photo-grid" aria-live="polite"></div>
+            <div id="photoGrid" class="photo-feed" aria-live="polite"></div>
             <p id="photoEmpty" class="photo-empty" style="display:none;">No photos yet — check back soon.</p>
             <p id="photoError" class="photo-error" style="display:none;"></p>
         </div>
@@ -57,6 +57,116 @@
             var lb = document.getElementById('lightbox');
             var lbImg = document.getElementById('lightboxImg');
             var lbClose = lb.querySelector('.lightbox-close');
+
+            function makePhotoButton(p, className) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = className;
+                btn.setAttribute('aria-label', 'Open photo' + (p.caption ? ': ' + p.caption : ''));
+                var img = document.createElement('img');
+                img.src = p.src;
+                img.alt = p.caption || '';
+                img.loading = 'lazy';
+                btn.appendChild(img);
+                btn.addEventListener('click', function () {
+                    openLightbox(p.src, p.caption);
+                });
+                return btn;
+            }
+
+            function renderPhotoSet(photos) {
+                photos.sort(function (a, b) {
+                    return (a.setOrder || 0) - (b.setOrder || 0);
+                });
+
+                var carousel = document.createElement('section');
+                carousel.className = 'photo-carousel';
+                carousel.setAttribute('aria-label', 'Photo slideshow');
+
+                var viewport = document.createElement('div');
+                viewport.className = 'photo-carousel-viewport';
+                var track = document.createElement('div');
+                track.className = 'photo-carousel-track';
+
+                photos.forEach(function (p, index) {
+                    var slide = document.createElement('div');
+                    slide.className = 'photo-carousel-slide';
+                    slide.setAttribute('aria-label', 'Photo ' + (index + 1) + ' of ' + photos.length);
+                    slide.appendChild(makePhotoButton(p, 'photo-carousel-image'));
+                    track.appendChild(slide);
+                });
+
+                var previous = document.createElement('button');
+                previous.type = 'button';
+                previous.className = 'photo-carousel-arrow photo-carousel-previous';
+                previous.setAttribute('aria-label', 'Previous photo');
+                previous.innerHTML = '&#8249;';
+
+                var next = document.createElement('button');
+                next.type = 'button';
+                next.className = 'photo-carousel-arrow photo-carousel-next';
+                next.setAttribute('aria-label', 'Next photo');
+                next.innerHTML = '&#8250;';
+
+                var count = document.createElement('span');
+                count.className = 'photo-carousel-count';
+                count.textContent = '1 / ' + photos.length;
+
+                var dots = document.createElement('div');
+                dots.className = 'photo-carousel-dots';
+                photos.forEach(function (_, index) {
+                    var dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.className = 'photo-carousel-dot' + (index === 0 ? ' is-active' : '');
+                    dot.setAttribute('aria-label', 'Go to photo ' + (index + 1));
+                    dot.addEventListener('click', function () {
+                        viewport.scrollTo({ left: index * viewport.clientWidth, behavior: 'smooth' });
+                    });
+                    dots.appendChild(dot);
+                });
+
+                function currentIndex() {
+                    return Math.max(0, Math.min(photos.length - 1,
+                        Math.round(viewport.scrollLeft / viewport.clientWidth)));
+                }
+                function updatePosition() {
+                    var index = currentIndex();
+                    count.textContent = (index + 1) + ' / ' + photos.length;
+                    Array.prototype.forEach.call(dots.children, function (dot, dotIndex) {
+                        dot.classList.toggle('is-active', dotIndex === index);
+                    });
+                    previous.disabled = index === 0;
+                    next.disabled = index === photos.length - 1;
+                }
+                function go(direction) {
+                    var index = Math.max(0, Math.min(photos.length - 1, currentIndex() + direction));
+                    viewport.scrollTo({ left: index * viewport.clientWidth, behavior: 'smooth' });
+                }
+
+                previous.addEventListener('click', function () { go(-1); });
+                next.addEventListener('click', function () { go(1); });
+                viewport.addEventListener('scroll', updatePosition, { passive: true });
+                window.addEventListener('resize', updatePosition);
+
+                viewport.appendChild(track);
+                carousel.appendChild(viewport);
+                carousel.appendChild(previous);
+                carousel.appendChild(next);
+                carousel.appendChild(count);
+                carousel.appendChild(dots);
+                grid.appendChild(carousel);
+                updatePosition();
+            }
+
+            function renderSinglePhotos(photos) {
+                if (!photos.length) return;
+                var legacyGrid = document.createElement('div');
+                legacyGrid.className = 'photo-grid';
+                photos.forEach(function (p) {
+                    legacyGrid.appendChild(makePhotoButton(p, 'photo-tile'));
+                });
+                grid.appendChild(legacyGrid);
+            }
 
             function openLightbox(src, alt) {
                 lbImg.src = src;
@@ -88,21 +198,21 @@
                         emptyMsg.style.display = '';
                         return;
                     }
-                    photos.slice().reverse().forEach(function (p) {
-                        var btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'photo-tile';
-                        btn.setAttribute('aria-label', 'Open photo' + (p.caption ? ': ' + p.caption : ''));
-                        var img = document.createElement('img');
-                        img.src = p.src;
-                        img.alt = p.caption || '';
-                        img.loading = 'lazy';
-                        btn.appendChild(img);
-                        btn.addEventListener('click', function () {
-                            openLightbox(p.src, p.caption);
-                        });
-                        grid.appendChild(btn);
+                    var reversed = photos.slice().reverse();
+                    var sets = {};
+                    var singles = [];
+                    reversed.forEach(function (p) {
+                        if (p.set) {
+                            if (!sets[p.set]) sets[p.set] = [];
+                            sets[p.set].push(p);
+                        } else {
+                            singles.push(p);
+                        }
                     });
+                    Object.keys(sets).forEach(function (setName) {
+                        renderPhotoSet(sets[setName]);
+                    });
+                    renderSinglePhotos(singles);
                 })
                 .catch(function (err) {
                     console.error(err);
