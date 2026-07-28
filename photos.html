@@ -473,7 +473,8 @@
                 dot.className = 'pg-full-dot' + (dotIndex === 0 ? ' is-active' : '');
                 dot.setAttribute('aria-label', 'Go to slide ' + (dotIndex + 1));
                 dot.addEventListener('click', function () {
-                    viewport.scrollTo({ left: dotIndex * viewport.clientWidth, behavior: prefersReduced ? 'auto' : 'smooth' });
+                    viewport.style.scrollBehavior = prefersReduced ? 'auto' : 'smooth';
+                    viewport.scrollLeft = dotIndex * viewport.clientWidth;
                 });
                 dots.appendChild(dot);
             });
@@ -493,7 +494,8 @@
             }
             function move(direction) {
                 var target = Math.max(0, Math.min(sources.length - 1, currentSlide() + direction));
-                viewport.scrollTo({ left: target * viewport.clientWidth, behavior: prefersReduced ? 'auto' : 'smooth' });
+                viewport.style.scrollBehavior = prefersReduced ? 'auto' : 'smooth';
+                viewport.scrollLeft = target * viewport.clientWidth;
             }
 
             previous.addEventListener('click', function () { move(-1); });
