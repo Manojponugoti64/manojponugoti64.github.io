@@ -158,9 +158,14 @@
         var main = document.querySelector('main');
         if (!main || document.querySelector('.landing-hero')) return;
 
-        // Permanent landing hero: fixed white-bougainvillea photo (no rotation).
-        var HERO_SRC = 'gallery/1782100000000-bougainvillea-arch.jpg';
-        var HERO_ALT = 'A cascading arch of white bougainvillea framing a soft twilight sky';
+        var HERO_FALLBACK = {
+            src: 'gallery/1782100000000-bougainvillea-arch.jpg',
+            caption: 'A cascading arch of white bougainvillea framing a soft twilight sky.'
+        };
+        var now = new Date();
+        var dayNumber = Math.floor(Date.UTC(
+            now.getFullYear(), now.getMonth(), now.getDate()
+        ) / 86400000);
 
         var style = document.createElement('style');
         style.id = 'landing-hero-style';
@@ -200,17 +205,60 @@
 
         var hero = document.createElement('section');
         hero.className = 'landing-hero';
-        hero.setAttribute('aria-label', 'White bougainvillea');
+        hero.setAttribute('aria-label', 'Photo of the day');
+        hero.dataset.photoDay = String(dayNumber);
 
         var photo = document.createElement('img');
         photo.className = 'landing-hero-photo';
         photo.loading = 'eager';
         photo.decoding = 'async';
-        photo.alt = HERO_ALT;
-        photo.onload = function () { photo.classList.add('is-loaded'); };
-        photo.src = HERO_SRC;
+        photo.setAttribute('fetchpriority', 'high');
 
         hero.appendChild(photo);
         main.insertBefore(hero, main.firstElementChild);
+
+        function showDailyPhoto(photos, index, attemptsLeft) {
+            if (!photos.length || attemptsLeft < 1) {
+                if (photo.src.indexOf(HERO_FALLBACK.src) === -1) {
+                    showDailyPhoto([HERO_FALLBACK], 0, 1);
+                }
+                return;
+            }
+
+            var selected = photos[index % photos.length];
+            photo.classList.remove('is-loaded');
+            photo.onload = function () {
+                hero.dataset.photoSrc = selected.src;
+                photo.classList.add('is-loaded');
+            };
+            photo.onerror = function () {
+                showDailyPhoto(photos, index + 1, attemptsLeft - 1);
+            };
+            photo.alt = selected.caption || 'Photo of the day';
+            photo.src = selected.src + '?hero-day=' + dayNumber;
+        }
+
+        fetch('gallery/manifest.json?hero-day=' + dayNumber)
+            .then(function (response) {
+                if (!response.ok) throw new Error('manifest ' + response.status);
+                return response.json();
+            })
+            .then(function (data) {
+                var photos = ((data && data.photos) || []).filter(function (item) {
+                    return item && typeof item.src === 'string' && item.src;
+                });
+                if (!photos.length) photos = [HERO_FALLBACK];
+                showDailyPhoto(photos, dayNumber % photos.length, photos.length);
+            })
+            .catch(function () {
+                showDailyPhoto([HERO_FALLBACK], 0, 1);
+            });
+
+        var nextMidnight = new Date(
+            now.getFullYear(), now.getMonth(), now.getDate() + 1
+        );
+        window.setTimeout(function () {
+            location.reload();
+        }, nextMidnight.getTime() - now.getTime() + 1000);
     });
 })();
