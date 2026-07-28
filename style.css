@@ -785,25 +785,34 @@ body.sidebar-open { overflow: hidden; }
   width: min(100%, 680px);
   margin: 0 auto;
 }
-.photo-carousel-viewport {
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
+.photo-carousel-stage {
+  overflow: hidden;
   border-radius: 12px;
   background: var(--bg-secondary);
   box-shadow: 0 12px 34px var(--shadow);
-  touch-action: pan-x pinch-zoom;
+  touch-action: pan-y pinch-zoom;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.photo-carousel-viewport::-webkit-scrollbar { display: none; }
+.photo-carousel-stage:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
 .photo-carousel-track {
   display: flex;
+  will-change: transform;
+}
+.photo-carousel-track.is-animating {
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.photo-carousel-track.is-dragging {
+  transition: none;
+  cursor: grabbing;
 }
 .photo-carousel-slide {
   flex: 0 0 100%;
   min-width: 0;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
 }
 .photo-carousel-image {
   display: block;
@@ -819,6 +828,9 @@ body.sidebar-open { overflow: hidden; }
   height: auto;
   aspect-ratio: 3 / 4;
   object-fit: cover;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 .photo-carousel-arrow {
   position: absolute;
@@ -871,7 +883,7 @@ body.sidebar-open { overflow: hidden; }
   border-radius: 50%;
   background: var(--border);
   cursor: pointer;
-  transition: width 0.2s ease, border-radius 0.2s ease, background 0.2s ease;
+  transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.32s cubic-bezier(0.22, 1, 0.36, 1), background 0.24s ease, opacity 0.24s ease;
 }
 .photo-carousel-dot.is-active {
   width: 19px;
@@ -908,12 +920,15 @@ body.sidebar-open { overflow: hidden; }
     width: calc(100% + 2rem);
     margin-left: -1rem;
   }
-  .photo-carousel-viewport { border-radius: 8px; }
+  .photo-carousel-stage { border-radius: 8px; }
   .photo-carousel-arrow { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .photo-carousel-viewport { scroll-behavior: auto; }
+  .photo-carousel-track.is-animating {
+    transition-duration: 0.14s;
+    transition-timing-function: ease;
+  }
 }
 
 /* Lightbox */
