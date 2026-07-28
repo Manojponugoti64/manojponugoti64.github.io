@@ -440,6 +440,17 @@ body.pg-lb-open { overflow: hidden; }
     radial-gradient(ellipse at center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.55) 100%),
     rgba(0, 0, 0, 0.35);
 }
+/* Desktop/MacBook: keep ambience quiet so the photo owns the frame.
+   Portrait phone shots leave wide side gutters on landscape screens —
+   a loud blurred backdrop makes those gutters feel like the main visual. */
+@media (min-width: 761px) {
+  .pg-lb-bg {
+    opacity: 0 !important;
+  }
+  .pg-lb-bg-scrim {
+    background: #000;
+  }
+}
 
 .pg-lb > .pg-lb-btn,
 .pg-lb-stage,
@@ -456,12 +467,13 @@ body.pg-lb-open { overflow: hidden; }
   min-height: 0;
   padding: clamp(3rem, 7vh, 5rem) clamp(3.5rem, 8vw, 7rem) 1rem;
 }
+/* Edge-to-edge carousel — photo fills the viewport (object-fit: contain) */
 .pg-lb.is-carousel .pg-lb-stage {
-  padding: 3.5rem 0 0.25rem;
+  padding: 0;
 }
 @media (max-width: 760px) {
   .pg-lb-stage { padding: 3.25rem 0.75rem 0.5rem; }
-  .pg-lb.is-carousel .pg-lb-stage { padding: 3.25rem 0 0; }
+  .pg-lb.is-carousel .pg-lb-stage { padding: 0; }
 }
 
 .pg-lb-viewport {
@@ -494,6 +506,7 @@ body.pg-lb-open { overflow: hidden; }
 .pg-lb-slide {
   flex: 0 0 100%;
   width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -501,8 +514,10 @@ body.pg-lb-open { overflow: hidden; }
 }
 
 .pg-lb-img {
-  max-width: 100%;
-  max-height: calc(100vh - 8.5rem);
+  max-width: min(100%, 96vw);
+  max-height: calc(100dvh - 6.5rem);
+  width: auto;
+  height: auto;
   object-fit: contain;
   border-radius: 6px;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
@@ -514,19 +529,22 @@ body.pg-lb-open { overflow: hidden; }
   opacity: 0;
   transition: transform 0.4s var(--pg-ease), opacity 0.4s var(--pg-ease);
 }
+/* Full-viewport carousel slides — same idea as the earlier
+   "Show canopy carousel full screen" layout. No 680px column. */
+.pg-lb.is-carousel .pg-lb-img,
 .pg-lb.is-carousel .pg-lb-img--track,
-.pg-lb.is-carousel .pg-lb-viewport.is-track .pg-lb-img {
+.pg-lb.is-carousel .pg-lb-viewport .pg-lb-img {
   width: 100%;
-  max-width: min(100%, 680px);
-  max-height: calc(100vh - 7rem);
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
   border-radius: 0;
   box-shadow: none;
 }
-@media (max-width: 760px) {
-  .pg-lb.is-carousel .pg-lb-img--track,
-  .pg-lb.is-carousel .pg-lb-viewport.is-track .pg-lb-img {
-    max-width: 100%;
-    max-height: calc(100vh - 5.5rem);
+@media (min-width: 761px) {
+  .pg-lb-img {
+    max-height: calc(100dvh - 5.5rem);
   }
 }
 .pg-lb.is-open .pg-lb-img { transform: scale(1); opacity: 1; }
@@ -612,9 +630,19 @@ body.pg-lb-open { overflow: hidden; }
   text-align: center;
 }
 .pg-lb.is-carousel .pg-lb-meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
   flex-direction: column;
   gap: 0.65rem;
-  padding: 0.75rem 1rem max(1.25rem, env(safe-area-inset-bottom));
+  padding: 1.5rem 1rem max(1.25rem, env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+.pg-lb.is-carousel .pg-lb-carousel-dots {
+  pointer-events: auto;
 }
 .pg-lb.is-carousel .pg-lb-dot,
 .pg-lb.is-carousel .pg-lb-cap {
