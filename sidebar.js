@@ -52,8 +52,7 @@
             { href: prefix + 'videos.html', label: 'Videos' },
             { href: prefix + 'music.html', label: 'Music' },
             { href: prefix + 'books.html', label: 'Books' },
-            { href: prefix + 'archive.html', label: 'Archive' },
-            { href: 'https://manojkumar520199.substack.com', label: 'Substack' }
+            { href: prefix + 'archive.html', label: 'Archive' }
         ];
         var navItems = items.length ? items : defaults;
         var hasVideos = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'videos'; });
@@ -66,14 +65,6 @@
             var insertAt = Math.min(2, navItems.length);
             navItems.splice(insertAt, 0, { href: prefix + 'music.html', label: 'Music' });
         }
-        var hasSubstack = navItems.some(function (it) {
-            var l = (it.label || '').toLowerCase();
-            return l === 'substack' || l === 'newsletter';
-        });
-        if (!hasSubstack) {
-            navItems.push({ href: 'https://manojkumar520199.substack.com', label: 'Substack' });
-        }
-
         var html = '';
         html += '<div class="sidebar-header">';
         html += '<span class="sidebar-title">Manoj\'s Blog</span>';
@@ -145,6 +136,31 @@
                 refreshThemeUI();
             });
         }
+    });
+})();
+
+(function () {
+    function ready(fn) {
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+        else fn();
+    }
+
+    ready(function () {
+        var social = document.querySelector('.footer-social');
+        if (!social || social.querySelector('[data-social="substack"]')) return;
+
+        var link = document.createElement('a');
+        link.href = 'https://manojkumar520199.substack.com';
+        link.className = 'social-link social-link--icon-only';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.dataset.social = 'substack';
+        link.setAttribute('aria-label', 'Manoj on Substack');
+        link.title = 'Substack';
+        link.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.539 8.242H1.46V5.406h21.08v2.836ZM1.46 10.812v13.617L12 18.51l10.539 5.918V10.812H1.46ZM22.539 0H1.46v2.836h21.08V0Z"/></svg>';
+
+        var firstTextLink = social.querySelector('.social-link:not(.social-link--icon-only)');
+        social.insertBefore(link, firstTextLink || null);
     });
 })();
 
