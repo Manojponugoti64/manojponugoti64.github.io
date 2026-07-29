@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Videos — Manoj's Blog</title>
+    <link rel="canonical" href="https://manojponugoti64.github.io/videos.html">
+    <link rel="alternate" type="application/rss+xml" title="Manoj's Blog" href="/feed.xml">
+    <meta name="description" content="Short films and moving moments from Manoj's Blog.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Manoj's Blog">
+    <meta property="og:title" content="Videos — Manoj's Blog">
+    <meta property="og:description" content="Short films and moving moments.">
+    <meta property="og:url" content="https://manojponugoti64.github.io/videos.html">
+    <meta property="og:image" content="https://manojponugoti64.github.io/videos/the-trees-remember-the-wind-poster.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://manojponugoti64.github.io/videos/the-trees-remember-the-wind-poster.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=1.9">
+    <link rel="stylesheet" href="videos.css?v=1.0">
+    <script src="theme.js"></script>
+    <script src="sidebar.js?v=2.0" defer></script>
+    <script src="spotify.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a class="logo" href="index.html">Manoj's Blog</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="photos.html">Photos</a></li>
+                <li><a href="videos.html" class="active">Videos</a></li>
+                <li><a href="music.html">Music</a></li>
+                <li><a href="books.html">Books</a></li>
+                <li><a href="iss-tracker/">ISS Tracker</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="film-main">
+        <section class="film-hero" aria-labelledby="filmTitle">
+            <p class="film-eyebrow">Moving images</p>
+            <h1 id="filmTitle" class="film-title">Short <em>films</em></h1>
+            <p class="film-intro">Small moments that needed more than one frame.</p>
+        </section>
+
+        <section id="filmList" class="film-list" aria-live="polite">
+            <p class="film-status">Loading films...</p>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-social">
+            <a href="https://github.com/Manojponugoti64" class="social-link social-link--icon-only" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            </a>
+            <a href="https://x.com/younghoax20" class="social-link social-link--icon-only" target="_blank" rel="noopener noreferrer" aria-label="Zorothepirate_ on X (@younghoax20)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="mailto:ponugotimanojkumar@gmail.com" class="social-link" aria-label="Email Manoj">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                <span>ponugotimanojkumar@gmail.com</span>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var list = document.getElementById('filmList');
+
+            function createFilm(item, index) {
+                var article = document.createElement('article');
+                article.className = 'film-entry';
+
+                var stage = document.createElement('div');
+                stage.className = 'film-stage';
+
+                var video = document.createElement('video');
+                video.controls = true;
+                video.playsInline = true;
+                video.preload = 'metadata';
+                video.poster = item.poster || '';
+                video.src = item.src;
+                video.setAttribute('aria-label', item.title || 'Short film');
+                stage.appendChild(video);
+
+                var copy = document.createElement('div');
+                copy.className = 'film-copy';
+
+                var number = document.createElement('p');
+                number.className = 'film-number';
+                number.textContent = String(index + 1).padStart(2, '0');
+
+                var name = document.createElement('h2');
+                name.className = 'film-name';
+                name.textContent = item.title || 'Untitled film';
+
+                var caption = document.createElement('p');
+                caption.className = 'film-caption';
+                caption.textContent = item.caption || '';
+
+                var duration = document.createElement('p');
+                duration.className = 'film-duration';
+                duration.textContent = item.duration || '';
+
+                copy.appendChild(number);
+                copy.appendChild(name);
+                if (item.caption) copy.appendChild(caption);
+                if (item.duration) copy.appendChild(duration);
+                article.appendChild(stage);
+                article.appendChild(copy);
+                return article;
+            }
+
+            fetch('videos/manifest.json?cb=' + Date.now())
+                .then(function (response) {
+                    if (!response.ok) throw new Error('Films are temporarily unavailable.');
+                    return response.json();
+                })
+                .then(function (data) {
+                    var videos = (data && data.videos) || [];
+                    list.textContent = '';
+                    if (!videos.length) {
+                        list.innerHTML = '<p class="film-status">No films yet.</p>';
+                        return;
+                    }
+                    videos.slice().reverse().forEach(function (item, index) {
+                        list.appendChild(createFilm(item, index));
+                    });
+                    list.querySelectorAll('video').forEach(function (player) {
+                        player.addEventListener('play', function () {
+                            list.querySelectorAll('video').forEach(function (other) {
+                                if (other !== player) other.pause();
+                            });
+                        });
+                    });
+                })
+                .catch(function (error) {
+                    list.innerHTML = '<p class="film-status">' + error.message + '</p>';
+                });
+        })();
+    </script>
+</body>
+</html>

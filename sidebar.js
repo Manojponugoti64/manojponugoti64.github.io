@@ -49,12 +49,18 @@
         var defaults = [
             { href: prefix + 'index.html', label: 'Home' },
             { href: prefix + 'photos.html', label: 'Photos' },
+            { href: prefix + 'videos.html', label: 'Videos' },
             { href: prefix + 'music.html', label: 'Music' },
             { href: prefix + 'books.html', label: 'Books' },
             { href: prefix + 'archive.html', label: 'Archive' },
             { href: 'https://manojkumar520199.substack.com', label: 'Substack' }
         ];
         var navItems = items.length ? items : defaults;
+        var hasVideos = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'videos'; });
+        if (!hasVideos) {
+            var videoInsertAt = Math.min(2, navItems.length);
+            navItems.splice(videoInsertAt, 0, { href: prefix + 'videos.html', label: 'Videos' });
+        }
         var hasMusic = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'music'; });
         if (!hasMusic) {
             var insertAt = Math.min(2, navItems.length);
