@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=1.9">
-    <link rel="stylesheet" href="videos.css?v=1.0">
+    <link rel="stylesheet" href="videos.css?v=1.1">
     <script src="theme.js"></script>
     <script src="sidebar.js?v=2.9" defer></script>
     <script src="spotify.js" defer></script>
@@ -74,9 +74,11 @@
             function createFilm(item, index) {
                 var article = document.createElement('article');
                 article.className = 'film-entry';
+                if (item.orientation === 'landscape') article.classList.add('is-landscape');
 
                 var stage = document.createElement('div');
                 stage.className = 'film-stage';
+                if (item.orientation === 'landscape') stage.classList.add('is-landscape');
 
                 var video = document.createElement('video');
                 video.controls = true;
