@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=1.9">
-    <link rel="stylesheet" href="videos.css?v=1.1">
+    <link rel="stylesheet" href="videos.css?v=1.2">
     <script src="theme.js"></script>
     <script src="sidebar.js?v=2.9" defer></script>
     <script src="spotify.js" defer></script>
@@ -89,31 +89,40 @@
                 video.setAttribute('aria-label', item.title || 'Short film');
                 stage.appendChild(video);
 
-                var copy = document.createElement('div');
-                copy.className = 'film-copy';
+                var hasCopy = !!(item.title || item.caption || item.duration);
+                if (hasCopy) {
+                    var copy = document.createElement('div');
+                    copy.className = 'film-copy';
 
-                var number = document.createElement('p');
-                number.className = 'film-number';
-                number.textContent = String(index + 1).padStart(2, '0');
+                    var number = document.createElement('p');
+                    number.className = 'film-number';
+                    number.textContent = String(index + 1).padStart(2, '0');
+                    copy.appendChild(number);
 
-                var name = document.createElement('h2');
-                name.className = 'film-name';
-                name.textContent = item.title || 'Untitled film';
-
-                var caption = document.createElement('p');
-                caption.className = 'film-caption';
-                caption.textContent = item.caption || '';
-
-                var duration = document.createElement('p');
-                duration.className = 'film-duration';
-                duration.textContent = item.duration || '';
-
-                copy.appendChild(number);
-                copy.appendChild(name);
-                if (item.caption) copy.appendChild(caption);
-                if (item.duration) copy.appendChild(duration);
-                article.appendChild(stage);
-                article.appendChild(copy);
+                    if (item.title) {
+                        var name = document.createElement('h2');
+                        name.className = 'film-name';
+                        name.textContent = item.title;
+                        copy.appendChild(name);
+                    }
+                    if (item.caption) {
+                        var caption = document.createElement('p');
+                        caption.className = 'film-caption';
+                        caption.textContent = item.caption;
+                        copy.appendChild(caption);
+                    }
+                    if (item.duration) {
+                        var duration = document.createElement('p');
+                        duration.className = 'film-duration';
+                        duration.textContent = item.duration;
+                        copy.appendChild(duration);
+                    }
+                    article.appendChild(stage);
+                    article.appendChild(copy);
+                } else {
+                    article.classList.add('is-video-only');
+                    article.appendChild(stage);
+                }
                 return article;
             }
 

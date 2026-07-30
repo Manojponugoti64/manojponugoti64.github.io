@@ -80,6 +80,18 @@
   grid-template-columns: minmax(360px, 760px) minmax(240px, 1fr);
 }
 
+.film-entry.is-video-only {
+  display: block;
+  width: min(1120px, calc(100% - 3rem));
+}
+
+.film-entry.is-video-only .film-stage,
+.film-entry.is-video-only .film-stage.is-landscape {
+  width: min(100%, 900px);
+  margin: 0 auto;
+  justify-self: center;
+}
+
 .film-stage video {
   display: block;
   width: 100%;
