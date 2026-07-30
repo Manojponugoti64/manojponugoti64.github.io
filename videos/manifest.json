@@ -6,6 +6,7 @@
       "title": "The trees remember the wind",
       "caption": "A quiet study of leaves, light, and moving air.",
       "duration": "0:08",
+      "orientation": "portrait",
       "uploaded": 1785298717000
     },
     {
@@ -14,6 +15,7 @@
       "title": "Introducing Mika — The Newest Grok Companion",
       "caption": "xAI's Grok Imagine promo for Mika, the newest Grok Companion.",
       "duration": "0:42",
+      "orientation": "landscape",
       "uploaded": 1785431000000,
       "source": "https://x.com/xai/status/1981865619176788279"
     }
