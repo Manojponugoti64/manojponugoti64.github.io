@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chart Export</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #faf9f6;
+      color: #0a0a0a;
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+    body.r1440 { width: 2560px; height: 1440px; padding: 28px; }
+    body.r1080 { width: 1920px; height: 1080px; padding: 20px; }
+
+    .chart-inner {
+      display: flex;
+      height: calc(100% - 56px);
+      border: 2px solid #111;
+      background: #fff;
+    }
+    body.r1080 .chart-inner { height: calc(100% - 44px); }
+
+    .title-bar {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      background: #111;
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 52px;
+      font-size: 22px;
+      line-height: 1.15;
+      padding: 18px 0;
+    }
+    body.r1080 .title-bar {
+      flex-basis: 40px;
+      font-size: 16px;
+      letter-spacing: 0.1em;
+      padding: 12px 0;
+    }
+
+    .table-wrap { flex: 1; min-width: 0; }
+    table {
+      width: 100%;
+      height: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1.5px solid #111;
+      text-align: center;
+      vertical-align: middle;
+      padding: 0 6px;
+    }
+    th {
+      background: #ececec;
+      font-weight: 800;
+      height: 64px;
+      font-size: 18px;
+      line-height: 1.15;
+    }
+    body.r1080 th { height: 48px; font-size: 14px; }
+    td { font-size: 17px; height: 58px; }
+    body.r1080 td { font-size: 13px; height: 44px; }
+
+    .col-drug { width: 15%; text-align: left; padding-left: 14px; font-weight: 600; }
+    .col-dose { width: 6%; }
+    .col-route { width: 5%; }
+    .col-freq { width: 3.4%; }
+    .col-vital { width: 4%; }
+    .col-time { width: 6%; }
+    .col-sign { width: 8%; }
+
+    .shift-header td {
+      text-align: left;
+      font-weight: 800;
+      background: #f3f3f3;
+      padding-left: 14px;
+      font-size: 18px;
+      height: 42px;
+    }
+    body.r1080 .shift-header td { font-size: 14px; height: 34px; }
+
+    .check { font-size: 22px; font-weight: 800; line-height: 1; }
+    body.r1080 .check { font-size: 17px; }
+
+    .hand {
+      font-family: "Segoe Print", "Comic Sans MS", "Bradley Hand", cursive;
+      color: #153a8a;
+      font-weight: 600;
+    }
+
+    .footer {
+      margin-top: 14px;
+      font-size: 15px;
+      line-height: 1.45;
+      color: #222;
+    }
+    body.r1080 .footer { margin-top: 10px; font-size: 12px; }
+    .footer strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 2px;
+    }
+    body.r1080 .footer strong { font-size: 13px; }
+  </style>
+</head>
+<body class="r1440">
+  <div class="chart-inner">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-drug">Drug</th>
+            <th class="col-dose">Dose</th>
+            <th class="col-route">Route</th>
+            <th class="col-freq">OD</th>
+            <th class="col-freq">BD</th>
+            <th class="col-freq">TID</th>
+            <th class="col-freq">QID</th>
+            <th class="col-freq">STAT</th>
+            <th class="col-vital">PR</th>
+            <th class="col-vital">TEMP</th>
+            <th class="col-vital">SPO2</th>
+            <th class="col-vital">RBS</th>
+            <th class="col-time">Time</th>
+            <th class="col-time">Time 2</th>
+            <th class="col-time">Time 3</th>
+            <th class="col-sign">Signature</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="shift-header">
+            <td colspan="16"><span class="hand">30/7/24 &nbsp; night-shift</span></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Inj - Zonomax</span></td>
+            <td><span class="hand">1.5gm</span></td>
+            <td><span class="hand">IV</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td>
+            <td><span class="hand">stat</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td><span class="hand">6:10pm</span></td>
+            <td></td><td></td>
+            <td><span class="hand">Anusha</span></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Inj - Zofer</span></td>
+            <td><span class="hand">4mg</span></td>
+            <td><span class="hand">IV</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td><span class="hand">6:20pm</span></td>
+            <td></td><td></td>
+            <td><span class="hand">"</span></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Inj - Pantop</span></td>
+            <td><span class="hand">40mg</span></td>
+            <td><span class="hand">IV</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td><span class="hand">6:30pm</span></td>
+            <td></td><td></td>
+            <td><span class="hand">"</span></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Inj - Thiamine</span></td>
+            <td><span class="hand">1gm</span></td>
+            <td><span class="hand">IV</span></td>
+            <td></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td><span class="hand">7:00am</span></td>
+            <td><span class="hand">1:00pm</span></td>
+            <td><span class="hand">7:00pm</span></td>
+            <td><span class="hand">"</span></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Inj - Calcium gluconate</span></td>
+            <td><span class="hand">100mg</span></td>
+            <td><span class="hand">IV</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td><span class="hand">7:00pm</span></td>
+            <td></td><td></td>
+            <td><span class="hand">"</span></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Inj - Lornit</span></td>
+            <td><span class="hand">10mg</span></td>
+            <td><span class="hand">IV</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td><span class="hand">8:00pm</span></td>
+            <td></td><td></td>
+            <td><span class="hand">"</span></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Inj - PCM</span></td>
+            <td><span class="hand">1gm</span></td>
+            <td><span class="hand">IV</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td>
+            <td><span class="hand">stat</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td><span class="hand">8:00pm</span></td>
+            <td></td><td></td>
+            <td><span class="hand">"</span></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Inj - KCL</span></td>
+            <td><span class="hand">10mg</span></td>
+            <td><span class="hand">IV</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td><span class="hand">8:30pm</span></td>
+            <td></td><td></td>
+            <td><span class="hand">"</span></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Tab - Dox-t</span></td>
+            <td><span class="hand">400mg</span></td>
+            <td><span class="hand">P/O</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Tab - Cilacar</span></td>
+            <td><span class="hand">10mg</span></td>
+            <td><span class="hand">P/O</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Tab - Nusam</span></td>
+            <td><span class="hand">400mg</span></td>
+            <td><span class="hand">P/O</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td class="col-drug"><span class="hand">Inj - Ursocol</span></td>
+            <td><span class="hand">300mg</span></td>
+            <td><span class="hand">IV</span></td>
+            <td></td>
+            <td><span class="check hand">✓</span></td>
+            <td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+          </tr>
+          <tr><td class="col-drug"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="col-drug"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="col-drug"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="title-bar">DRUG CHART &amp; MAINTAINING CHART</div>
+  </div>
+  <div class="footer">
+    <strong>Beside Reliance Smart, Kothabazr, Mahabubabad, Telangana. 9281430309</strong>
+    Facilities: Ultrasonography | CT Scan | Biopsy/Aspiration | Digital X-ray | ECG | Clinical laboratory
+  </div>
+  <script>
+    const res = new URLSearchParams(location.search).get('res') || '1440p';
+    document.body.className = res === '1080p' ? 'r1080' : 'r1440';
+  </script>
+</body>
+</html>
