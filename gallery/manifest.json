@@ -164,6 +164,25 @@
         "Flora",
         "Nature"
       ]
+    },
+    {
+      "src": "gallery/1785690843-redtrees.jpg",
+      "uploaded": 1785690843,
+      "caption": "Red trees",
+      "tags": [
+        "Flora",
+        "Nature",
+        "Sky"
+      ]
+    },
+    {
+      "src": "gallery/1785690856-branches.jpg",
+      "uploaded": 1785690856,
+      "caption": "Branches",
+      "tags": [
+        "Flora",
+        "Sky"
+      ]
     }
   ]
 }
