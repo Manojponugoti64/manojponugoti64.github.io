@@ -1,8 +1,7 @@
 /* share.js
  *
  * Injects a small share row above the upvote bar on any page that has
- * a `.post-content` article. Three actions:
- *   - Twitter / X
+ * a `.post-content` article. Two actions:
  *   - WhatsApp
  *   - Copy link (with a brief "Copied!" confirmation)
  *
@@ -55,19 +54,6 @@
     label.className = 'share-bar-label';
     label.textContent = 'Share';
     bar.appendChild(label);
-
-    // X / Twitter
-    bar.appendChild(makeBtn(
-      'X',
-      'Share on X',
-      '<path d="M18 4l-12 16M6 4l12 16"/>',
-      function () {
-        var u = 'https://twitter.com/intent/tweet'
-          + '?text=' + encodeURIComponent(title)
-          + '&url=' + encodeURIComponent(url);
-        window.open(u, '_blank', 'noopener,noreferrer');
-      }
-    ));
 
     // WhatsApp
     bar.appendChild(makeBtn(
