@@ -28,11 +28,13 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Deploy to Vercel
 
+Connected to GitHub — every push to `main` auto-deploys to production.
+
 ```bash
 npx vercel
 ```
 
-Or connect the `cathcase/` directory to Vercel from the dashboard.
+Production: https://cathcase.vercel.app
 
 ## Disclaimer
 
