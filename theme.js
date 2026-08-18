@@ -14,16 +14,9 @@
         try { localStorage.setItem(KEY, t); } catch (e) {}
     }
 
-    // Apply immediately to avoid flicker
-    var saved = getSaved();
-    if (!saved) {
-        // First-time visitor: respect system preference
-        try {
-            saved = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        } catch (e) {
-            saved = 'dark';
-        }
-    }
+    // Apply immediately to avoid flicker.
+    // Light is the site default; returning visitors keep whatever they chose.
+    var saved = getSaved() || 'light';
     applyTheme(saved);
 
     function iconFor(t) {

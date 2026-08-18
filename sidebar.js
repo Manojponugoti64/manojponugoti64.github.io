@@ -192,31 +192,24 @@
         var style = document.createElement('style');
         style.id = 'landing-hero-style';
         style.textContent = [
+            /* Editorial plate: the frame takes the photo's own proportions, */
+            /* so nothing is cropped and no letterbox bars appear.          */
+            '.landing-hero-figure { margin: 0 auto 3.2rem; width: -moz-fit-content; width: fit-content; max-width: 100%; }',
             '.landing-hero {',
             '  position: relative;',
-            '  display: block;',
-            '  width: min(100%, 600px);',
-            '  aspect-ratio: 3 / 4;',
-            '  min-height: 0;',
+            '  display: flex;',
+            '  justify-content: center;',
+            '  margin: 0;',
             '  overflow: hidden;',
-            '  margin: 0 auto 3rem;',
-            '  border-radius: 8px;',
-            '  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);',
-            '  background: var(--bg-secondary, #2d2d2d);',
+            '  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.16);',
             '}',
-            '.landing-hero-photo { width: 100%; height: 100%; object-fit: contain; display: block; opacity: 0; transition: opacity 0.6s ease; }',
+            '.landing-hero-photo { display: block; max-width: 100%; max-height: min(64vh, 600px); width: auto; height: auto; opacity: 0; transition: opacity 0.6s ease; }',
             '.landing-hero-photo.is-loaded { opacity: 1; }',
-            '[data-theme="dark"] .landing-hero-photo, :root:not([data-theme="light"]) .landing-hero-photo { filter: brightness(0.92) saturate(1.02); }',
-            '@media (min-width: 761px) {',
-            '  .landing-hero {',
-            '    width: auto;',
-            '    height: min(72vh, 760px);',
-            '    max-width: calc(100vw - 48px);',
-            '    aspect-ratio: 3 / 4;',
-            '  }',
-            '}',
+            '[data-theme="dark"] .landing-hero-photo { filter: brightness(0.92) saturate(1.02); }',
+            '[data-theme="dark"] .landing-hero { box-shadow: 0 18px 46px rgba(0, 0, 0, 0.5); }',
             '@media (max-width: 760px) {',
-            '  .landing-hero { width: 100%; aspect-ratio: 3 / 4; border-radius: 8px; margin-bottom: 2rem; }',
+            '  .landing-hero-figure { margin-bottom: 2.2rem; }',
+            '  .landing-hero-photo { max-height: 62vh; }',
             '}'
         ].join('\n');
         document.head.appendChild(style);
@@ -233,7 +226,23 @@
         photo.setAttribute('fetchpriority', 'high');
 
         hero.appendChild(photo);
-        main.insertBefore(hero, main.firstElementChild);
+
+        // Editorial caption beneath the plate, tracking the photo on show.
+        var caption = document.createElement('figcaption');
+        caption.className = 'landing-hero-caption';
+        var captionText = document.createElement('span');
+        captionText.className = 'lh-text';
+        var captionTag = document.createElement('span');
+        captionTag.className = 'lh-place';
+        captionTag.textContent = 'Photograph';
+        caption.appendChild(captionText);
+        caption.appendChild(captionTag);
+
+        var heroFigure = document.createElement('figure');
+        heroFigure.className = 'landing-hero-figure';
+        heroFigure.appendChild(hero);
+        heroFigure.appendChild(caption);
+        main.insertBefore(heroFigure, main.firstElementChild);
 
         function showDailyPhoto(photos, index, attemptsLeft) {
             if (!photos.length || attemptsLeft < 1) {
@@ -248,6 +257,7 @@
             photo.onload = function () {
                 hero.dataset.photoSrc = selected.src;
                 photo.classList.add('is-loaded');
+                captionText.textContent = selected.caption || '';
             };
             photo.onerror = function () {
                 showDailyPhoto(photos, index + 1, attemptsLeft - 1);
