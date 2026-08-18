@@ -3100,6 +3100,9 @@ body {
 
 /* ---- Masthead ---- */
 header {
+  /* Editorial masthead: scrolls away with the page instead of pinning,
+     so nothing tracks over the content on the way down. */
+  position: static;
   background-color: transparent;
   border-top: 3px solid var(--accent);
   border-bottom: 1px solid var(--border);
