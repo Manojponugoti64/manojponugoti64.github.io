@@ -1,0 +1,58 @@
+/* WebMCP inspector panel — dev only, loaded behind ?mcp=debug */
+.mcp-panel {
+    position: fixed; right: 16px; bottom: 16px; z-index: 9999;
+    width: 380px; max-height: 78vh; overflow-y: auto;
+    background: #12151a; color: #e6e6e6;
+    border: 1px solid #2b3140; border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0,0,0,.5);
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+    padding: 14px;
+}
+.mcp-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.mcp-head strong { font-size: 14px; letter-spacing: .04em; }
+.mcp-badge { font-size: 10px; color: #8b93a5; margin-left: auto; }
+.mcp-close {
+    background: none; border: none; color: #8b93a5;
+    font-size: 20px; line-height: 1; cursor: pointer; padding: 0 2px;
+}
+.mcp-close:hover { color: #fff; }
+
+.mcp-tool { border-top: 1px solid #232936; padding: 12px 0; }
+.mcp-name { display: flex; align-items: center; gap: 8px; }
+.mcp-name code { color: #7dd3fc; font-size: 13px; }
+.mcp-tag {
+    font-size: 9px; letter-spacing: .08em; padding: 2px 6px;
+    border-radius: 999px; margin-left: auto;
+}
+.mcp-tag.ro { background: #14301f; color: #6ee7a8; }
+.mcp-tag.rw { background: #3a1d1d; color: #fca5a5; }
+
+.mcp-desc { color: #8b93a5; font-size: 11px; margin: 6px 0 10px; }
+
+.mcp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.mcp-key { min-width: 62px; color: #9aa3b5; font-size: 11px; }
+.mcp-row input, .mcp-row select {
+    flex: 1; min-width: 0;
+    background: #0b0e13; color: #e6e6e6;
+    border: 1px solid #2b3140; border-radius: 6px;
+    padding: 5px 8px; font: inherit;
+}
+.mcp-row input:focus, .mcp-row select:focus { outline: none; border-color: #4b7bec; }
+
+.mcp-run {
+    background: #1d4ed8; color: #fff; border: none;
+    border-radius: 6px; padding: 6px 14px; margin-top: 4px;
+    font: inherit; cursor: pointer;
+}
+.mcp-run:hover:not(:disabled) { background: #2563eb; }
+.mcp-run:disabled { opacity: .5; cursor: default; }
+
+.mcp-out:empty { display: none; }
+.mcp-out {
+    margin: 10px 0 0; padding: 9px;
+    background: #0b0e13; border: 1px solid #232936; border-radius: 6px;
+    max-height: 190px; overflow: auto;
+    white-space: pre-wrap; word-break: break-word;
+    font-size: 11px; color: #a7f3d0;
+}
+.mcp-out.err { color: #fca5a5; }
