@@ -3,10 +3,7 @@
 
   /* Identity shown on every note. Change it here and it updates everywhere. */
   var AUTHOR = {
-    name: 'Manoj Ponugoti',
-    handle: 'younghoax20',
-    profileUrl: 'https://x.com/younghoax20',
-    avatar: ''
+    name: 'Manoj Ponugoti'
   };
 
   function escapeHtml(value) {
@@ -26,12 +23,6 @@
       var suffix = url.slice(clean.length);
       var shown = clean.replace(/^https?:\/\//, '').replace(/\/$/, '');
       return '<a href="' + clean + '" target="_blank" rel="noopener noreferrer">' + shown + '</a>' + suffix;
-    });
-    out = out.replace(/(^|[\s(])@([A-Za-z0-9_]{1,15})\b/g, function (all, pre, handle) {
-      return pre + '<a href="https://x.com/' + handle + '" target="_blank" rel="noopener noreferrer">@' + handle + '</a>';
-    });
-    out = out.replace(/(^|[\s(])#([A-Za-z][A-Za-z0-9_]*)/g, function (all, pre, tag) {
-      return pre + '<a href="https://x.com/hashtag/' + tag + '" target="_blank" rel="noopener noreferrer">#' + tag + '</a>';
     });
     return out;
   }
@@ -60,14 +51,6 @@
     }).format(date);
   }
 
-  function avatarMarkup() {
-    if (AUTHOR.avatar) {
-      return '<img class="note-avatar" src="' + escapeHtml(AUTHOR.avatar) + '" alt="' + escapeHtml(AUTHOR.name) + '" loading="lazy" decoding="async">';
-    }
-    var initial = escapeHtml((AUTHOR.name || 'M').trim().charAt(0).toUpperCase());
-    return '<span class="note-avatar note-avatar--monogram" aria-hidden="true">' + initial + '</span>';
-  }
-
   function renderNote(note, baseUrl) {
     var id = escapeHtml(note.id || '');
     var permalink = baseUrl + '#' + encodeURIComponent(note.id || '');
@@ -77,11 +60,9 @@
 
     return [
       '<article class="note-entry" id="' + id + '">',
-      '  <a class="note-avatar-link" href="' + escapeHtml(AUTHOR.profileUrl) + '" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true">' + avatarMarkup() + '</a>',
       '  <div class="note-main">',
       '    <div class="note-head">',
       '      <span class="note-name">' + escapeHtml(AUTHOR.name) + '</span>',
-      '      <span class="note-handle">@' + escapeHtml(AUTHOR.handle) + '</span>',
       '      <span class="note-dot" aria-hidden="true">·</span>',
       '      <a class="note-time" href="' + escapeHtml(permalink) + '" title="' + escapeHtml(fullDate(note.createdAt)) + '">' + escapeHtml(relativeTime(note.createdAt)) + '</a>',
       '    </div>',
@@ -95,10 +76,8 @@
   function renderProfile(host, count) {
     host.innerHTML = [
       '<div class="notes-profile">',
-      '  <a class="notes-profile-avatar" href="' + escapeHtml(AUTHOR.profileUrl) + '" target="_blank" rel="noopener noreferrer">' + avatarMarkup() + '</a>',
       '  <div class="notes-profile-id">',
       '    <span class="notes-profile-name">' + escapeHtml(AUTHOR.name) + '</span>',
-      '    <a class="notes-profile-handle" href="' + escapeHtml(AUTHOR.profileUrl) + '" target="_blank" rel="noopener noreferrer">@' + escapeHtml(AUTHOR.handle) + '</a>',
       '    <span class="notes-profile-count">' + count + (count === 1 ? ' note' : ' notes') + '</span>',
       '  </div>',
       '</div>'
