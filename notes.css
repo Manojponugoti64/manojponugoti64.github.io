@@ -32,50 +32,33 @@
 .notes-feed {
   position: relative;
   margin-top: 1.75rem;
-  padding-left: 1.35rem;
+  padding-left: 0;
+  border-top: 1px solid var(--border);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .notes-feed::before {
-  content: "";
-  position: absolute;
-  top: 0.6rem;
-  bottom: 0.6rem;
-  left: 3px;
-  width: 1px;
-  background: linear-gradient(var(--accent), var(--border) 35%, var(--border) 80%, transparent);
+  content: none;
 }
 
 .note-entry {
   position: relative;
-  padding: 0 0 2.25rem 1.2rem;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
 }
 
 .note-entry::before {
-  content: "";
-  position: absolute;
-  top: 0.55rem;
-  left: -1.56rem;
-  width: 7px;
-  height: 7px;
-  border: 2px solid var(--bg-primary);
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent-dark);
+  content: none;
 }
 
 .note-entry:target,
 .note-entry.is-targeted {
-  margin-left: -0.75rem;
-  padding: 1rem 1rem 1.45rem 1.95rem;
-  border: 1px solid var(--accent-dark);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
-}
-
-.note-entry:target::before,
-.note-entry.is-targeted::before {
-  top: 1.55rem;
-  left: -0.83rem;
+  margin: 0;
+  padding: 12px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-card));
 }
 
 .note-meta {
@@ -83,11 +66,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 4px;
   color: var(--text-secondary);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.73rem;
-  line-height: 1.4;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0;
 }
 
 .note-date {
@@ -117,15 +102,18 @@
 }
 
 .note-copy svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .note-body {
   margin: 0;
   color: var(--text-primary);
-  font-size: clamp(1.05rem, 2.3vw, 1.18rem);
-  line-height: 1.68;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -141,9 +129,9 @@
   display: block;
   width: 100%;
   max-height: 620px;
-  margin-top: 1rem;
+  margin-top: 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 16px;
   object-fit: cover;
   background: var(--bg-secondary);
 }
@@ -164,7 +152,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin: 0.25rem 0 0 2.55rem;
+  margin: 1rem 0 0;
   font-size: 0.9rem;
 }
 
@@ -209,18 +197,6 @@
   .notes-heading p {
     margin-top: 0.8rem;
     text-align: left;
-  }
-
-  .notes-feed {
-    padding-left: 1rem;
-  }
-
-  .note-entry {
-    padding-left: 0.85rem;
-  }
-
-  .note-entry::before {
-    left: -1.22rem;
   }
 
   .note-meta {
