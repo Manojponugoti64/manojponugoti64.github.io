@@ -10,8 +10,6 @@
     bio: 'Essays, photographs, and small bright pieces. Short notes live here.'
   };
 
-  var LIKE_KEY = 'notes-liked';
-
   function escapeHtml(value) {
     return String(value)
       .replace(/&/g, '&amp;')
@@ -63,22 +61,6 @@
     }).format(date);
   }
 
-  var ICONS = {
-    heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9A5.4 5.4 0 0 1 12 6.2a5.4 5.4 0 0 1 9.6 5.8c-2.1 4.4-9.6 9-9.6 9z"/></svg>',
-    link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l2-2A5 5 0 0 0 12.5 4.5l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2A5 5 0 0 0 11.5 19.5l1.1-1.1"/></svg>',
-    x: '<svg viewBox="0 0 24 24" aria-hidden="true" class="icon-solid"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.97 6.82H1.67l7.73-8.84L1.25 2.25h6.83l4.71 6.23zm-1.16 17.52h1.83L7.08 4.13H5.12z"/></svg>',
-    reply: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.9-.9L3 20.5l1.6-4.4A8.3 8.3 0 0 1 3.5 11.5a8.4 8.4 0 0 1 9-8.4 8.4 8.4 0 0 1 8.5 8.4z"/></svg>'
-  };
-
-  function likedSet() {
-    try { return new Set(JSON.parse(localStorage.getItem(LIKE_KEY) || '[]')); }
-    catch (e) { return new Set(); }
-  }
-
-  function saveLiked(set) {
-    try { localStorage.setItem(LIKE_KEY, JSON.stringify(Array.from(set))); } catch (e) {}
-  }
-
   function avatarMarkup() {
     if (AUTHOR.avatar) {
       return '<img class="note-avatar" src="' + escapeHtml(AUTHOR.avatar) + '" alt="' + escapeHtml(AUTHOR.name) + '" loading="lazy" decoding="async">';
@@ -87,14 +69,12 @@
     return '<span class="note-avatar note-avatar--monogram" aria-hidden="true">' + initial + '</span>';
   }
 
-  function renderNote(note, baseUrl, liked) {
+  function renderNote(note, baseUrl) {
     var id = escapeHtml(note.id || '');
     var permalink = baseUrl + '#' + encodeURIComponent(note.id || '');
-    var isLiked = liked.has(note.id);
     var image = note.image
       ? '<img class="note-image" src="' + escapeHtml(note.image) + '" alt="' + escapeHtml(note.imageAlt || '') + '" loading="lazy" decoding="async">'
       : '';
-    var shareText = encodeURIComponent(String(note.text || '').slice(0, 180));
 
     return [
       '<article class="note-entry" id="' + id + '">',
@@ -108,11 +88,6 @@
       '    </div>',
       '    <p class="note-body">' + linkify(note.text || '') + '</p>',
       image,
-      '    <div class="note-actions">',
-      '      <button class="note-action note-action--like' + (isLiked ? ' is-active' : '') + '" type="button" data-note-like="' + id + '" aria-pressed="' + (isLiked ? 'true' : 'false') + '" aria-label="Like this note">' + ICONS.heart + '</button>',
-      '      <button class="note-action note-action--link" type="button" data-note-link="' + escapeHtml(permalink) + '" aria-label="Copy link to this note" title="Copy link">' + ICONS.link + '</button>',
-      '      <a class="note-action note-action--share" href="https://x.com/intent/post?text=' + shareText + '" target="_blank" rel="noopener noreferrer" aria-label="Share this note on X" title="Share on X">' + ICONS.x + '</a>',
-      '    </div>',
       '  </div>',
       '</article>'
     ].join('\n');
@@ -130,38 +105,6 @@
       '  </div>',
       '</div>'
     ].join('\n');
-  }
-
-  function wireActions(feed) {
-    feed.querySelectorAll('[data-note-link]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        var absolute = new URL(button.dataset.noteLink, location.href).href;
-        var done = function () {
-          button.classList.add('is-copied');
-          button.title = 'Link copied';
-          setTimeout(function () {
-            button.classList.remove('is-copied');
-            button.title = 'Copy link';
-          }, 1600);
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(absolute).then(done, function () {});
-        }
-      });
-    });
-
-    feed.querySelectorAll('[data-note-like]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        var set = likedSet();
-        var id = button.dataset.noteLike;
-        if (set.has(id)) { set.delete(id); } else { set.add(id); button.classList.add('just-liked'); }
-        saveLiked(set);
-        var on = set.has(id);
-        button.classList.toggle('is-active', on);
-        button.setAttribute('aria-pressed', on ? 'true' : 'false');
-        setTimeout(function () { button.classList.remove('just-liked'); }, 400);
-      });
-    });
   }
 
   function initFeed(feed) {
@@ -189,9 +132,7 @@
           return;
         }
 
-        var liked = likedSet();
-        feed.innerHTML = notes.map(function (note) { return renderNote(note, baseUrl, liked); }).join('');
-        wireActions(feed);
+        feed.innerHTML = notes.map(function (note) { return renderNote(note, baseUrl); }).join('');
 
         var targetId = decodeURIComponent(location.hash.slice(1));
         if (targetId) {
