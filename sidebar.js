@@ -200,7 +200,7 @@
         style.textContent = [
             /* Editorial plate: the frame takes the photo's own proportions, */
             /* so nothing is cropped and no letterbox bars appear.          */
-            '.landing-hero-figure { margin: 0 auto 3.2rem; width: -moz-fit-content; width: fit-content; max-width: 100%; }',
+            '.landing-hero-figure { position: relative; left: 50%; transform: translateX(-50%); margin: 0 0 3.2rem; width: -moz-fit-content; width: fit-content; max-width: min(calc(100vw - 2.5rem), 1120px); }',
             '.landing-hero {',
             '  position: relative;',
             '  display: flex;',
@@ -209,13 +209,13 @@
             '  overflow: hidden;',
             '  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.16);',
             '}',
-            '.landing-hero-photo { display: block; max-width: 100%; max-height: min(64vh, 600px); width: auto; height: auto; opacity: 0; transition: opacity 0.6s ease; }',
+            '.landing-hero-photo { display: block; max-width: 100%; max-height: min(82vh, 840px); width: auto; height: auto; opacity: 0; transition: opacity 0.6s ease; }',
             '.landing-hero-photo.is-loaded { opacity: 1; }',
             '[data-theme="dark"] .landing-hero-photo { filter: brightness(0.92) saturate(1.02); }',
             '[data-theme="dark"] .landing-hero { box-shadow: 0 18px 46px rgba(0, 0, 0, 0.5); }',
             '@media (max-width: 760px) {',
             '  .landing-hero-figure { margin-bottom: 2.2rem; }',
-            '  .landing-hero-photo { max-height: 62vh; }',
+            '  .landing-hero-photo { max-height: 72vh; }',
             '}'
         ].join('\n');
         document.head.appendChild(style);
