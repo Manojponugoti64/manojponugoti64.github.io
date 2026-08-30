@@ -3413,3 +3413,60 @@ footer {
   .about-bio-container h1 { font-size: 2rem; }
   .nav-links { gap: 1.15rem; }
 }
+
+/* ---- About panel: the DavidSHolz quote rendered as a post ---- */
+.about-bio-container {
+  max-width: 640px;
+  text-align: left;
+}
+
+.about-bio-container h1 {
+  text-align: left;
+  margin-bottom: 1.6rem;
+}
+
+/* A post row, but sized for a standalone quote rather than a timeline. */
+.quote-post {
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 16px;
+  padding: 0;
+  border-bottom: 0;
+}
+
+.quote-post:hover,
+.quote-post:target { background: transparent; }
+
+.quote-post .note-avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 24px;
+}
+
+.quote-post .note-head {
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.quote-post .note-name { font-size: 1.05rem; }
+.quote-post .note-handle { font-size: 1rem; text-decoration: none; }
+.quote-post .note-handle:hover { color: var(--accent); }
+
+/* Same size the quote has always been — only the framing changed. */
+.about-bio-container .quote-post .note-body {
+  font-size: 2.02rem;
+  line-height: 1.42;
+  letter-spacing: 0;
+  color: var(--text-primary);
+  text-wrap: pretty;
+}
+
+@media (max-width: 760px) {
+  .quote-post {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .quote-post .note-avatar { width: 44px; height: 44px; font-size: 19px; }
+  .about-bio-container .quote-post .note-body { font-size: 1.55rem; }
+}
