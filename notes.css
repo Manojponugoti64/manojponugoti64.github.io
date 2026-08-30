@@ -50,14 +50,8 @@
 }
 .notes-profile-handle:hover { color: var(--accent); }
 
-.notes-profile-bio {
-  margin: 6px 0 4px;
-  color: var(--text-primary);
-  font-size: 15px;
-  line-height: 20px;
-}
-
 .notes-profile-count {
+  margin-top: 6px;
   color: var(--text-secondary);
   font-size: 13px;
   line-height: 18px;

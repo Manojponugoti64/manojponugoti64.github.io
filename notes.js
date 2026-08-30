@@ -6,8 +6,7 @@
     name: 'Manoj Ponugoti',
     handle: 'younghoax20',
     profileUrl: 'https://x.com/younghoax20',
-    avatar: '',
-    bio: 'Essays, photographs, and small bright pieces. Short notes live here.'
+    avatar: ''
   };
 
   function escapeHtml(value) {
@@ -100,7 +99,6 @@
       '  <div class="notes-profile-id">',
       '    <span class="notes-profile-name">' + escapeHtml(AUTHOR.name) + '</span>',
       '    <a class="notes-profile-handle" href="' + escapeHtml(AUTHOR.profileUrl) + '" target="_blank" rel="noopener noreferrer">@' + escapeHtml(AUTHOR.handle) + '</a>',
-      '    <p class="notes-profile-bio">' + escapeHtml(AUTHOR.bio) + '</p>',
       '    <span class="notes-profile-count">' + count + (count === 1 ? ' note' : ' notes') + '</span>',
       '  </div>',
       '</div>'
