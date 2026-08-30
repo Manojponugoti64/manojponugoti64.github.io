@@ -1,13 +1,14 @@
+/* ============================================================
+   NOTES — timeline (X / Twitter) style
+   ============================================================ */
+
 .notes-page {
-  max-width: 720px;
+  max-width: 640px;
 }
 
+/* ---- Profile header ---- */
 .notes-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding-bottom: 1.25rem;
+  padding-bottom: 0.9rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -15,111 +16,155 @@
   margin: 0;
   color: var(--text-primary);
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: clamp(2.7rem, 7vw, 4.7rem);
-  line-height: 0.9;
-  letter-spacing: 0;
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  line-height: 1;
 }
 
-.notes-heading p {
-  max-width: 25rem;
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.55;
-  text-align: right;
-}
-
-.notes-feed {
-  position: relative;
-  margin-top: 1.75rem;
-  padding-left: 0;
-  border-top: 1px solid var(--border);
+.notes-profile {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 1.25rem 0 1.1rem;
+  border-bottom: 1px solid var(--border);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.notes-feed::before {
-  content: none;
+.notes-profile-avatar { flex: 0 0 auto; text-decoration: none; }
+.notes-profile-avatar .note-avatar { width: 64px; height: 64px; font-size: 27px; }
+
+.notes-profile-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.notes-profile-name {
+  color: var(--text-primary);
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 24px;
+  letter-spacing: -0.01em;
 }
 
+.notes-profile-handle {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 20px;
+  text-decoration: none;
+}
+.notes-profile-handle:hover { color: var(--accent); }
+
+.notes-profile-bio {
+  margin: 6px 0 4px;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.notes-profile-count {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* ---- Feed ---- */
+.notes-feed {
+  position: relative;
+  margin-top: 0;
+  padding-left: 0;
+  border-top: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.notes-feed::before { content: none; }
+
+/* ---- A single post ---- */
 .note-entry {
   position: relative;
-  margin-bottom: 18px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.note-entry::before {
-  content: none;
-}
-
-.note-entry:target,
-.note-entry.is-targeted {
-  margin: 0 0 18px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
   padding: 12px 16px;
   border: 0;
   border-bottom: 1px solid var(--border);
   border-radius: 0;
-  background: color-mix(in srgb, var(--accent) 5%, var(--bg-card));
+  transition: background-color 0.15s ease;
 }
 
-.note-entry:last-child,
-.note-entry:target:last-child,
-.note-entry.is-targeted:last-child {
-  margin-bottom: 0;
+.note-entry::before { content: none; }
+
+.note-entry:hover { background: color-mix(in srgb, var(--text-primary) 3.5%, transparent); }
+
+.note-entry:target,
+.note-entry.is-targeted {
+  margin: 0;
+  padding: 12px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
 }
 
-.note-meta {
+.note-entry:last-child { border-bottom: 1px solid var(--border); }
+
+/* ---- Avatar ---- */
+.note-avatar-link { display: block; text-decoration: none; }
+
+.note-avatar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 4px;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bg-secondary);
+}
+
+.note-avatar--monogram {
+  background: linear-gradient(140deg, var(--accent), var(--accent-dark));
+  color: #fff;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+
+/* ---- Post body ---- */
+.note-main { min-width: 0; }
+
+.note-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 2px;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.note-name {
+  color: var(--text-primary);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.note-handle,
+.note-dot,
+.note-time {
   color: var(--text-secondary);
-  font-family: inherit;
-  font-size: 13px;
   font-weight: 400;
-  line-height: 16px;
-  letter-spacing: 0;
+  white-space: nowrap;
 }
 
-.note-date {
-  color: inherit;
-  text-decoration: none;
-}
-
-.note-date:hover {
-  color: var(--accent);
-}
-
-.note-copy {
-  appearance: none;
-  padding: 0.25rem;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  line-height: 0;
-}
-
-.note-copy:hover,
-.note-copy:focus-visible {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-.note-copy svg {
-  width: 18px;
-  height: 18px;
-}
+.note-time { text-decoration: none; }
+.note-time:hover { color: var(--accent); text-decoration: underline; }
 
 .note-body {
   margin: 0;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 400;
-  line-height: 22px;
+  line-height: 21px;
   letter-spacing: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -127,15 +172,14 @@
 
 .note-body a {
   color: var(--accent);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
+.note-body a:hover { text-decoration: underline; }
 
 .note-image {
   display: block;
   width: 100%;
-  max-height: 620px;
+  max-height: 560px;
   margin-top: 12px;
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -143,18 +187,91 @@
   background: var(--bg-secondary);
 }
 
+/* ---- Action bar ---- */
+.note-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 10px 0 -4px -8px;
+}
+
+.note-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.note-action svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.note-action svg.icon-solid {
+  fill: currentColor;
+  stroke: none;
+}
+
+.note-action--like:hover,
+.note-action--like:focus-visible {
+  color: #f4245e;
+  background: rgba(244, 36, 94, 0.1);
+}
+
+.note-action--like.is-active {
+  color: #f4245e;
+}
+.note-action--like.is-active svg { fill: #f4245e; stroke: #f4245e; }
+
+.note-action--like.just-liked svg { animation: note-pop 0.4s cubic-bezier(0.3, 1.5, 0.6, 1); }
+
+@keyframes note-pop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.note-action--link:hover,
+.note-action--link:focus-visible,
+.note-action--link.is-copied {
+  color: #17a37f;
+  background: rgba(23, 163, 127, 0.1);
+}
+
+.note-action--share:hover,
+.note-action--share:focus-visible {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+
+/* ---- States ---- */
 .notes-empty,
 .notes-error,
 .notes-loading {
   padding: 2.5rem 1.25rem;
   color: var(--text-secondary);
   text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
 }
 
-.notes-error {
-  color: #d77b70;
-}
+.notes-error { color: #d77b70; }
 
+/* ---- Homepage embed ---- */
 .notes-more {
   display: inline-flex;
   align-items: center;
@@ -164,7 +281,7 @@
 }
 
 .home-notes-shell {
-  max-width: 720px;
+  max-width: 640px;
   margin: 0 auto;
 }
 
@@ -183,6 +300,8 @@
   font-size: 2rem;
 }
 
+.home-notes-shell .notes-feed { border-top: 1px solid var(--border); }
+
 @media (max-width: 600px) {
   .homepage-tabs {
     display: grid;
@@ -197,22 +316,20 @@
     letter-spacing: 0.08em;
   }
 
-  .notes-heading {
-    display: block;
+  .note-entry {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px 4px;
   }
 
-  .notes-heading p {
-    margin-top: 0.8rem;
-    text-align: left;
-  }
-
-  .note-meta {
-    align-items: flex-start;
-  }
+  .note-avatar { width: 40px; height: 40px; font-size: 18px; }
+  .notes-profile-avatar .note-avatar { width: 56px; height: 56px; font-size: 24px; }
+  .note-head { font-size: 14px; }
+  .note-body { font-size: 14.5px; line-height: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .note-entry {
-    scroll-behavior: auto;
-  }
+  .note-entry { scroll-behavior: auto; transition: none; }
+  .note-action { transition: none; }
+  .note-action--like.just-liked svg { animation: none; }
 }
