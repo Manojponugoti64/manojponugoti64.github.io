@@ -23,8 +23,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=3.1">
+    <link rel="stylesheet" href="notes.css?v=1.0">
     <script src="theme.js?v=3.0"></script>
     <script src="sidebar.js?v=3.0" defer></script>
+    <script src="notes.js?v=1.0" defer></script>
     <script src="reading-time.js" defer></script>
     <script src="spotify.js" defer></script>
 </head>
@@ -48,6 +50,7 @@
         <!-- Homepage Premium Tabs -->
         <div class="homepage-tabs">
             <button class="home-tab-btn active" data-tab="about">About</button>
+            <button class="home-tab-btn" data-tab="notes">Notes</button>
             <button class="home-tab-btn" data-tab="writing">Writing</button>
             <button class="home-tab-btn" data-tab="art">Art</button>
         </div>
@@ -58,6 +61,20 @@
                 <h1>Manoj Ponugoti</h1>
                 <p>i wish i could do more - i wish i had a thousand hands and a thousand eyes and a thousand years and army of angels and a thousand stars that lit the sky so bright that the night would never come and that our sleepless dreams would fill this world</p>
                 <p>- by DavidSHolz</p>
+            </div>
+        </div>
+
+        <!-- Notes Tab Panel -->
+        <div id="tabPanelNotes" class="tab-panel">
+            <div class="home-notes-shell">
+                <div class="home-notes-title">
+                    <h2>Latest notes</h2>
+                    <a href="notes.html">All notes</a>
+                </div>
+                <section class="notes-feed" data-notes-feed data-source="notes/manifest.json" data-base-url="notes.html" data-limit="3" aria-live="polite">
+                    <div class="notes-loading">Loading notes...</div>
+                </section>
+                <a class="notes-more" href="notes.html">Read all notes &rarr;</a>
             </div>
         </div>
 
@@ -186,14 +203,14 @@
 
             // Activate tab via deep linking
             var hash = location.hash.replace('#', '').toLowerCase();
-            if (hash && ['about', 'writing', 'art'].indexOf(hash) > -1) {
+            if (hash && ['about', 'notes', 'writing', 'art'].indexOf(hash) > -1) {
                 switchTab(hash);
             }
 
             // Listen for hashchange for history support
             window.addEventListener('hashchange', function () {
                 var newHash = location.hash.replace('#', '').toLowerCase();
-                if (newHash && ['about', 'writing', 'art'].indexOf(newHash) > -1) {
+                if (newHash && ['about', 'notes', 'writing', 'art'].indexOf(newHash) > -1) {
                     switchTab(newHash);
                 }
             });

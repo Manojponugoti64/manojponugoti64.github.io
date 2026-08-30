@@ -48,6 +48,7 @@
 
         var defaults = [
             { href: prefix + 'index.html', label: 'Home' },
+            { href: prefix + 'notes.html', label: 'Notes' },
             { href: prefix + 'photos.html', label: 'Photos' },
             { href: prefix + 'videos.html', label: 'Videos' },
             { href: prefix + 'music.html', label: 'Music' },
@@ -55,6 +56,11 @@
             { href: prefix + 'archive.html', label: 'Archive' }
         ];
         var navItems = items.length ? items : defaults;
+        var hasNotes = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'notes'; });
+        if (!hasNotes) {
+            var notesInsertAt = Math.min(1, navItems.length);
+            navItems.splice(notesInsertAt, 0, { href: prefix + 'notes.html', label: 'Notes' });
+        }
         var hasVideos = navItems.some(function (it) { return (it.label || '').toLowerCase() === 'videos'; });
         if (!hasVideos) {
             var videoInsertAt = Math.min(2, navItems.length);

@@ -69,11 +69,23 @@
         .key-setup code { background: rgba(0,0,0,0.4); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
 
         .toolbar { display: flex; gap: 0.8rem; margin-top: 0.8rem; flex-wrap: wrap; }
+        .note-composer { min-height: 150px; }
+        .note-composer-meta {
+            display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.45rem;
+            color: var(--text-secondary); font-size: 0.8rem;
+        }
+        .note-image-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .note-image-row input[type="file"] { padding: 0.55rem; font-size: 0.85rem; }
+        .note-preview-text {
+            color: var(--text-primary); white-space: pre-wrap; overflow-wrap: anywhere;
+            font-size: 0.92rem; line-height: 1.5; margin-top: 0.25rem;
+        }
+        @media (max-width: 620px) { .note-image-row { grid-template-columns: 1fr; } }
         .footer-actions { margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-secondary); text-align: right; }
         .footer-actions a { cursor: pointer; }
     </style>
     <script src="../theme.js"></script>
-    <script src="../sidebar.js?v=2.9" defer></script>
+    <script src="../sidebar.js?v=3.0" defer></script>
 
 </head>
 <body>
@@ -110,6 +122,33 @@
             </div>
 
             <div id="dashboard" style="display:none;">
+                <section class="card">
+                    <h2>Short notes</h2>
+                    <p class="hint">Publish a quick thought to the Notes feed. A photo is optional, and every note gets a permanent link.</p>
+                    <label for="noteText">Your note</label>
+                    <textarea id="noteText" class="note-composer" maxlength="2000" placeholder="Write what is on your mind..."></textarea>
+                    <div class="note-composer-meta">
+                        <span id="notePhotoName">No photo selected</span>
+                        <span><span id="noteCharCount">0</span>/2000</span>
+                    </div>
+                    <div class="note-image-row">
+                        <div>
+                            <label for="noteImage">Photo (optional)</label>
+                            <input type="file" id="noteImage" accept="image/*" />
+                        </div>
+                        <div>
+                            <label for="noteImageAlt">Photo description</label>
+                            <input id="noteImageAlt" maxlength="180" placeholder="Describe the photo for readers" />
+                        </div>
+                    </div>
+                    <div class="toolbar">
+                        <button id="publishNote" type="button">Publish note</button>
+                        <button id="clearNote" class="ghost" type="button">Clear</button>
+                        <button id="reloadNotes" class="ghost" type="button">Refresh notes</button>
+                    </div>
+                    <div id="notesList"><div class="empty">Loading...</div></div>
+                </section>
+
                 <section class="card">
                     <h2>Your posts</h2>
                     <p class="hint">Click Edit to change a post. Click Delete to remove it from your blog.</p>
@@ -290,6 +329,7 @@
             loadAbout();
             loadPhotos();
             loadMusic();
+            loadNotes();
         }
         function showKeyPrompt() {
             $('keyPrompt').style.display = 'block';
@@ -529,7 +569,7 @@
     <title>About - Manoj's Blog</title>
     <link rel="stylesheet" href="style.css">
     <script src="theme.js"><\/script>
-    <script src="sidebar.js?v=2.9" defer><\/script>
+    <script src="sidebar.js?v=3.0" defer><\/script>
 </head>
 <body>
     <header>
@@ -758,6 +798,143 @@ ${bodyHtml}
             } catch (err) {
                 console.error(err);
                 setStatus('Delete failed: ' + (err.message || err), 'error');
+            }
+        }
+
+        // ---------- Short notes ----------
+        function noteId(date) {
+            const stamp = date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z').toLowerCase();
+            return `note-${stamp}-${Math.random().toString(36).slice(2, 6)}`;
+        }
+
+        function clearNoteComposer() {
+            $('noteText').value = '';
+            $('noteImage').value = '';
+            $('noteImageAlt').value = '';
+            $('noteCharCount').textContent = '0';
+            $('notePhotoName').textContent = 'No photo selected';
+        }
+
+        $('noteText').addEventListener('input', () => {
+            $('noteCharCount').textContent = String($('noteText').value.length);
+        });
+        $('noteImage').addEventListener('change', () => {
+            const file = $('noteImage').files && $('noteImage').files[0];
+            $('notePhotoName').textContent = file ? file.name : 'No photo selected';
+        });
+        $('clearNote').addEventListener('click', clearNoteComposer);
+        $('reloadNotes').addEventListener('click', loadNotes);
+
+        async function getNotesManifest() {
+            try {
+                const file = await getFile('notes/manifest.json');
+                let data = { notes: [] };
+                try { data = JSON.parse(file.content); } catch (e) {}
+                if (!data || !Array.isArray(data.notes)) data = { notes: [] };
+                return data;
+            } catch (err) {
+                if (String(err.message || '').includes('Not Found')) return { notes: [] };
+                throw err;
+            }
+        }
+
+        async function loadNotes() {
+            const list = $('notesList');
+            list.innerHTML = '<div class="empty">Loading...</div>';
+            try {
+                const data = await getNotesManifest();
+                const notes = data.notes.slice().sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+                if (!notes.length) {
+                    list.innerHTML = '<div class="empty">No notes yet. Your first one can be short.</div>';
+                    return;
+                }
+                list.innerHTML = notes.slice(0, 12).map(note => {
+                    const text = String(note.text || '');
+                    const preview = text.length > 180 ? text.slice(0, 180).replace(/\s+\S*$/, '') + '...' : text;
+                    const date = new Date(note.createdAt);
+                    const formatted = Number.isNaN(date.getTime()) ? '' : date.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+                    return `
+                        <div class="post-row" data-note-id="${escHtml(note.id)}">
+                            <div class="info">
+                                <div class="meta"><a href="../notes.html#${encodeURIComponent(note.id)}" target="_blank">${escHtml(formatted)}</a>${note.image ? ' · photo' : ''}</div>
+                                <div class="note-preview-text">${escHtml(preview)}</div>
+                            </div>
+                            <div class="actions">
+                                <button class="danger" type="button" data-delete-note="${escHtml(note.id)}">Delete</button>
+                            </div>
+                        </div>`;
+                }).join('');
+                list.querySelectorAll('[data-delete-note]').forEach(button => {
+                    button.addEventListener('click', () => deleteNote(button.dataset.deleteNote));
+                });
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = '<div class="empty">Could not load notes: ' + escHtml(err.message || err) + '</div>';
+            }
+        }
+
+        $('publishNote').addEventListener('click', async () => {
+            const text = $('noteText').value.trim();
+            const imageFile = $('noteImage').files && $('noteImage').files[0];
+            const imageAlt = $('noteImageAlt').value.trim();
+            if (!text) return setStatus('Write something before publishing.', 'error');
+            if (imageFile && !imageAlt) return setStatus('Add a short photo description before publishing.', 'error');
+
+            const button = $('publishNote');
+            button.disabled = true;
+            const now = new Date();
+            const id = noteId(now);
+            let imagePath = '';
+            try {
+                if (imageFile) {
+                    setStatus('Optimizing note photo...', 'info');
+                    const dataUrl = await resizeToJpeg(imageFile);
+                    imagePath = `notes/media/${id}.jpg`;
+                    await uploadBinary(imagePath, dataUrlToBase64(dataUrl), `Add image for note: ${id}`);
+                }
+
+                setStatus('Publishing note...', 'info');
+                await modifyFile('notes/manifest.json', (txt) => {
+                    let data = { notes: [] };
+                    try { data = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(data.notes)) data.notes = [];
+                    data.notes.push({ id, text, createdAt: now.toISOString(), image: imagePath, imageAlt });
+                    return JSON.stringify(data, null, 2) + '\n';
+                }, `Publish note: ${id}`);
+
+                clearNoteComposer();
+                setStatus(`Note published. <a href="../notes.html#${encodeURIComponent(id)}" target="_blank">Open it</a> after GitHub Pages rebuilds.`, 'success');
+                loadNotes();
+            } catch (err) {
+                console.error(err);
+                setStatus('Could not publish note: ' + escHtml(err.message || err), 'error');
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        async function deleteNote(id) {
+            const data = await getNotesManifest();
+            const note = data.notes.find(item => item.id === id);
+            if (!note || !confirm('Delete this note? Its permanent link will stop working.')) return;
+            setStatus('Deleting note...', 'info');
+            try {
+                await modifyFile('notes/manifest.json', (txt) => {
+                    let latest = { notes: [] };
+                    try { latest = JSON.parse(txt); } catch (e) {}
+                    if (!Array.isArray(latest.notes)) latest.notes = [];
+                    latest.notes = latest.notes.filter(item => item.id !== id);
+                    return JSON.stringify(latest, null, 2) + '\n';
+                }, `Delete note: ${id}`);
+                if (note.image) {
+                    try { await deleteFileWithRetry(note.image, `Delete image for note: ${id}`); }
+                    catch (err) { if (!String(err.message || '').includes('Not Found')) throw err; }
+                }
+                setStatus('Note deleted.', 'success');
+                loadNotes();
+            } catch (err) {
+                console.error(err);
+                setStatus('Could not delete note: ' + escHtml(err.message || err), 'error');
             }
         }
 
