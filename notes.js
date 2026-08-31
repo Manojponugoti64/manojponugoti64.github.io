@@ -1,11 +1,6 @@
 (function () {
   'use strict';
 
-  /* Identity shown on every note. Change it here and it updates everywhere. */
-  var AUTHOR = {
-    name: 'Manoj Ponugoti'
-  };
-
   function escapeHtml(value) {
     return String(value)
       .replace(/&/g, '&amp;')
@@ -62,8 +57,6 @@
       '<article class="note-entry" id="' + id + '">',
       '  <div class="note-main">',
       '    <div class="note-head">',
-      '      <span class="note-name">' + escapeHtml(AUTHOR.name) + '</span>',
-      '      <span class="note-dot" aria-hidden="true">·</span>',
       '      <a class="note-time" href="' + escapeHtml(permalink) + '" title="' + escapeHtml(fullDate(note.createdAt)) + '">' + escapeHtml(relativeTime(note.createdAt)) + '</a>',
       '    </div>',
       '    <p class="note-body">' + linkify(note.text || '') + '</p>',
@@ -77,7 +70,6 @@
     host.innerHTML = [
       '<div class="notes-profile">',
       '  <div class="notes-profile-id">',
-      '    <span class="notes-profile-name">' + escapeHtml(AUTHOR.name) + '</span>',
       '    <span class="notes-profile-count">' + count + (count === 1 ? ' note' : ' notes') + '</span>',
       '  </div>',
       '</div>'
