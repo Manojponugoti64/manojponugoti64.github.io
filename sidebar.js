@@ -233,21 +233,11 @@
 
         hero.appendChild(photo);
 
-        // Editorial caption beneath the plate, tracking the photo on show.
-        var caption = document.createElement('figcaption');
-        caption.className = 'landing-hero-caption';
-        var captionText = document.createElement('span');
-        captionText.className = 'lh-text';
-        var captionTag = document.createElement('span');
-        captionTag.className = 'lh-place';
-        captionTag.textContent = 'Photograph';
-        caption.appendChild(captionText);
-        caption.appendChild(captionTag);
-
+        // Photo only — no visible caption. The description still rides on the
+        // img alt attribute for screen readers and when the image fails to load.
         var heroFigure = document.createElement('figure');
         heroFigure.className = 'landing-hero-figure';
         heroFigure.appendChild(hero);
-        heroFigure.appendChild(caption);
         main.insertBefore(heroFigure, main.firstElementChild);
 
         function showDailyPhoto(photos, index, attemptsLeft) {
@@ -263,7 +253,6 @@
             photo.onload = function () {
                 hero.dataset.photoSrc = selected.src;
                 photo.classList.add('is-loaded');
-                captionText.textContent = selected.caption || '';
             };
             photo.onerror = function () {
                 showDailyPhoto(photos, index + 1, attemptsLeft - 1);
