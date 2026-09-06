@@ -25,8 +25,20 @@
       "id": "note-20260906t043935z-infinity",
       "text": "infinity ∞",
       "createdAt": "2026-09-06T04:39:35Z",
-      "image": "notes/media/note-20260906t043935z-infinity.jpg",
-      "imageAlt": "A vast draped translucent form hanging over a still sea at dusk, with a lone figure seated at a small desk beneath it"
+      "images": [
+        {
+          "src": "notes/media/note-20260906t043935z-infinity-1.jpg",
+          "alt": "A vast translucent draped form falling toward a still sea at dusk"
+        },
+        {
+          "src": "notes/media/note-20260906t043935z-infinity-2.jpg",
+          "alt": "The same draped form seen wide, with a lone figure seated at a small desk beneath it"
+        },
+        {
+          "src": "notes/media/note-20260906t043935z-infinity-3.jpg",
+          "alt": "The drape sweeping across the frame in folds above the water"
+        }
+      ]
     }
   ]
 }
