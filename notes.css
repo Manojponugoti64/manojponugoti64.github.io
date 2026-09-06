@@ -115,6 +115,18 @@
 }
 .note-body a:hover { text-decoration: underline; }
 
+.note-images {
+  margin-top: 12px;
+}
+
+/* Several photos read as one set: equal columns, shared height. */
+.note-images.is-set {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: start;
+}
+
 .note-image {
   /* Show the whole photo. object-fit: cover cropped tall portraits and cut
      the subject out of frame, so size to the image instead of a fixed box. */
@@ -123,10 +135,16 @@
   max-height: 620px;
   width: auto;
   height: auto;
-  margin-top: 12px;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--bg-secondary);
+}
+
+/* Inside a set each photo fills its column, so the row lines up. */
+.note-images.is-set .note-image {
+  width: 100%;
+  max-height: none;
+  border-radius: 10px;
 }
 
 /* ---- States ---- */
@@ -188,6 +206,8 @@
   }
 
   .note-entry { padding: 12px 4px; }
+  .note-images.is-set { gap: 5px; }
+  .note-images.is-set .note-image { border-radius: 7px; }
   .note-head { font-size: 14px; }
   .note-body { font-size: 17px; line-height: 25px; }
 }

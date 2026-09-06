@@ -49,8 +49,17 @@
   function renderNote(note, baseUrl) {
     var id = escapeHtml(note.id || '');
     var permalink = baseUrl + '#' + encodeURIComponent(note.id || '');
-    var image = note.image
-      ? '<img class="note-image" src="' + escapeHtml(note.image) + '" alt="' + escapeHtml(note.imageAlt || '') + '" loading="lazy" decoding="async">'
+    /* A note may carry one image (image/imageAlt) or several (images[]). */
+    var pics = Array.isArray(note.images) && note.images.length
+      ? note.images
+      : (note.image ? [{ src: note.image, alt: note.imageAlt || '' }] : []);
+    var image = pics.length
+      ? '<div class="note-images' + (pics.length > 1 ? ' is-set' : '') + '">'
+        + pics.map(function (pic) {
+            return '<img class="note-image" src="' + escapeHtml(pic.src)
+              + '" alt="' + escapeHtml(pic.alt || '') + '" loading="lazy" decoding="async">';
+          }).join('')
+        + '</div>'
       : '';
 
     return [
