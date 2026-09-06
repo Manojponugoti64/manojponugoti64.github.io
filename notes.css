@@ -109,6 +109,15 @@
   overflow-wrap: anywhere;
 }
 
+/* The infinity sign reads blue against the site's warm accent. */
+.note-infinity {
+  color: #2f6fd0;
+}
+
+[data-theme="dark"] .note-infinity {
+  color: #7fb0ff;
+}
+
 .note-body a {
   color: var(--accent);
   text-decoration: none;

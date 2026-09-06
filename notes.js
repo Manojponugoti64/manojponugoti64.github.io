@@ -19,6 +19,8 @@
       var shown = clean.replace(/^https?:\/\//, '').replace(/\/$/, '');
       return '<a href="' + clean + '" target="_blank" rel="noopener noreferrer">' + shown + '</a>' + suffix;
     });
+    /* Tint the infinity sign wherever it appears in a note. */
+    out = out.replace(/\u221E/g, '<span class="note-infinity">\u221E</span>');
     return out;
   }
 
